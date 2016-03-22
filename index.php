@@ -394,8 +394,52 @@
 					*/
 							
 				});
+				var deferreds = getJsons();
+			
+			    $.when.apply(null, deferreds).done(function() {
+			    	console.log("all done");
+			    });
+				/*
+				$.getJSON("map/" + districts_filenames[0] + "_perimeter.json.json", function(data) {
+					perimeter.push(data);
+				}).done(function(){
+					console.log(perimeter.length);
+					for(var j = 0; j < perimeter[0].paths.length; j++){
+						perimeter[0].paths[j] = perimeter[0].paths[j].split(",");
+					}
+					perimeter_polylines[0] = map.drawPolyline({
+						path: perimeter[0].paths,
+						strokeColor: '#131540',
+						strokeOpacity: 0.8,
+						strokeWeight: 7
+					});
+				});
+				*/
+				
 			});
-
+			function getJsons() {
+			    var deferreds = [];
+			    var district_names = ["amarollo", "EP", "beaumont", "childress", "corpus", "laredo", "lubok", "lufkin", "odesa", "phar", "sanAntonio"];
+			    var i;
+			    for (i = 0; i < district_names.length; i++) {
+			        var count = i;
+			
+			        deferreds.push(
+			        $.getJSON("map/" + district_names[i] + "_perimeter.json.json").success(function(data) {
+			            for(var j = 0; j < data.paths.length; j++){
+							data.paths[j] = data.paths[j].split(",");
+						}
+				        map.drawPolyline({
+							path: data.paths,
+							strokeColor: '#131540',
+							strokeOpacity: 0.8,
+							strokeWeight: 7
+						});
+			        }));
+			    }
+			    
+			    return deferreds;
+			}
 		</script>
 	</body>
 </html>
