@@ -125,7 +125,10 @@
 		
 		<script>
 			/*
+ this one has been decrapitated
  http://google-maps-utility-library-v3.googlecode.com
+ the code is still available here:
+ https://github.com/printercu/google-maps-utility-library-v3-read-only/tree/master/arcgislink
 */
 (function(){function q(a,b,c){var d=b===""?0:a.indexOf(b);c=c===""?a.length:a.indexOf(c,d+b.length);return a.substring(d+b.length,c)}function H(a){return a&&typeof a==="string"}function r(a){return a&&a.splice}function l(a,b,c){if(a&&b){var d;for(d in a)if(c||!(d in b))b[d]=a[d]}return b}function y(){i.event.trigger.apply(this,arguments)}function v(a,b){a&&b&&b.error&&a(b.error)}function ca(a,b){var c="";if(a)c+=a.getTime()-a.getTimezoneOffset()*6E4;if(b)c+=", "+(b.getTime()-b.getTimezoneOffset()*
 6E4);return c}function I(a,b){b=Math.min(Math.max(b,0),1);if(a){var c=a.style;if(typeof c.opacity!=="undefined")c.opacity=b;if(typeof c.filters!=="undefined")c.filters.alpha.opacity=Math.floor(100*b);if(typeof c.filter!=="undefined")c.filter="alpha(opacity:"+Math.floor(b*100)+")"}}function U(a){var b="";for(var c in a)if(a.hasOwnProperty(c)){if(b.length>0)b+=";";b+=c+":"+a[c]}return b}function ma(){if(typeof XMLHttpRequest==="undefined"){try{return new ActiveXObject("Msxml2.XMLHTTP.6.0")}catch(a){}try{return new ActiveXObject("Msxml2.XMLHTTP.3.0")}catch(b){}try{return new ActiveXObject("Msxml2.XMLHTTP")}catch(c){}throw new Error("This browser does not support XMLHttpRequest.");
@@ -198,8 +201,6 @@ TOUCHES:"esriSpatialRelTouches",WITHIN:"esriSpatialRelWithin"},GeometryType:s,SR
 MapOverlay:p,MapType:u,CopyrightControl:la};window.gmaps=$})();
 
 		</script>
-		
-		<script src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/arcgislink/src/arcgislink_compiled.js"></script>
 		<script>
 			$(':radio').click(function(e){
 				var selected = $(":checked").attr('id');
