@@ -123,6 +123,7 @@
 		<script src="js/gmaps.js"></script>
 		<script src="js/jquery.autocomplete.min.js"></script>
 		
+		<!-- arcgis link -->
 		<script>
 			/*
  this one has been decrapitated
@@ -466,7 +467,7 @@ MapOverlay:p,MapType:u,CopyrightControl:la};window.gmaps=$})();
 							title : 'Marker #' + 5,
 							infoWindow : {
 								content : "<p>Hello</p>"
-							}
+							}			
 						});
 					}
 					*/
@@ -493,13 +494,19 @@ MapOverlay:p,MapType:u,CopyrightControl:la};window.gmaps=$})();
 					});
 				});
 				*/
-				var perUrl = 'http://irpsrvgis37.utep.edu/arcgis/rest/services/Texas/Perimeters_joined/MapServer';
-				var plastUrl = 'http://irpsrvgis37.utep.edu/arcgis/rest/services/Texas/PlasTxMap/MapServer';
-				var perimeters = new gmaps.ags.MapOverlay(perUrl);
-				var polygons = new gmaps.ags.MapOverlay(plastUrl);
-				polygons.setMap(map.map);
-				perimeters.setMap(map.map);
+				//var perUrl = 'http://irpsrvgis37.utep.edu/arcgis/rest/services/Texas/Perimeters_joined/MapServer';
+				//var plastUrl = 'http://irpsrvgis37.utep.edu/arcgis/rest/services/Texas/PlasTxMap/MapServer';
+				var url = 'http://irpsrvgis34.utep.edu/arcgis/rest/services/Texas_plasticity/MapServer';
 				
+				var plasticity = new gmaps.ags.MapOverlay(url);
+				plasticity.setMap(map.map);
+				
+				/*
+				var agsType = new  gmaps.ags.MapType(url,{name:'ArcGIS'});
+				console.log(map);
+			    map.map.mapTypes.set('arcgis', agsType);
+			    map.map.setMapTypeId('arcgis');
+				*/
 			});
 			function getJsons() {
 			    var deferreds = [];
