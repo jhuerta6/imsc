@@ -493,11 +493,23 @@ MapOverlay:p,MapType:u,CopyrightControl:la};window.gmaps=$})();
 				});
 				*/
 				var perUrl = 'http://irpsrvgis37.utep.edu/arcgis/rest/services/Texas/Perimeters_joined/MapServer';
-				var plastUrl = 'http://irpsrvgis37.utep.edu/arcgis/rest/services/Texas/PlasTxMap/MapServer';
+				var plastUrl = 'http://irpsrvgis34.utep.edu/arcgis/rest/services/Texas/Stickiness_state/MapServer/0';
 				var perimeters = new gmaps.ags.MapOverlay(perUrl);
 				var polygons = new gmaps.ags.MapOverlay(plastUrl);
 				polygons.setMap(map.map);
 				perimeters.setMap(map.map);
+
+//				map.loadFromKML({
+//    			    url: 'https://localhost:6443/arcgis/rest/services/Texas/Stickiness_state/MapServer',
+//    			    suppressInfoWindows: true,
+//    			    events: {
+//    			    click: function(point){
+//    			        infoWindow.setContent(point.featureData.infoWindowHtml);
+//    			        infoWindow.setPosition(point.latLng);
+//    			        infoWindow.open(map.map);
+//    			    }
+//    			   	}
+//    			});
 				
 			});
 			function getJsons() {
