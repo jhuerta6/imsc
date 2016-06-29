@@ -55,64 +55,26 @@
 		<div>
 
 			<div class="row">
-				<div class="col-md-8">
+				<div class="col-md-9">
 					<div id="map"></div>
 				</div>
-				<div class="col-md-4">
+				<div class="col-md-3">
 					<div class="panel panel-default">
 						<div class="panel-heading">
-							<center><h3 class="panel-title">Mode</h3></center>
-							<fieldset>
-								<div class="switch-toggle switch-holo">
-									<input id="search" name="view" type="radio" checked>
-									<label for="search" onclick="">Search</label>
-
-									<input id="draw" name="view" type="radio">
-									<label for="draw" onclick="">Draw</label>
-
-									<a></a>
-								</div>
-							</fieldset>
+							<center><h3 class="panel-title">Toolbar</h3></center>
 						</div>
 						<div class="panel-body">
-							<!-- Hidden Nav tabs -->
-							<ul class="nav nav-tabs" role="tablist" id="myTab">
-								<li class="hidden active">
-									<a href="#searchTab" role="tab" data-toggle="tab">Search</a>
-								</li>
-								<li class="hidden">
-									<a href="#drawTab" role="tab" data-toggle="tab" >Draw</a>
-								</li>
-							</ul>
-
-							<!-- Tab panes -->
-							<div class="tab-content">
-								<div class="tab-pane active" id="searchTab">
-									<div class="row">
-										Search
-									</div>
-									<div class="row">
-										<div class="input-group">
-											<span class="input-group-addon glyphicon glyphicon-search" id="basic-addon"></span>
-											<input type="text" class="form-control" placeholder="Ground Property" aria-describedby="basic-addon" id="autocomplete">
-										</div>
-									</div>
+							<div class="row">
+								Search
+							</div>
+							<div class="row">
+								<div class="input-group">
+									<span class="input-group-addon glyphicon glyphicon-search" id="basic-addon"></span>
+									<input type="text" class="form-control" placeholder="Ground Property" aria-describedby="basic-addon" id="autocomplete">
 								</div>
-								<div class="tab-pane" id='drawTab'>
-									<div class="row">Draw</div>
-									<div class="row vert-offset-top-2">
-										<button id="area" type="submit" class="btn btn-default"><span class="glyphicon glyphicon-edit"> Area</span></button>
-									</div>
-								</div>
-
 							</div>
 						</div>
 					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div id="info" class="col-md-6 col-md-offset-3">
-					<p>This appears when a polygon is clicked.</p>
 				</div>
 			</div>
 		</div>
@@ -123,9 +85,13 @@
 		<script src="js/gmaps.js"></script>
 		<script src="js/jquery.autocomplete.min.js"></script>
 		
+		<!-- arcgis link -->
 		<script>
 			/*
+ this one has been decrapitated
  http://google-maps-utility-library-v3.googlecode.com
+ the code is still available here:
+ https://github.com/printercu/google-maps-utility-library-v3-read-only/tree/master/arcgislink
 */
 (function(){function q(a,b,c){var d=b===""?0:a.indexOf(b);c=c===""?a.length:a.indexOf(c,d+b.length);return a.substring(d+b.length,c)}function H(a){return a&&typeof a==="string"}function r(a){return a&&a.splice}function l(a,b,c){if(a&&b){var d;for(d in a)if(c||!(d in b))b[d]=a[d]}return b}function y(){i.event.trigger.apply(this,arguments)}function v(a,b){a&&b&&b.error&&a(b.error)}function ca(a,b){var c="";if(a)c+=a.getTime()-a.getTimezoneOffset()*6E4;if(b)c+=", "+(b.getTime()-b.getTimezoneOffset()*
 6E4);return c}function I(a,b){b=Math.min(Math.max(b,0),1);if(a){var c=a.style;if(typeof c.opacity!=="undefined")c.opacity=b;if(typeof c.filters!=="undefined")c.filters.alpha.opacity=Math.floor(100*b);if(typeof c.filter!=="undefined")c.filter="alpha(opacity:"+Math.floor(b*100)+")"}}function U(a){var b="";for(var c in a)if(a.hasOwnProperty(c)){if(b.length>0)b+=";";b+=c+":"+a[c]}return b}function ma(){if(typeof XMLHttpRequest==="undefined"){try{return new ActiveXObject("Msxml2.XMLHTTP.6.0")}catch(a){}try{return new ActiveXObject("Msxml2.XMLHTTP.3.0")}catch(b){}try{return new ActiveXObject("Msxml2.XMLHTTP")}catch(c){}throw new Error("This browser does not support XMLHttpRequest.");
@@ -178,7 +144,7 @@ n.prototype.find=function(a,b,c){if(a){var d=l(a,{});if(a.layerIds){d.layers=a.l
 {geometry:h,attributes:g.attributes};delete g.attributes}b(e);v(c,e)})}};n.prototype.queryLayer=function(a,b,c,d){(a=this.getLayer(a))&&a.query(b,c,d)};P.prototype.init_=function(a){l(a,this);if(a.spatialReference)this.spatialReference=B[a.spatialReference.wkid||a.spatialReference.wkt]||K;this.loaded_=true;y(this,"load")};P.prototype.findAddressCandidates=function(a,b,c){var d=l(a,{});if(d.inputs){l(d.inputs,d);delete d.inputs}if(r(d.outFields))d.outFields=d.outFields.join(",");var e=this;o(this.url+
 "/findAddressCandidates",d,"",function(f){if(f.candidates)for(var g,h,j=[],C=0;C<f.candidates.length;C++){g=f.candidates[C];h=g.location;if(!isNaN(h.x)&&!isNaN(h.y)){h=[h.x,h.y];var D=e.spatialReference;if(a.outSR)D=B[a.outSR];if(D)h=D.inverse(h);g.location=new i.LatLng(h[1],h[0]);j[j.length]=g}}b({candidates:j});v(c,f)})};P.prototype.geocode=function(a,b){this.findAddressCandidates(a,b)};P.prototype.reverseGeocode=function(a,b,c){if(!H(a.location))a.location=J(a.location);a.outSR=4326;var d=this;
 o(this.url+"/reverseGeocode",a,"",function(e){if(e.location){var f=e.location;if(!isNaN(f.x)&&!isNaN(f.y)){f=[f.x,f.y];if(d.spatialReference)f=d.spatialReference.inverse(f);e.location=new i.LatLng(f[1],f[0])}}b(e);v(c,e)})};Z.prototype.project=function(a,b,c){var d=ha(a);o(this.url+"/project",d,"callback",function(e){var f=[];if(a.outSpatialReference===4326||a.outSpatialReference.wkid===4326){for(var g=0,h=e.geometries.length;g<h;g++)f.push(L(e.geometries[g]));e.geometries=f}b(e);v(c,e)})};Z.prototype.buffer=
-function(a,b,c){var d=ha(a);if(a.bufferSpatialReference)d.bufferSR=N(a.bufferSpatialReference);d.outSR=4326;d.distances=a.distances.join(",");if(a.unit)d.unit=a.unit;o(this.url+"/buffer",d,"callback",function(e){var f=[];if(e.geometries)for(var g=0,h=e.geometries.length;g<h;g++)f.push(L(e.geometries[g],a.overlayOptions));e.geometries=f;b(e);v(c,e)})};ja.prototype.execute=function(a,b,c){var d={};a.parameters&&l(a.parameters,d);d["env:outSR"]=a.outSpatialReference?N(a.outSpatialReference):4326;if(a.processSpatialReference)d["env:processSR"]=
+function(a,b,c){var d=ha(a);if(a.bufferSpatialReference				)d.bufferSR=N(a.bufferSpatialReference);d.outSR=4326;d.distances=a.distances.join(",");if(a.unit)d.unit=a.unit;o(this.url+"/buffer",d,"callback",function(e){var f=[];if(e.geometries)for(var g=0,h=e.geometries.length;g<h;g++)f.push(L(e.geometries[g],a.overlayOptions));e.geometries=f;b(e);v(c,e)})};ja.prototype.execute=function(a,b,c){var d={};a.parameters&&l(a.parameters,d);d["env:outSR"]=a.outSpatialReference?N(a.outSpatialReference):4326;if(a.processSpatialReference)d["env:processSR"]=
 N(a.processSpatialReference);o(this.url+"/execute",d,"",function(e){if(e.results)for(var f,g,h=0;h<e.results.length;h++){f=e.results[h];if(f.dataType==="GPFeatureRecordSetLayer")for(var j=0,C=f.value.features.length;j<C;j++){g=f.value.features[j];if(g.geometry)g.geometry=L(g.geometry,a.overlayOptions)}}b(e);v(c,e)})};ka.prototype.solve=function(a,b,c){if(a){var d=l(a,{});if(r(a.stops))d.stops=ga(a.stops);if(r(a.barriers))if(a.barriers.length>0)d.barriers=ga(a.barriers);else delete d.barriers;d.returnRoutes=
 a.returnRoutes===false?false:true;d.returnDirections=a.returnDirections===true?true:false;d.returnBarriers=a.returnBarriers===true?true:false;d.returnStops=a.returnStops===true?true:false;o(this.url+"/solve",d,"",function(e){e.routes&&fa(e.routes.features,a.overlayOptions);b(e);v(c,e)})}};t.prototype.fromLatLngToPoint=function(a,b){if(!a||isNaN(a.lat())||isNaN(a.lng()))return null;var c=this.spatialReference_.forward([a.lng(),a.lat()]),d=b||new i.Point(0,0);d.x=(c[0]-this.originX_)/this.scale_;d.y=
 (this.originY_-c[1])/this.scale_;return d};t.prototype.fromLatLngToPoint=t.prototype.fromLatLngToPoint;t.prototype.fromPointToLatLng=function(a){if(a===null)return null;a=this.spatialReference_.inverse([a.x*this.scale_+this.originX_,this.originY_-a.y*this.scale_]);return new i.LatLng(a[1],a[0])};t.prototype.getScale=function(a){a=a-this.minZoom;var b=0;if(this.lods_[a])b=this.lods_[a].scale;return b};t.WEB_MECATOR=new t;A.prototype.init_=function(a){if(this.mapService_.tileInfo){this.projection_=
@@ -198,215 +164,17 @@ TOUCHES:"esriSpatialRelTouches",WITHIN:"esriSpatialRelWithin"},GeometryType:s,SR
 MapOverlay:p,MapType:u,CopyrightControl:la};window.gmaps=$})();
 
 		</script>
-		
-		<script src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/arcgislink/src/arcgislink_compiled.js"></script>
 		<script>
-			$(':radio').click(function(e){
-				var selected = $(":checked").attr('id');
-				$('#myTab a[href="#' + selected + 'Tab"]').tab('show')
-			});
-			//implements switch-toggle to act as tab switcher
-			
 			var properties = [
 				{value: 'Plasticity', data: 'PI'}
 			];
-			var button = "<div class=\"row vert-offset-top-2\"><div class=\"col-sm-6\"><button class=\"btn btn-default\" type=\"submit\" id=\"location\">Location</button></div><div class=\"col-sm-6\"><div class=\"dropdown\"><button class=\"btn btn-default\" id=\"dLabel\" disabled=\"disabled\" type=\"button\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">Option<span class=\"caret\"></span></button><ul class=\"dropdown-menu\" aria-labelledby=\"dLabel\"><li><a href=\"#\" id=\"very\" style=\"color: red;\">Very</a></li><li><a href=\"#\" id=\"moderatley\" style=\"color: yellow;\">Moderately</a></li><li><a href=\"#\" id=\"non-plastic\" ><span style=\"background-color: green\"></span> Non-plastic</a></li></ul></div></div></div>";
-			var instruction = "";
-			var info = false;
-			var loc = false;
-			var lowLeft = null;
-			var topRight = null;
 			$('#autocomplete').autocomplete({
 				lookup: properties,
 				onSelect: function (suggestion) {
 				console.log('You selected: ' + suggestion.value + ', ' + suggestion.data);
-				$(button).hide().appendTo('#searchTab').fadeIn(1000);
 				}
 			});
 			//implements local autocomplete for the search mode
-			
-			$('#searchTab').delegate('#location', 'click', function(e){
-				if(!info){
-					instruction = "<div class=\"alert alert-info vert-offset-top-1\" role=\"alert\">Click on map the area you want to search on</div>";
-					$(instruction).hide().appendTo('#searchTab').fadeIn(1000);
-					info = true;
-					loc = true;
-				}
-				
-			});
-			$('#area').click(function(e){
-				$('#drawTab').find(".alert").remove();
-				instruction = "<div class=\"alert alert-info vert-offset-top-1\" role=\"alert\">Click the lower left corner of the area you want to search on</div>";
-				$(instruction).hide().appendTo('#drawTab').fadeIn(1000);
-				lowLeft = new google.maps.LatLng('0', '0');
-				topRight = null;
-				
-			});
-			
-			$('#info').hide();
-			var mukeyIn = [], biggestY = -90, smallestY = 90, biggestX = -180, smallestX = 180;
-			var map, polygons;
-			$.getJSON("map/dallas.json", function(data) {
-				polygons = data;
-			}).done(function(){
-				console.log("Polygons: " +polygons.length);
-			});
-			var consistence;
-			$.getJSON("tables/chconsistence.csv.json", function(data) {
-				consistence = data;
-			});
-			var component;
-			$.getJSON("tables/component.csv.json", function(data) {
-				component = data;
-			});
-			var horizon;
-			$.getJSON("tables/horizon.json", function(data) {
-				horizon = data;
-				console.log("Horizon: " + horizon.length);
-			});
-			function loadResults(mukey, color, attr) {
-				if (mukeyIn.indexOf(mukey) > -1) {
-					return;
-				}
-				var items,
-				    paths_data = [];
-				if (polygons.features.length > 0) {
-					items = polygons.features;
-					for (var i = 0; i < items.length; i++) {
-						var item = items[i];
-						if (item.attributes.MUKEY == mukey) {
-							if (!(mukeyIn.indexOf(mukey) > -1)) {
-								mukeyIn.push(mukey);
-							}
-							var currPath = [];
-							if(!$.each(item.geometry.rings[0], function(index, entry) {
-								if(lowLeft != null){
-									if(lowLeft.lat() > entry[1] || topRight.lat() < entry[1]){
-										console.log("Polygon out of bounds");
-										return false;
-									}
-									else if (lowLeft.lng() > entry[0] || topRight.lng < entry[0]){
-										console.log("Polygon out of bounds");
-										return false;
-									}
-								}
-								
-								currPath.push([entry[1], entry[0]]);
-								if(entry[1] > biggestY){
-									biggestY = entry[1];
-								} else if(entry[1] < smallestY){
-									smallestY = entry[1];
-								}
-								if(entry[0] > biggestX){
-									biggestX = entry[0];
-								} else if(entry[0] < smallestX){
-									smallestX = entry[0];
-								}
-							})){
-								break;
-							}
-							map.drawPolygon({
-								paths : currPath,
-								strokeColor : '#BBD8E9',
-								strokeOpacity : 1,
-								strokeWeight : 1,
-								fillColor : color,
-								fillOpacity : 0.6,
-								visible : true,
-								data : item.attributes.MUKEY,
-								click : function(e) {
-									map.map.panTo(e.latLng);
-									map.setZoom(13);
-									var infowindow = new google.maps.InfoWindow({
-										size: new google.maps.Size(150, 50),
-										content: '<ul><li>Depth: '+ attr[0] + '</li></ul>',
-										position: e.latLng
-									});
-									infowindow.open(map.map);
-									$('#info').text(this.data);
-									$('#info').show();
-								},
-								
-							});
-						}
-					}
-				}
-			}
-			
-			function iterateJSON(attribute, color){
-				var promises = [];
-				for (var i = 0; i < consistence.length; i++) {
-					if (consistence[i].plasticity == attribute) {
-						var horizonKey = consistence[i].chkey;
-						for (var j = 0; j < horizon.length; j++) {
-							if (horizonKey == horizon[j].chkey) {
-								var componentKey = horizon[j].cokey;
-								var attr = [horizon[j].topDepth, horizon[j].bottomDepth];
-								for (var k = 0; k < component.length; k++) {
-									if (componentKey == component[k].cokey) {
-										var polygonKey = component[k].mukey;
-										var def = new $.Deferred();
-										
-										loadResults(polygonKey, color, attr);
-										def.resolve();
-										promises.push(def);
-									}
-								}
-							}
-						}
-					}
-				}
-				return $.when.apply(undefined, promises).promise();
-			}
-			function allLevels(){
-				iterateJSON("Very plastic", 'red');
-				iterateJSON("Moderately plastic", 'yellow');
-				iterateJSON("Nonplastic", 'green');
-				if(biggestY != -90){
-					map.setCenter((biggestY + smallestY)/2, (biggestX + smallestX)/2);
-					map.setZoom(11);
-				}
-			}
-			$('#searchTab').delegate('#very', 'click', function(e) {
-				console.log("started to read tables");
-				var filtered = iterateJSON("Very plastic", 'red');
-				if(biggestY != -90){
-					map.setCenter((biggestY + smallestY)/2, (biggestX + smallestX)/2);
-					map.setZoom(11);
-				}
-				else{
-					alert("No areas were found.");
-				}
-				filtered.done(function(){
-					console.log("finished reading table");
-				});
-				
-			});
-			$('#searchTab').delegate('#moderatley', 'click', function(e) {
-				console.log("started to read tables");
-				var filtered = iterateJSON("Moderately plastic", 'yellow');
-				if(biggestY != -90){
-					map.setCenter((biggestY + smallestY)/2, (biggestX + smallestX)/2);
-					map.setZoom(11);
-				}
-				else{
-					alert("No areas were found.");
-				}
-				console.log("finished reading table");
-			});
-			$('#searchTab').delegate('#non-plastic', 'click', function(e) {
-				console.log("started to read tables");
-				var filtered = iterateJSON("Nonplastic", 'green');
-				if(biggestY != -90){
-					map.setCenter((biggestY + smallestY)/2, (biggestX + smallestX)/2);
-					map.setZoom(11);
-				}
-				else{
-					alert("No areas were found.");
-				}
-				
-				console.log("finished reading table");
-			});
 					
 			$(document).ready(function() {
 				map = new GMaps({
@@ -419,122 +187,23 @@ MapOverlay:p,MapType:u,CopyrightControl:la};window.gmaps=$})();
 					var lat = event.latLng.lat();
 					var lng = event.latLng.lng();
 					console.log(lat + ", " + lng);
-					if (loc){
-						if (lat > 33.465816745730024 || lat < 32.312670050625805){
-							alert("This area is not yet supported");
-						}
-						else if (lng > -95.9381103515625 || lng < -97.4652099609375){
-							alert("This area is not yet supported");
-						}
-						else{
-							var info = $('#searchTab').find('.alert');
-							info.removeClass('alert-info').addClass('alert-success');
-							info.text('Selected Dallas District');
-							$('#searchTab').find('#dLabel').removeProp('disabled');
-							loc = false;
-						}
-					}
-					else if (lowLeft != null && topRight == null){
-						lowLeft = event.latLng;
-						topRight = new google.maps.LatLng('0', '0');
-						var info = $('#drawTab').find('.alert');
-						info.text('Now select upper right corner.');
-					}
-					else if (topRight != null){
-						topRight = event.latLng;
-						var info = $('#drawTab').find('.alert');
-						info.text('Area selected.');
-						map.fitLatLngBounds([lowLeft, topRight]);
-						if (topRight.lat() > 33.465816745730024 && lowLeft.lat() < 32.312670050625805){
-							alert("This area is not yet supported");
-						}
-						else if (topRight.lng() > -95.9381103515625 && lowLeft.lng() < -97.4652099609375){
-							alert("This area is not yet supported");
-						}
-						else{
-							info.removeClass('alert-info').addClass('alert-success');
-							info.text('Selected Dallas District');
-							allLevels();
-						}
-					}
-					/*
-					if (marker){
-						map.addMarker({
-							lat : lat,
-							lng : lng,
-							title : 'Marker #' + 5,
-							infoWindow : {
-								content : "<p>Hello</p>"
-							}
-						});
-					}
-					*/
-							
 				});
-				//var deferreds = getJsons();
-			
-			    //$.when.apply(null, deferreds).done(function() {
-			    //	console.log("all done");
-			    //});
-				/*
-				$.getJSON("map/" + districts_filenames[0] + "_perimeter.json.json", function(data) {
-					perimeter.push(data);
-				}).done(function(){
-					console.log(perimeter.length);
-					for(var j = 0; j < perimeter[0].paths.length; j++){
-						perimeter[0].paths[j] = perimeter[0].paths[j].split(",");
-					}
-					perimeter_polylines[0] = map.drawPolyline({
-						path: perimeter[0].paths,
-						strokeColor: '#131540',
-						strokeOpacity: 0.8,
-						strokeWeight: 7
-					});
-				});
-				*/
 				var perUrl = 'http://irpsrvgis37.utep.edu/arcgis/rest/services/Texas/Perimeters_joined/MapServer';
-				var plastUrl = 'http://irpsrvgis34.utep.edu/arcgis/rest/services/Texas/Stickiness_state/MapServer/0';
-				var perimeters = new gmaps.ags.MapOverlay(perUrl);
-				var polygons = new gmaps.ags.MapOverlay(plastUrl);
-				polygons.setMap(map.map);
-				perimeters.setMap(map.map);
 
-//				map.loadFromKML({
-//    			    url: 'https://localhost:6443/arcgis/rest/services/Texas/Stickiness_state/MapServer',
-//    			    suppressInfoWindows: true,
-//    			    events: {
-//    			    click: function(point){
-//    			        infoWindow.setContent(point.featureData.infoWindowHtml);
-//    			        infoWindow.setPosition(point.latLng);
-//    			        infoWindow.open(map.map);
-//    			    }
-//    			   	}
-//    			});
+				//var url = 'http://irpsrvgis37.utep.edu/arcgis/rest/services/Texas/PlasTxMap/MapServer';
+				var url ='http://irpsrvgis34.utep.edu/arcgis/rest/services/Texas/rupturemoist_texas/MapServer';
+				//var url = 'http://irpsrvgis34.utep.edu/arcgis/rest/services/Texas/Stickiness_state/MapServer';
+				var plasticity = new gmaps.ags.MapOverlay(url);
+				plasticity.setMap(map.map);
+				/*
+				var agsType = new  gmaps.ags.MapType(url,{name:'ArcGIS'});
+				console.log(map);
+			    map.map.mapTypes.set('arcgis', agsType);
+			    map.map.setMapTypeId('arcgis');
+			    */
+
 				
 			});
-			function getJsons() {
-			    var deferreds = [];
-			    var district_names = ["amarollo", "EP", "beaumont", "childress", "corpus", "laredo", "lubok", "lufkin", "odesa", "phar", "sanAntonio"];
-			    var i;
-			    for (i = 0; i < district_names.length; i++) {
-			        var count = i;
-			
-			        deferreds.push(
-			        $.getJSON("map/" + district_names[i] + "_perimeter.json.json").success(function(data) {
-			            for(var j = 0; j < data.paths.length; j++){
-							data.paths[j] = data.paths[j].split(",");
-						}
-				        map.drawPolyline({
-							path: data.paths,
-							strokeColor: '#131540',
-							strokeOpacity: 0.8,
-							strokeWeight: 7
-						});
-			        }));
-			    }
-			    
-			    return deferreds;
-			}
 		</script>
 	</body>
 </html>
