@@ -68,13 +68,13 @@
 
         esriConfig.defaults.io.proxyUrl = "/proxy/";
 
-        app.dataUrl = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer/2";
-        //app.dataUrl = "http://irpsrvgis34.utep.edu/arcgis/rest/services/Texas/Stickiness_state/MapServer/0";
+        //app.dataUrl = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer/2";
+        app.dataUrl = "http://irpsrvgis34.utep.edu/arcgis/rest/services/Texas/Stickiness_state/MapServer/0";
         app.defaultFrom = "#ffffcc";
         app.defaultTo = "#006837";
 
         app.map = new Map("map", {
-          center: [-85.787, 39.782],
+          center: [-99.03076, 31.63467],
           zoom: 6,
           slider: false
         });
@@ -85,7 +85,8 @@
         app.map.addLayer(ref);
 
         // add US Counties as a dynamic map service layer
-        var urlDyn = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer";
+        var urlDyn = "http://irpsrvgis34.utep.edu/arcgis/rest/services/Texas/Stickiness_state/MapServer";
+        //var urlDyn = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer";
         var usaLayer = new ArcGISDynamicMapServiceLayer(urlDyn, {
           id: "us_counties",
           opacity: 0.7,
