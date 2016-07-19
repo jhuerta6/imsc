@@ -73,90 +73,92 @@
 									<input type="text" class="form-control" placeholder="Ground Property" aria-describedby="basic-addon" id="autocomplete">
 								</div>
 							</div>
+							<div class="row">
+								<label>District:</label>
+								<select id="target" class="form-control">
+									<option value="32.43561304116276,-100.1953125">
+										Abilene
+									</option>
+									<option value="35.764343479667176,-101.49169921875">
+										Amarillo
+									</option>
+									<option value="32.69651010951669, -94.691162109375">
+										Atlanta
+									</option>
+									<option value="30.25391637229704, -98.23212890625">
+										Austin
+									</option>
+									<option value="30.40211367909724, -94.39453125" data-district="beaumont">
+										Beaumont
+									</option>
+									<option value="31.765537409484374, -99.140625">
+										Brownwood
+									</option>
+									<option value="30.894611546632302, -96.30615234375" data-district="bryan">
+										Bryan
+									</option>
+									<option value="34.397844946449865, -100.37109375" data-district="childress">
+										Childress
+									</option>
+									<option value="28.110748760633534, -97.71240234375" data-district="corpus">
+										Corpus Christi
+									</option>
+									<option value="32.54681317351514, -96.85546875">
+										Dallas
+									</option>
+									<option value="30.694611546632302, -104.52392578125">
+										El Paso
+									</option>
+									<option value="32.62087018318113, -97.75634765625">
+										Fort Worth
+									</option>
+									<option value="29.661670115197377, -95.33935546875">
+										Houston
+									</option>
+									<option value="28.613459424004418, -99.90966796875" data-district="laredo">
+										Laredo
+									</option>
+									<option value="33.43144133557529, -101.93115234375" data-district="lubbock">
+										Lubbock
+									</option>
+									<option value="31.203404950917395, -94.7021484375">
+										Lufkin
+									</option>
+									<option value="31.203404950917395, -102.568359375" data-district="odessa">
+										Odessa
+									</option>
+									<option value="33.43144133557529, -95.625">
+										Paris
+									</option>
+									<option value="26.951453083498258, -98.32763671875" data-district="pharr">
+										Pharr
+									</option>
+									<option value="31.10819929911196, -100.48095703125">
+										San Angelo
+									</option>
+									<option value="29.13297013087864, -98.89892578125" data-district="sanAntonio">
+										San Antonio
+									</option>
+									<option value="32.222095840502334, -95.33935546875">
+										Tyler
+									</option>
+									<option value="31.403404950917395, -97.119140625">
+										Waco
+									</option>
+									<option value="33.77914733128647, -98.37158203125">
+										Wichita Falls
+									</option>
+									<option value="29.05616970274342, -96.8115234375">
+										Yoakum
+									</option>
+								</select>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div id="dropdown">
-		<select id="target">
-			<option value="32.43561304116276,-100.1953125">
-				Abilene
-			</option>
-			<option value="35.764343479667176,-101.49169921875">
-				Amarillo
-			</option>
-			<option value="32.69651010951669, -94.691162109375">
-				Atlanta
-			</option>
-			<option value="30.25391637229704, -98.23212890625">
-				Austin
-			</option>
-			<option value="30.40211367909724, -94.39453125" data-district="beaumont">
-				Beaumont
-			</option>
-			<option value="31.765537409484374, -99.140625">
-				Brownwood
-			</option>
-			<option value="30.894611546632302, -96.30615234375" data-district="bryan">
-				Bryan
-			</option>
-			<option value="34.397844946449865, -100.37109375" data-district="childress">
-				Childress
-			</option>
-			<option value="28.110748760633534, -97.71240234375" data-district="corpus">
-				Corpus Christi
-			</option>
-			<option value="32.54681317351514, -96.85546875">
-				Dallas
-			</option>
-			<option value="30.694611546632302, -104.52392578125">
-				El Paso
-			</option>
-			<option value="32.62087018318113, -97.75634765625">
-				Fort Worth
-			</option>
-			<option value="29.661670115197377, -95.33935546875">
-				Houston
-			</option>
-			<option value="28.613459424004418, -99.90966796875" data-district="laredo">
-				Laredo
-			</option>
-			<option value="33.43144133557529, -101.93115234375" data-district="lubbock">
-				Lubbock
-			</option>
-			<option value="31.203404950917395, -94.7021484375">
-				Lufkin
-			</option>
-			<option value="31.203404950917395, -102.568359375" data-district="odessa">
-				Odessa
-			</option>
-			<option value="33.43144133557529, -95.625">
-				Paris
-			</option>
-			<option value="26.951453083498258, -98.32763671875" data-district="pharr">
-				Pharr
-			</option>
-			<option value="31.10819929911196, -100.48095703125">
-				San Angelo
-			</option>
-			<option value="29.13297013087864, -98.89892578125" data-district="sanAntonio">
-				San Antonio
-			</option>
-			<option value="32.222095840502334, -95.33935546875">
-				Tyler
-			</option>
-			<option value="31.403404950917395, -97.119140625">
-				Waco
-			</option>
-			<option value="33.77914733128647, -98.37158203125">
-				Wichita Falls
-			</option>
-			<option value="29.05616970274342, -96.8115234375">
-				Yoakum
-			</option>
-		</select>
-		</div>
+		
 		<!-- Bootstrap Core JavaScript -->
 		<script src="js/jquery.js"></script>
 		<script src="js/bootstrap.js"></script>
