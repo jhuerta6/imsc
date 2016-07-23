@@ -105,14 +105,14 @@
 
       var currentExtentFilter = null;
 
-      var url = "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Puget_Sound_BG_demographics/FeatureServer/0";
+      var url = "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Puget_Sound_BG_demographics/FeatureServer/0";
 
       var qt = new QueryTask(url);
 
       var map = new Map("esri-map-container", {
         basemap: "gray",
-        center: [ -99.140625, 30.845647420182598],
-        zoom: 6
+        center: [-122.324424, 47.599179],
+        zoom: 13
       });
 
       var busySpinner = dom.byId("spinner");
@@ -131,7 +131,7 @@
 
       var lyr = new FeatureLayer(url, {
         outFields: ["*"],
-        visible: true
+        visible: false
       });
 
       //FeatureLayerStatistics will be used to generate stats and histogram for the color slider
@@ -153,8 +153,8 @@
         maxValue: 1,  // absolute maximum value of slider
         colorInfo: {  // determines color ramp mapped to data values
           stops:[
-            {color: new Color("#fffcd4"), value: 0.0001},
-            {color: new Color("#fffcd4"), value: 1.0001}
+            {color: new Color("#FFFCD4"), value: 0.0001},
+            {color: new Color("#FFFCD4"), value: 1.0001}
           ]
         },
         showTransparentBackground: true
@@ -178,7 +178,7 @@
         } else if(field.includes("COL_DEG")){
           normField = "EDUCBASECY";  // Total population 25 and older
         } else {
-          normField = "stickiness";  // Total population
+          normField = "TOTPOP_CY";  // Total population
         }
 
         return normField;
@@ -195,10 +195,10 @@
         map.addLayer(lyr);
         //Configure InfoTemplate on FeatureLayer
 
-        var content = "Total Population: {stickiness}<br>"
-        + "Pop 18+: {stickiness}<br>"
-        + "Male: {mannerfailure}<br>"
-        + "Female: {rupresplate}<br>"
+        var content = "Total Population: {TOTPOP_CY}<br>"
+        + "Pop 18+: {POP18UP_CY}<br>"
+        + "Male: {MALES_CY}<br>"
+        + "Female: {FEMALES_CY}<br>"
         + "College Degree: {COL_DEG}<br>"
         + "No College Degree: {NO_COL_DEG}<br>"
         + "Median household income: {MEDHINC_CY}<br>"
@@ -436,9 +436,9 @@
       <div id="attSelection">
         Attribute:
         <select id="select-field">
-          <option value="stickiness" selected>stickiness</option>
-          <option value="mannerfailure">Manner of Failure</option>
-          <option value="rupresplate">Rupture Plate</option>
+          <option value="POP18UP_CY" selected>Population 18+</option>
+          <option value="HH_Income_0_35K">Household income 0-$35K</option>
+          <option value="HH_Income_35_75K">Household income $35K - $75K</option>
           <option value="HH_Income_75_200K">Household income $75K - $200K</option>
           <option value="HINC200_CY">Household income >$200K</option>
           <option value="COL_DEG">Pop 25+ earned a college degree</option>
@@ -469,7 +469,7 @@
           <option value="extremes">Extremes</option>
         </select>
       </div></div>
-      <div id="esri-colorinfoslider"></div>
+      <div id="esri-colorinfoslider"><img src="img/busy-indicator.gif" id="spinner"></div>
     </div>
   </body>
 </html>
