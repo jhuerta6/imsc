@@ -367,7 +367,6 @@ MapOverlay:p,MapType:u,CopyrightControl:la};window.gmaps=$})();
 				plasticity.setMap(map.map);
 				perimeter.setMap(map.map);
 
-
 				/*
 				var agsType = new  gmaps.ags.MapType(url,{name:'ArcGIS'});
 				console.log(map);

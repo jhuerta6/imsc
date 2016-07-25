@@ -1,220 +1,474 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
-    <title>Change attribute used for a renderer</title>
-    <link rel="stylesheet" href="https://js.arcgis.com/3.17/dijit/themes/tundra/tundra.css">
-    <link rel="stylesheet" href="https://js.arcgis.com/3.17/esri/css/esri.css">
-    <style>
-      html, body { height: 100%; width: 100%; margin: 0; padding: 0; }
-      h3 { margin: 0 0 5px 0; border-bottom: 1px solid #444; text-align: center; }
-      .shadow {
-        -moz-box-shadow: 0 0 5px #888;
-        -webkit-box-shadow: 0 0 5px #888;
-        box-shadow: 0 0 5px #888;
-      }
-      #map{ margin: 0; padding: 0; }
-      #feedback {
-        background: #fff;
-        color: #444;
-        font-family: arial;
-        left: 30px;
-        margin: 5px;
-        padding: 10px;
-        position: absolute;
-        top: 30px;
-        width: 300px;
-        z-index: 40;
-      }
-      #note { font-size: 80%; font-weight: 700; padding: 0 0 10px 0; }
-      #loading { visibility: hidden; }
-      #legendDiv { padding: 10px 0 0 0; }
-    </style>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
+  <title>Greater Seattle Demographics</title>
+  <link rel="stylesheet" href="//js.arcgis.com/3.17/dijit/themes/claro/claro.css">
+  <link rel="stylesheet" href="//js.arcgis.com/3.17/esri/css/esri.css">
+  <script src="//js.arcgis.com/3.17/"></script>
 
-    <script src="https://js.arcgis.com/3.17/"></script>
-    <script>
-      // one global for persistent app variables
-      var app = {};
-      require([
-        "esri/map",
-        "esri/layers/ArcGISTiledMapServiceLayer", "esri/layers/ArcGISDynamicMapServiceLayer",
-        "esri/request", "esri/config",
-        "esri/tasks/ClassBreaksDefinition", "esri/tasks/AlgorithmicColorRamp",
-        "esri/tasks/GenerateRendererParameters", "esri/tasks/GenerateRendererTask",
-        "esri/layers/LayerDrawingOptions",
-        "esri/symbols/SimpleFillSymbol", "esri/dijit/Legend",
-        "dojo/parser", "dojo/_base/array", "esri/Color", "dojo/dom-style",
-        "dojo/json", "dojo/dom",
-        "dojo/data/ItemFileReadStore",
-        "dijit/registry",
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
+    #esri-map-container{
+      height: 100%;
+      width: 100%;
+      left: 300px;
+      position: absolute;
+    }
+    #esri-colorinfoslider-container{
+      position: absolute;
+      z-index: 2;
+      bottom: 0;
+      left: 0;
+      background-color: #FFFCD4;
+      color: #6B3B64;
+      height: 100%;
+      width: 300px;
+      border-top-right-radius: 8px;
+      overflow-x: hidden;
+    }
+    #basemapToggle-container{
+      z-index: 4;
+      position: absolute;
+      top: 15px;
+      right: 15px;
+    }
+    #spinner{
+      visibility: hidden;
+      position: relative;
+      z-index: 98;
+      left: 90px;
+      bottom: 250px;
+    }
+    .btn {
+      background: #3498db;
+      background-image: -webkit-linear-gradient(top, #6B3B64, #6B3B64);
+      background-image: -moz-linear-gradient(top, #6B3B64, #6B3B64);
+      background-image: -ms-linear-gradient(top, #6B3B64, #6B3B64);
+      background-image: -o-linear-gradient(top, #6B3B64, #6B3B64);
+      background-image: linear-gradient(to bottom, #6B3B64, #6B3B64);
+      -webkit-border-radius: 28;
+      -moz-border-radius: 28;
+      border-radius: 28px;
+      font-family: Arial;
+      color: #ffffff;
+      font-size: 14px;
+      padding: 3px 7px 3px 7px;
+      text-decoration: none;
+    }
 
-        "dijit/layout/BorderContainer", "dijit/layout/ContentPane", "dijit/form/FilteringSelect",
-        "dojo/domReady!"
-      ], function(
-        Map,
-        ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer,
-        esriRequest, esriConfig,
-        ClassBreaksDefinition, AlgorithmicColorRamp,
-        GenerateRendererParameters, GenerateRendererTask,
-        LayerDrawingOptions,
-        SimpleFillSymbol, Legend,
-        parser, arrayUtils, Color, domStyle,
-        JSON, dom,
-        ItemFileReadStore,
-        registry
-      ) {
-        parser.parse();
+    .btn:hover {
+      background: #3cb0fd;
+      background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
+      background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
+      background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
+      background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
+      background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+      text-decoration: none;
+    }
+    h2{
+      text-align: center;
+    }
+    #esri_dijit_RendererSlider_0{
+      background-color: #FFFCD4;
+    }
+  </style>
 
-        esriConfig.defaults.io.proxyUrl = "/proxy/";
+  <script>
+    require([
+      "esri/Color",
+      "esri/dijit/BasemapToggle",
+      "esri/dijit/ColorInfoSlider",
+      "esri/dijit/PopupTemplate",
+      "esri/layers/FeatureLayer",
+      "esri/map",
+      "esri/plugins/FeatureLayerStatistics",
+      "esri/renderers/smartMapping",
+      "esri/tasks/query",
+      "esri/tasks/QueryTask",
+      "dojo/_base/array",
+      "dojo/dom",
+      "dojo/on",
+      "dojo/domReady!"
+    ], function (
+      Color, BasemapToggle, ColorInfoSlider,
+      PopupTemplate, FeatureLayer, Map, FeatureLayerStatistics, smartMapping,
+      Query, QueryTask, array, dom, on
+    ){
 
-        //app.dataUrl = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer/2";
-        app.dataUrl = "http://irpsrvgis34.utep.edu/arcgis/rest/services/Texas/Stickiness_state/MapServer/0";
-        app.defaultFrom = "#ffffcc";
-        app.defaultTo = "#006837";
+      var currentExtentFilter = null;
 
-        app.map = new Map("map", {
-          center: [-99.03076, 31.63467],
-          zoom: 6,
-          slider: false
-        });
+      var url = "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Puget_Sound_BG_demographics/FeatureServer/0";
 
-        var basemap = new ArcGISTiledMapServiceLayer("https://services.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer");
-        app.map.addLayer(basemap);
-        var ref = new ArcGISTiledMapServiceLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Reference_Overlay/MapServer");
-        app.map.addLayer(ref);
+      var qt = new QueryTask(url);
 
-        // add US Counties as a dynamic map service layer
-        var urlDyn = "http://irpsrvgis34.utep.edu/arcgis/rest/services/Texas/Stickiness_state/MapServer";
-        //var urlDyn = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer";
-        var usaLayer = new ArcGISDynamicMapServiceLayer(urlDyn, {
-          id: "us_counties",
-          opacity: 0.7,
-          visible: false
-        });
-        usaLayer.setVisibleLayers([0]);
-        app.map.addLayer(usaLayer);
-
-        // get field info
-        var countyFields = esriRequest({
-          url: app.dataUrl,
-          content: {
-            f: "json"
-          },
-          callbackParamName: "callback"
-        });
-        countyFields.then(function(resp) {
-          var fieldNames, fieldStore;
-
-          fieldNames = { identifier: "value", label: "name", items: [] };
-          arrayUtils.forEach(resp.fields.slice(8, 58), function(f) { // add some field names to the FS
-            fieldNames.items.push({ "name": f.name, "value": f.name });
-          });
-          fieldStore = new ItemFileReadStore({ data: fieldNames });
-          registry.byId("fieldNames").set("store", fieldStore);
-          registry.byId("fieldNames").set("value", "stickiness"); // set a value
-        }, function(err) {
-          console.log("failed to get field names: ", err);
-        });
-
-        // hide the loading icon when the counties layer finishes updating
-        usaLayer.on("update-end", function() {
-          domStyle.set("loading", "visibility", "hidden");
-        });
-
-        // update renderer when field name changes
-        registry.byId("fieldNames").on("change", getData);
-        registry.byId("fieldNames").set("value", "stickiness"); // triggers getData()
-
-        function getData() {
-          domStyle.set("loading", "visibility", "visible");
-          classBreaks(app.defaultFrom, app.defaultTo);
-        }
-
-        function classBreaks(c1, c2) {
-          var classDef = new ClassBreaksDefinition();
-          classDef.classificationField = registry.byId("fieldNames").get("value") || "stickiness";
-          classDef.classificationMethod = "natural-breaks"; // always natural breaks
-          classDef.breakCount = 5; // always five classes
-
-          var colorRamp = new AlgorithmicColorRamp();
-          colorRamp.fromColor = new Color.fromHex(c1);
-          colorRamp.toColor = new Color.fromHex(c2);
-          colorRamp.algorithm = "hsv"; // options are:  "cie-lab", "hsv", "lab-lch"
-
-          classDef.baseSymbol = new SimpleFillSymbol("solid", null, null);
-          classDef.colorRamp = colorRamp;
-
-          var params = new GenerateRendererParameters();
-          params.classificationDefinition = classDef;
-          var generateRenderer = new GenerateRendererTask(app.dataUrl);
-          generateRenderer.execute(params, applyRenderer, errorHandler);
-        }
-
-        function applyRenderer(renderer) {
-          // dynamic layer stuff
-          var optionsArray = [];
-          var drawingOptions = new LayerDrawingOptions();
-          drawingOptions.renderer = renderer;
-          // set the drawing options for the relevant layer
-          // optionsArray index corresponds to layer index in the map service
-          optionsArray[0] = drawingOptions;
-          app.map.getLayer("us_counties").setLayerDrawingOptions(optionsArray);
-          app.map.getLayer("us_counties").show();
-          // create the legend if it doesn't exist
-          if ( ! app.hasOwnProperty("legend") ) {
-            createLegend();
-          }
-        }
-
-        function createLegend() {
-          app.legend = new Legend({
-            map : app.map,
-            layerInfos : [ {
-              layer : app.map.getLayer("us_counties"),
-              title : "US Counties"
-            } ]
-          }, dom.byId("legendDiv"));
-          app.legend.startup();
-        }
-
-        function errorHandler(err) {
-          // console.log("Something broke, error: ", err);
-          console.log("error: ", JSON.stringify(err));
-        }
+      var map = new Map("esri-map-container", {
+        basemap: "gray",
+        center: [-122.324424, 47.599179],
+        zoom: 13
       });
-    </script>
+
+      var busySpinner = dom.byId("spinner");
+
+      var bt = new BasemapToggle({
+        basemap: "dark-gray",
+        map: map
+      }, "basemapToggle-container");
+      bt.startup();
+
+      bt.on("toggle", function(evt){
+        updateSmartMapping({
+          newBasemap: evt.currentBasemap
+        });
+      });
+
+      var lyr = new FeatureLayer(url, {
+        outFields: ["*"],
+        visible: false
+      });
+
+      //FeatureLayerStatistics will be used to generate stats and histogram for the color slider
+      var featureLayerStatistics = new FeatureLayerStatistics({ layer: lyr, visible: false });
+
+      /******************************************************************************
+      * Create the ColorInfoSlider widget and initialize. Pass in an initial
+      * stops parameter inside the colorInfo object, which will be replaced when
+      * the new renderer is generated.
+      *
+      * The values of all the properties set in this constructor
+      * (minValue, maxValue, colorInfo + stops) are unimportant. Just initialize them
+      * with anything if you don't know the stats of the data associated with the slider
+      * then let SmartMapping handle the rest.
+      *****************************************************************************/
+
+      var colorInfoSlider = new ColorInfoSlider({
+        minValue: 0.0001,  // absolute minimum value of slider
+        maxValue: 1,  // absolute maximum value of slider
+        colorInfo: {  // determines color ramp mapped to data values
+          stops:[
+            {color: new Color("#FFFCD4"), value: 0.0001},
+            {color: new Color("#FFFCD4"), value: 1.0001}
+          ]
+        },
+        showTransparentBackground: true
+      }, "esri-colorinfoslider");
+
+      colorInfoSlider.startup();
+
+      // Gets the indicated field name from the user
+      function getFieldName(){
+        return dom.byId("select-field").value;
+      }
+
+      // Determines which field to normalize by given the selected field name
+      function getNormalizedField(field){
+        var normField;
+
+        if (field.includes("HH_Income") || field.includes("HINC")) {
+          normField = "HINCBASECY";  // Total number of households
+        } else if (field.includes("HomeValue")) {
+          normField = "VALBASE_CY";  // Total number of owner-occupied homes
+        } else if(field.includes("COL_DEG")){
+          normField = "EDUCBASECY";  // Total population 25 and older
+        } else {
+          normField = "TOTPOP_CY";  // Total population
+        }
+
+        return normField;
+      }
+
+      /******************************************************************************
+      * After the FeatureLayer loads, format the Popup and calculate the
+      * suggested scale range from the FeatureLayerStatistics plugin. Then
+      * generate a new renderer based on the selected field and the basemap using the
+      * Smart Mapping module.
+      *****************************************************************************/
+
+      lyr.on("load", function (){
+        map.addLayer(lyr);
+        //Configure InfoTemplate on FeatureLayer
+
+        var content = "Total Population: {TOTPOP_CY}<br>"
+        + "Pop 18+: {POP18UP_CY}<br>"
+        + "Male: {MALES_CY}<br>"
+        + "Female: {FEMALES_CY}<br>"
+        + "College Degree: {COL_DEG}<br>"
+        + "No College Degree: {NO_COL_DEG}<br>"
+        + "Median household income: {MEDHINC_CY}<br>"
+        + "Median home value: {MEDVAL_CY}<br>";
+        var title = "Key Demographics: {FID_Block_Group}";
+
+        lyr.setInfoTemplate(new PopupTemplate({
+          title: title,
+          description: content
+        }));
+
+        featureLayerStatistics.getSuggestedScaleRange().then(function(response){
+          lyr.setMaxScale(response.maxScale);
+          lyr.setMinScale(response.minScale);
+        });
+
+        // Generate the renderer on the fly based on the data
+
+        updateSmartMapping({
+          layer: lyr
+        });
+      });
+
+      /******************************************************************************
+      * Function for calling smartMapping and FeatureLayerStatistics plugin
+      * This updates the layer's renderer and the color slider
+      *****************************************************************************/
+
+      function updateSmartMapping(params){
+
+        busySpinner.style.visibility = "visible";
+
+        var newBasemap = params.newBasemap;
+        var layer = params.layer ? params.layer : lyr;
+        var theme = params.theme ? params.theme : dom.byId("color-renderer-theme").value;
+        var fieldName = getFieldName();
+        var normFieldName = getNormalizedField(fieldName);
+        var basemap = newBasemap ? newBasemap : map.getBasemap();
+
+        // Generate the color renderer based on the given field,
+        // normalization field, basemap and theme
+        smartMapping.createColorRenderer({
+          layer: layer,
+          field: fieldName,
+          normalizationField: normFieldName,
+          basemap: basemap,
+          theme: theme
+        }).then(function (colorRenderer){
+          if (!layer.visible) {
+            layer.show();
+          }
+
+          //Set the generated renderer on the layer
+          layer.setRenderer(colorRenderer.renderer);
+          layer.redraw();
+
+          // --------------------------------------------------------------------
+          // Calculate the Histogram
+          // --------------------------------------------------------------------
+          featureLayerStatistics.getHistogram({
+            field: fieldName,
+            normalizationField: normFieldName,
+            normalizationType: "field",
+            numBins: 20
+          }).then(function (histogram){
+            // --------------------------------------------------------------------
+            // Update the ColorInfoSlider and apply FeatureLayerStatistics histogram
+            // --------------------------------------------------------------------
+            var sliderHandleInfo = getSliderHandlePositions(theme);
+            colorInfoSlider.set("colorInfo", colorRenderer.renderer.visualVariables[0]);
+            colorInfoSlider.set("minValue", colorRenderer.statistics.min);
+            colorInfoSlider.set("maxValue", colorRenderer.statistics.max);
+            colorInfoSlider.set("statistics", colorRenderer.statistics);
+            colorInfoSlider.set("histogram", histogram);
+            colorInfoSlider.set("handles", sliderHandleInfo["handles"]);
+            colorInfoSlider.set("primaryHandle", sliderHandleInfo["primaryHandle"]);
+            busySpinner.style.visibility = "hidden";
+
+            // --------------------------------------------------------------------
+            // process slider handle changes
+            // Object with keys: type, field, normalizationField, stops
+            // And apply to renderer
+            // --------------------------------------------------------------------
+            colorInfoSlider.on("handle-value-change", function (sliderValueChange){
+              layer.renderer.setVisualVariables([sliderValueChange]);
+              layer.redraw();
+            });
+
+          }).otherwise(function (error){
+            busySpinner.style.visibility = "hidden";
+            console.log("An error occurred while calculating the histogram, Error: %o", error);
+          });
+
+        }).otherwise(function (error){
+          busySpinner.style.visibility = "hidden";
+          console.log("An error occurred while creating the color renderer, Error: %o", error);
+        });
+      }
+
+      // --------------------------------------------------------------------
+      // Update ColorInfoSlider handle positions based upon theme chosen.
+      // --------------------------------------------------------------------
+      function getSliderHandlePositions(theme){
+        switch (theme) {
+          case "high-to-low":
+            return {
+              handles: [0, 4],
+              primaryHandle: null
+            };
+          case "above-and-below":
+            return {
+              handles: [0, 2, 4],
+              primaryHandle: 2
+            };
+          case "centered-on":
+            return {
+              handles: [0, 2, 4],
+              primaryHandle: 2
+            };
+          case "extremes":
+            return {
+              handles: [0, 2, 4],
+              primaryHandle: null
+            };
+        }
+      }
+
+      /******************************************************************************
+      * Set definition expression on features when predetermined filter is
+      * selected.
+      ******************************************************************************/
+
+      function attributeFilter (evt, clear){
+        lyr.hide();
+        // Get the new definition expression if user selects attribute filter
+        var newVal = (evt.target) ? evt.target.value : evt;
+        var defExp = newVal;
+        var existingExpression = lyr.getDefinitionExpression();
+
+        // If an existing filter on map extent already exists. Keep it
+        // and handle the rest of the filtering in filterByExtent
+        if(existingExpression && existingExpression.includes("OBJECTID") && !clear){
+          filterByExtent(true);
+        }
+
+        // If no extent filter exists, filter by attributes only and reset renderer
+        // and slider values
+        if(evt.target){
+          lyr.setDefinitionExpression(defExp);
+          updateSmartMapping({
+            layer: lyr
+          });
+        }
+
+        return defExp;
+      }
+
+      // Filter the features by extent and reset renderer and slider values
+      function filterByExtent (keepCurrentFilter){
+        lyr.hide();
+        var defExp, extent, params = new Query();
+
+        extent = map.extent;
+        // If an extent currently exists and user doesn't want it changed, keep it
+        currentExtentFilter = (keepCurrentFilter === true) ? currentExtentFilter : extent;
+        params.geometry = currentExtentFilter;
+        params.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
+
+        qt.executeForIds(params, function(ids){
+
+          // Generate SQL expression for querying for features whose OBJECTIDs
+          // match those that are within the desired extent
+          var exp = [];
+          exp.push("(");
+          array.forEach(ids, function(id, num){
+            exp.push("OBJECTID = " + id);
+            if(num !== ids.length - 1){
+              exp.push("OR");
+            }
+          });
+          exp.push(")");
+          var defExp = exp.join(" ");
+
+          var selectedAttribute = dom.byId("select-filter").value;
+
+          // Keep filter on attributes if it exists
+          if(selectedAttribute.length > 0){
+            defExp += " AND " + attributeFilter(selectedAttribute, true);
+          }
+
+          // Reset renderer and slider
+          lyr.setDefinitionExpression(defExp);
+          updateSmartMapping({
+            layer: lyr
+          });
+        });
+      }
+
+      // If the theme changes, update the renderer and the slider
+      on(dom.byId("color-renderer-theme"), "change", function(evt){
+        updateSmartMapping({
+          layer: lyr,
+          theme: evt.target.value
+        });
+      });
+
+      on(dom.byId("select-field"), "change", updateSmartMapping);
+      on(dom.byId("select-filter"), "change", attributeFilter);
+      on(dom.byId("extent-filter"), "click", filterByExtent);
+
+      // Clear extent filter if desired
+      on(dom.byId("clear-extent-filter"), "click", function(evt){
+        var defExp = null;
+
+        var selectedAttribute = dom.byId("select-filter").value;
+
+        if(selectedAttribute.length > 0){
+          defExp = attributeFilter(selectedAttribute, true);
+        }
+
+        lyr.setDefinitionExpression(defExp);
+        updateSmartMapping({
+          layer: lyr
+        });
+      });
+
+    });
+  </script>
   </head>
+  <body class="claro">
+    <div id="esri-map-container"></div>
+    <div id="basemapToggle-container"></div>
+      <div id="title"><h2>Seattle Demographics</h2></div>
+      <div id="attSelection">
+        Attribute:
+        <select id="select-field">
+          <option value="POP18UP_CY" selected>Population 18+</option>
+          <option value="HH_Income_0_35K">Household income 0-$35K</option>
+          <option value="HH_Income_35_75K">Household income $35K - $75K</option>
+          <option value="HH_Income_75_200K">Household income $75K - $200K</option>
+          <option value="HINC200_CY">Household income >$200K</option>
+          <option value="COL_DEG">Pop 25+ earned a college degree</option>
+          <option value="NO_COL_DEG">Pop 25+ with no college degree</option>
+          <option value="HomeValue_0_150K">Homes worth 0-$150K</option>
+          <option value="HomeValue_150_300K">Homes worth $150K - $300K</option>
+          <option value="HomeValue_300K_up">Homes worth >$300K</option>
+          <option value="MALES_CY">Male</option>
+          <option value="FEMALES_CY">Female</option>
+        </select><br><br>
 
-  <body class="tundra">
-    <div data-dojo-type="dijit/layout/BorderContainer"
-         data-dojo-props="design:'headline',gutters:false"
-         style="width: 100%; height: 100%; margin: 0;">
-      <div id="map"
-           data-dojo-type="dijit/layout/ContentPane"
-           data-dojo-props="region:'center'">
+        Filter by:
+        <select id="select-filter">
+          <option value="" selected></option>
+          <option value="(CITY = 'Seattle')">City of Seattle</option>
+          <option value="(MEDHINC_CY >= 50000 AND MEDHINC_CY <= 100000)">Median HH income $50K - $100K</option>
+          <option value="(MEDVAL_CY >= 500000)">Median Home Value > $500K</option>
+          <option value="(PER_BACH_DEG >= 50)">>50% have a bachelor's degree</option>
+        </select><br><br>
 
-        <div id="feedback" class="shadow">
-          <h3>Change the Attribute Field Used to Render Data</h3>
-          <div id="info">
-            <div id="note">
-              Note:  This sample requires an ArcGIS Server version 10.1 map service to generate a renderer.
-            </div>
+        <button class="btn" id="extent-filter">Filter by map extent</button><button class="btn" id="clear-extent-filter">Clear extent filter</button><br><br>
 
-            
-            <label for="fieldNames">Render based on: </label>
-            <select id="fieldNames" name="baseSym"
-                    data-dojo-type="dijit/form/FilteringSelect"
-                    data-dojo-props="style:'width:200px;'">
-            </select>
-
-            <img id="loading" src="https://dl.dropboxusercontent.com/u/2142726/esrijs-samples/loading_black.gif" />
-
-            <div id="legendDiv"></div>
-
-          </div>
-        </div>
-      </div>
+        Theme:
+        <select id="color-renderer-theme" style="margin-right:1rem;">
+          <option value="high-to-low" selected>High to low</option>
+          <option value="above-and-below">Above and below</option>
+          <option value="centered-on">Centered on</option>
+          <option value="extremes">Extremes</option>
+        </select>
+      </div></div>
+      <div id="esri-colorinfoslider"><img src="img/busy-indicator.gif" id="spinner"></div>
     </div>
   </body>
 </html>
