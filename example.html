@@ -29,8 +29,9 @@
                     data-dojo-type="dijit/form/FilteringSelect"
                     data-dojo-props="style:'width:200px;'">
             </select>
+            <img id="loading" src="https://dl.dropboxusercontent.com/u/2142726/esrijs-samples/loading_black.gif" />
       </div>
-      <div id="esri-colorinfoslider"></div>
+      <div id="legendDiv"></div>
       <input type="checkbox" id="sliderZoomButton"/> Show histogram detail
     </div>
   </body>
@@ -49,6 +50,7 @@
       "esri/dijit/Basemap",
       "esri/dijit/BasemapGallery",
       "esri/dijit/PopupTemplate",
+      "esri/dijit/Legend",
       "esri/dijit/util/busyIndicator",
       "esri/InfoTemplate",
       "esri/layers/FeatureLayer",
@@ -64,7 +66,7 @@
       "dojo/domReady!"
     ], function (
       arrayUtils, dom, domStyle, number, on,
-      parser, esriBasemaps, Color, Basemap, BasemapGallery, PopupTemplate, busyIndicator,
+      parser, esriBasemaps, Color, Basemap, BasemapGallery, PopupTemplate, Legend, busyIndicator,
       InfoTemplate, FeatureLayer, Map, FeatureLayerStatistics, esriRequest, smartMapping,
       SimpleFillSymbol, SimpleLineSymbol, registry, ItemFileReadStore
     ){
@@ -86,6 +88,7 @@
       });
       
       var featureLayer = new FeatureLayer(url, {
+      	id: "soil",
         outFields: ["*"],
         infoTemplate: popupTemplate});
       var featureLayerStatistics = new FeatureLayerStatistics({layer: featureLayer, visible: false});
@@ -107,14 +110,20 @@
 		
 		  fieldNames = { identifier: "value", label: "name", items: [] };
 		  arrayUtils.forEach(resp.fields.slice(8, 58), function(f) { // add some field names to the FS
-		    fieldNames.items.push({ "name": f.name, "value": f.name });
+		  	//console.log(f);
+		    fieldNames.items.push({ "name": f.alias, "value": f.name });
 		  });
 		  fieldStore = new ItemFileReadStore({ data: fieldNames });
 		  registry.byId("fieldNames").set("store", fieldStore);
-		  //registry.byId("fieldNames").set("value", "frag3to10_r"); // set a value
+		  registry.byId("fieldNames").set("value", "frag3to10_r"); // set a value
 		}, function(err) {
 		  console.log("failed to get field names: ", err);
 		});
+
+		// hide the loading icon when the counties layer finishes updating
+        featureLayer.on("update-end", function() {
+          domStyle.set("loading", "visibility", "hidden");
+        });
 	    
       smartMapping.createColorRenderer({
         layer: featureLayer,
@@ -151,8 +160,9 @@
       };
 	  	registry.byId("fieldNames").on("change", getData);
 	    registry.byId("fieldNames").set("value", "frag3to10_r"); // triggers getData()
-	    
+	    var legend = "";
 	    function getData(){
+	    	domStyle.set("loading", "visibility", "visible");
 	    	var fieldName = registry.byId("fieldNames").get("value") || "frag3to10_r";
 	      	smartMapping.createColorRenderer({
 		        layer: featureLayer,
@@ -168,6 +178,22 @@
 		        }
 		        featureLayer.setRenderer(colorRenderer.renderer);
 		        featureLayer.redraw();
+		        if(typeof legend == "string"){
+		        	legend = new Legend({
+		            map : map,
+		            layerInfos : [ {
+		              layer : map.getLayer("soil"),
+		              hideLayers: [0],
+		              title : "Values"
+		            } ]
+		          }, dom.byId("legendDiv"));
+		          legend.defaultSymbol = false;
+		          legend.startup();
+		        }
+		        else{
+		        	legend.refresh([{layer:map.getLayer("soil")}]);
+		        }
+		        domStyle.set("loading", "visibility", "hidden");
 		      });
 	    }
 
