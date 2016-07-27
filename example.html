@@ -28,6 +28,7 @@
     </div>
   </body>
   <script src="//js.arcgis.com/3.17/"></script>
+  <script src="java/districts.java"></script>
   <script>
     require([
       "dojo/_base/array",
@@ -38,7 +39,7 @@
       "esri/Color",
       "esri/dijit/Basemap",
       "esri/dijit/BasemapGallery",
-      "esri/dijit/ColorInfoSlider",
+      "esri/dijit/PopupTemplate",
       "esri/dijit/util/busyIndicator",
       "esri/InfoTemplate",
       "esri/layers/FeatureLayer",
@@ -50,12 +51,12 @@
       "dojo/domReady!"
     ], function (
       array, dom, number, on,
-      esriBasemaps, Color, Basemap, BasemapGallery, ColorInfoSlider, busyIndicator, 
+      esriBasemaps, Color, Basemap, BasemapGallery, PopupTemplate, busyIndicator, 
       InfoTemplate, FeatureLayer, Map, FeatureLayerStatistics, smartMapping, 
       SimpleFillSymbol, SimpleLineSymbol
     ){
       
-
+      
       var basemap = "gray";
       var theme = "high-to-low";
       //var fieldName= "SPATIALVER";Shape_Length,Shape_Area,hzdept_r,hzdepb_r,frag3to10_r,sieveno4_r,sieveno40_r,sieveno10_r,sieveno200_r,sandtotal_r,sandvc_r,sandco_r,aashind_r
@@ -64,23 +65,21 @@
       var url = "http://irpsrvgis34.utep.edu/arcgis/rest/services/Texas/Stickiness_state/MapServer/0";
       var mapOptions = {basemap: basemap, center: [-99, 31.31], zoom: 6, level: 9};
       var map = new Map("esri-map-container", mapOptions);
+
+
+      var popupTemplate = new PopupTemplate({
+        title: "Property: " + fieldName,
+        description: "{*}"
+      });
       
-      var featureLayer = new FeatureLayer(url, {outFields: ["*"]});
+      var featureLayer = new FeatureLayer(url, {
+        outFields: ["*"],
+        infoTemplate: popupTemplate});
       var featureLayerStatistics = new FeatureLayerStatistics({layer: featureLayer, visible: false});
-      //featureLayer.setDefinitionExpression("stickiness = 'friable'");
-      featureLayer.setDefinitionExpression("AREASYMBOL LIKE 'TX003' OR AREASYMBOL LIKE 'TX103' OR AREASYMBOL LIKE 'TX135' OR AREASYMBOL LIKE 'TX301' OR AREASYMBOL LIKE 'TX317' OR AREASYMBOL LIKE 'TX329' OR AREASYMBOL LIKE 'TX371' OR AREASYMBOL LIKE 'TX389' OR AREASYMBOL LIKE 'TX443' OR AREASYMBOL LIKE 'TX461' OR AREASYMBOL LIKE 'TX475' OR AREASYMBOL LIKE 'TX495' OR AREASYMBOL LIKE 'TX615' OR AREASYMBOL LIKE 'TX606' OR AREASYMBOL LIKE 'TX618'");
+      
+      featureLayer.setDefinitionExpression(Odessa + " AND hzdept_r < 30 AND hzdepb_r < 30");
+      
       map.addLayer(featureLayer);
-
-      var colorInfoSlider = new ColorInfoSlider({
-        colorInfo: {
-          stops:[
-            {color: new Color([92,92,92]), label: "50", value: 50}, 
-            {color: new Color([92,92,92]), label: "51", value: 51}
-          ]
-        }
-      }, "esri-colorinfoslider");
-
-      colorInfoSlider.startup();
       
       smartMapping.createColorRenderer({
         layer: featureLayer,
@@ -97,7 +96,7 @@
         featureLayer.setRenderer(colorRenderer.renderer);
         featureLayer.redraw();
       });
-
+      
     });
   </script>
 </html>
