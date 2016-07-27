@@ -35,6 +35,7 @@
     </div>
   </body>
   <script src="//js.arcgis.com/3.17/"></script>
+  <script src="js/districts.js"></script>
   <script>
     require([
       "dojo/_base/array",
@@ -47,7 +48,7 @@
       "esri/Color",
       "esri/dijit/Basemap",
       "esri/dijit/BasemapGallery",
-      "esri/dijit/ColorInfoSlider",
+      "esri/dijit/PopupTemplate",
       "esri/dijit/util/busyIndicator",
       "esri/InfoTemplate",
       "esri/layers/FeatureLayer",
@@ -63,7 +64,7 @@
       "dojo/domReady!"
     ], function (
       arrayUtils, dom, domStyle, number, on,
-      parser, esriBasemaps, Color, Basemap, BasemapGallery, ColorInfoSlider, busyIndicator,
+      parser, esriBasemaps, Color, Basemap, BasemapGallery, PopupTemplate, busyIndicator,
       InfoTemplate, FeatureLayer, Map, FeatureLayerStatistics, esriRequest, smartMapping,
       SimpleFillSymbol, SimpleLineSymbol, registry, ItemFileReadStore
     ){
@@ -77,25 +78,21 @@
       var url = "http://irpsrvgis34.utep.edu/arcgis/rest/services/Texas/Stickiness_state/MapServer/0";
       var mapOptions = {basemap: basemap, center: [-99, 31.31], zoom: 6, level: 9};
       var map = new Map("esri-map-container", mapOptions);
+
+
+      var popupTemplate = new PopupTemplate({
+        title: "Property: " + fieldName,
+        description: "{*}"
+      });
       
-      var featureLayer = new FeatureLayer(url, {outFields: ["*"]});
+      var featureLayer = new FeatureLayer(url, {
+        outFields: ["*"],
+        infoTemplate: popupTemplate});
       var featureLayerStatistics = new FeatureLayerStatistics({layer: featureLayer, visible: false});
-      //featureLayer.setDefinitionExpression("stickiness = 'friable'");
       
-      //odesa
-      featureLayer.setDefinitionExpression("AREASYMBOL LIKE 'TX003' OR AREASYMBOL LIKE 'TX103' OR AREASYMBOL LIKE 'TX135' OR AREASYMBOL LIKE 'TX301' OR AREASYMBOL LIKE 'TX317' OR AREASYMBOL LIKE 'TX329' OR AREASYMBOL LIKE 'TX371' OR AREASYMBOL LIKE 'TX389' OR AREASYMBOL LIKE 'TX443' OR AREASYMBOL LIKE 'TX461' OR AREASYMBOL LIKE 'TX475' OR AREASYMBOL LIKE 'TX495' OR AREASYMBOL LIKE 'TX615' OR AREASYMBOL LIKE 'TX606' OR AREASYMBOL LIKE 'TX618'");
+      featureLayer.setDefinitionExpression(Odessa + " AND hzdept_r < 30 AND hzdepb_r < 30");
+      
       map.addLayer(featureLayer);
-
-      var colorInfoSlider = new ColorInfoSlider({
-        colorInfo: {
-          stops:[
-            {color: new Color([92,92,92]), label: "50", value: 50}, 
-            {color: new Color([92,92,92]), label: "51", value: 51}
-          ]
-        }
-      }, "esri-colorinfoslider");
-
-		colorInfoSlider.startup();
       
       	// get field info
 		var countyFields = esriRequest({
@@ -173,7 +170,6 @@
 		        featureLayer.redraw();
 		      });
 	    }
-
 
     });
   </script>
