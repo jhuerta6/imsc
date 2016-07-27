@@ -112,7 +112,7 @@
           });
           fieldStore = new ItemFileReadStore({ data: fieldNames });
           registry.byId("fieldNames").set("store", fieldStore);
-          registry.byId("fieldNames").set("value", "stickiness"); // set a value
+          registry.byId("fieldNames").set("value", "frag3to10_r"); // set a value
         }, function(err) {
           console.log("failed to get field names: ", err);
         });
@@ -124,7 +124,7 @@
 
         // update renderer when field name changes
         registry.byId("fieldNames").on("change", getData);
-        registry.byId("fieldNames").set("value", "stickiness"); // triggers getData()
+        registry.byId("fieldNames").set("value", "frag3to10_r"); // triggers getData()
 
         function getData() {
           domStyle.set("loading", "visibility", "visible");
@@ -133,7 +133,7 @@
 
         function classBreaks(c1, c2) {
           var classDef = new ClassBreaksDefinition();
-          classDef.classificationField = registry.byId("fieldNames").get("value") || "stickiness";
+          classDef.classificationField = registry.byId("fieldNames").get("value") || "frag3to10_r";
           classDef.classificationMethod = "natural-breaks"; // always natural breaks
           classDef.breakCount = 5; // always five classes
 
@@ -195,10 +195,10 @@
            data-dojo-props="region:'center'">
 
         <div id="feedback" class="shadow">
-          <h3>Change the Attribute Field Used to Render Data</h3>
+          <h3>Interactive Map for Soil Categorization</h3>
           <div id="info">
             <div id="note">
-              Note:  This sample requires an ArcGIS Server version 10.1 map service to generate a renderer.
+              Select an attribute to view the locations in the map.
             </div>
 
             
