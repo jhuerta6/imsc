@@ -58,6 +58,7 @@
       "esri/plugins/FeatureLayerStatistics",
       "esri/request",
       "esri/renderers/smartMapping",
+      "esri/renderers/UniqueValueRenderer",
       "esri/symbols/SimpleFillSymbol",
       "esri/symbols/SimpleLineSymbol",
       "dijit/registry",
@@ -67,7 +68,7 @@
     ], function (
       arrayUtils, dom, domStyle, number, on,
       parser, esriBasemaps, Color, Basemap, BasemapGallery, PopupTemplate, Legend, busyIndicator,
-      InfoTemplate, FeatureLayer, Map, FeatureLayerStatistics, esriRequest, smartMapping,
+      InfoTemplate, FeatureLayer, Map, FeatureLayerStatistics, esriRequest, smartMapping, UniqueValueRenderer,
       SimpleFillSymbol, SimpleLineSymbol, registry, ItemFileReadStore
     ){
       parser.parse();
@@ -110,8 +111,7 @@
 		
 		  fieldNames = { identifier: "value", label: "name", items: [] };
 		  arrayUtils.forEach(resp.fields.slice(8, 58), function(f) { // add some field names to the FS
-		  	//console.log(f);
-		    fieldNames.items.push({ "name": f.alias, "value": f.name });
+		    fieldNames.items.push({ "name": f.alias, "value": f.name, "type": f.type });
 		  });
 		  fieldStore = new ItemFileReadStore({ data: fieldNames });
 		  registry.byId("fieldNames").set("store", fieldStore);
@@ -164,7 +164,34 @@
 	    function getData(){
 	    	domStyle.set("loading", "visibility", "visible");
 	    	var fieldName = registry.byId("fieldNames").get("value") || "frag3to10_r";
-	      	smartMapping.createColorRenderer({
+	    	if(registry.byId("fieldNames").item.type[0] == "esriFieldTypeString"){//check if it is numeric
+	    		//case where not numeric, use uniquerender
+	    		//create symbol for renderer
+	    		var defaultSymbol = new SimpleFillSymbol().setStyle(SimpleFillSymbol.STYLE_NULL);
+          		defaultSymbol.outline.setStyle(SimpleLineSymbol.STYLE_NULL);
+	    		//create renderer
+          		var renderer = new UniqueValueRenderer(defaultSymbol, fieldName);
+          		renderer.addValue("Very plastic", new SimpleFillSymbol().setColor(new Color([255, 255, 0, 0.5])));
+          		featureLayer.setRenderer(renderer);
+          		featureLayer.redraw();
+          		if(typeof legend == "string"){
+		        	legend = new Legend({
+		            map : map,
+		            layerInfos : [ {
+		              layer : map.getLayer("soil"),
+		              hideLayers: [0],
+		              title : "Values"
+		            } ]
+		          }, dom.byId("legendDiv"));
+		          legend.defaultSymbol = false;
+		          legend.startup();
+		        }
+		        else{
+		        	legend.refresh([{layer:map.getLayer("soil")}]);
+		        }
+	    	}
+	    	else{//case where numeric, use smartmapping
+	    		smartMapping.createColorRenderer({
 		        layer: featureLayer,
 		        field: fieldName,
 		        showOthers: false,
@@ -195,6 +222,7 @@
 		        }
 		        domStyle.set("loading", "visibility", "hidden");
 		      });
+	    	}
 	    }
 
     });
