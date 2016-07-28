@@ -22,6 +22,34 @@
           <option value="2">2-3</option>
           <option value="3">3+</option>
         </select>
+        District:
+        <select id="District">
+          <option value="Abilene" selected>Abilene</option>
+          <option value="Amarillo">Amarillo</option>
+          <option value="Atlanta">Atlanta</option>
+          <option value="Austin">Austin</option>
+          <option value="Beaumont">Beaumont</option>
+          <option value="Brownwood">Brownwood</option>
+          <option value="Bryan">Bryan</option>
+          <option value="Childress">Childress</option>
+          <option value="CorpusChristi">Corpus Christi</option>
+          <option value="Dallas">Dallas</option>
+          <option value="ElPaso">El Paso</option>
+          <option value="FortWorth">Fort Worth</option>
+          <option value="Houston">Houston</option>
+          <option value="Laredo">Laredo</option>
+          <option value="Lubbock">Lubbock</option>
+          <option value="Lufkin">Lufkin</option>
+          <option value="Odessa">Odessa</option>
+          <option value="Paris">Paris</option>
+          <option value="Pharr">Pharr</option>
+          <option value="SanAngelo">San Angelo</option>
+          <option value="SanAntonio">San Antonio</option>
+          <option value="Tyler">Tyler</option>
+          <option value="Waco">Waco</option>
+          <option value="WichitaFalls">Wichita Falls</option>
+          <option value="Yoakum">Yoakum</option>
+        </select>
       </div>
       <div>
       	<label for="fieldNames">Render based on: </label>
@@ -77,20 +105,41 @@
       parser.parse();
       var app = {district: Yoakum, depth: depthQueries[0]};
       var basemap = "gray";
+      var district = "ElPaso";
       var theme = "high-to-low";
       //var fieldName= "SPATIALVER";Shape_Length,Shape_Area,hzdept_r,hzdepb_r,frag3to10_r,sieveno4_r,sieveno40_r,sieveno10_r,sieveno200_r,sandtotal_r,sandvc_r,sandco_r,aashind_r
       var fieldName = "frag3to10_r";
 
+      var perUrl = "http://irpsrvgis37.utep.edu/arcgis/rest/services/Texas/Perimeters_joined/MapServer/0";
       var url = "http://irpsrvgis34.utep.edu/arcgis/rest/services/Texas/Stickiness_state/MapServer/0";
       var mapOptions = {basemap: basemap, center: [-99, 31.31], zoom: 6, level: 9};
       var map = new Map("esri-map-container", mapOptions);
 
-
       var popupTemplate = new PopupTemplate({
         title: "Property: " + fieldName,
-        description: "{*}"
+        description: "Corrosion Concrete: {corcon}<br>" + "Corrosion Steel: {corsteel}<br>"
+        + "Top Depth: {hzdept_r}<br>" + "Bottom Depth: {hzdepb_r}<br>"
+        + "Rock 3-10: {frag3to10_r}<br>" + "Sieve #4: {sieveno4_r}<br>"
+        + "Sieve #10: {sieveno10_r}<br>" + "Sieve #40: {sieveno40_r}<br>"
+        + "Sieve #200: {sieveno200_r}<br>" + "Total Sand: {sandtotal_r}<br>"
+        + "Very Course Sand: {sandvc_r}<br>" + "Course Sand: {sandco_r}<br>"
+        + "Medium Sand: {sandmed_r}<br>" + "Fine Sand: {sandfine_r}<br>"
+        + "Very Fine Sand: {sandvf_r}<br>" + "Total Silt: {silttotal_r}<br>"
+        + "Coarse Silt: {siltco_r}<br>" + " Fine Silt: {siltfine_r}<br>"
+        + "Total Clay: {claytotal_r}<br>" + "CaCO3 Clay: {claysizedcarb_r}<br>"
+        + "OM: {om_r}<br>" + "Dp: {partdensity}<br>"
+        + "Ksat: {ksat_r}<br>" + "LL: {ll_r}<br>"
+        + "PI: {pi_r}<br>" + "AASHTO Group Index: {aashind_r}<br>"
+        + "K-Factor Whole Soil: {kwfact}<br>" + "K-Factor Rock Free: {kffact}<br>"
+        + "CaCO3: {caco3_r}<br>" + "Gypsum: {gypsum_r}<br>"
+        + "SAR: {sar_r}<br>" + " pH H2O: {ph1to1h2o_r}<br>"
+        + " pH CaCl2: {ph01mcacl2_r}<br>" + "Excav Diff: {excavdifcl}<br>"
+        + "Rupture Moist: {rupresblkmst}<br>" + "Rupture Dry: {rupresblkdry}<br>"
+        + "Rupture Cement: {rupresblkcem}<br>" + "Rupture Plate: {rupresplate}<br>"
+        + "Manner of Failure: {mannerfailure}<br>" + "stickiness: {stickiness}<br>"
+        + "plasticity: {plasticity}<br>"
       });
-      
+      var perimeter = new FeatureLayer (perUrl, {outFields: ["*"]});
       var featureLayer = new FeatureLayer(url, {
       	id: "soil",
         outFields: ["*"],
@@ -99,6 +148,7 @@
       
       featureLayer.setDefinitionExpression(app.district + " AND " + app.depth);
       
+      map.addLayer(perimeter);
       map.addLayer(featureLayer);
       
       	// get field info
@@ -154,24 +204,11 @@
       function updateDefinitionExpression(){
       	featureLayer.setDefinitionExpression(app.district + " AND " + app.depth);
       }
-      dom.byId("sliderZoomButton").onchange = function(){
-      	fieldName = "plasticity";
-      	smartMapping.createColorRenderer({
-	        layer: featureLayer,
-	        field: fieldName,
-	        showOthers: false,
-	        basemap: basemap,
-	        theme: theme
-	        }).then(function (colorRenderer){
-	        //console.log("create color renderer is generated", colorRenderer);
-	
-	        if (!featureLayer.visible) {
-	          featureLayer.show();
-	        }
-	        featureLayer.setRenderer(colorRenderer.renderer);
-	        featureLayer.redraw();
-	      });
-      };
+
+		dom.byId("District").onchange = function(){
+		  featureLayer.setDefinitionExpression(SanAngelo + " AND " + app.depth);
+		};
+
 	  	registry.byId("fieldNames").on("change", getData);
 	    registry.byId("fieldNames").set("value", "frag3to10_r"); // triggers getData()
 	    var legend = "";
@@ -271,6 +308,7 @@
       		domStyle.set("loading", "visibility", "hidden");
       		legend.refresh([{layer:map.getLayer("soil")}]);
 	    }
+
 
     });
   </script>
