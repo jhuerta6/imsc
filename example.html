@@ -15,12 +15,12 @@
       <div id="title"></div>
       <hr>
       <div>
-        Theme:
-        <select id="color-renderer-theme">
-          <option value="high-to-low" selected>High to low</option>
-          <option value="above-and-below">Above and below</option>
-          <option value="centered-on">Centered on</option>
-          <option value="extremes">Extremes</option>
+        Depth (ft):
+        <select id="depths">
+          <option value="0" selected>0-1</option>
+          <option value="1">1-2</option>
+          <option value="2">2-3</option>
+          <option value="3">3+</option>
         </select>
       </div>
       <div>
@@ -37,6 +37,7 @@
   </body>
   <script src="//js.arcgis.com/3.17/"></script>
   <script src="js/districts.js"></script>
+  <script src="js/depths.js"></script>
   <script>
     require([
       "dojo/_base/array",
@@ -61,6 +62,9 @@
       "esri/renderers/UniqueValueRenderer",
       "esri/symbols/SimpleFillSymbol",
       "esri/symbols/SimpleLineSymbol",
+      "esri/tasks/AlgorithmicColorRamp",
+      "esri/tasks/query",
+      "esri/tasks/QueryTask",
       "dijit/registry",
       "dojo/data/ItemFileReadStore",
       "dijit/form/FilteringSelect",
@@ -69,10 +73,10 @@
       arrayUtils, dom, domStyle, number, on,
       parser, esriBasemaps, Color, Basemap, BasemapGallery, PopupTemplate, Legend, busyIndicator,
       InfoTemplate, FeatureLayer, Map, FeatureLayerStatistics, esriRequest, smartMapping, UniqueValueRenderer,
-      SimpleFillSymbol, SimpleLineSymbol, registry, ItemFileReadStore
+      SimpleFillSymbol, SimpleLineSymbol, AlgorithmicColorRamp, Query, QueryTask, registry, ItemFileReadStore
     ){
       parser.parse();
-
+      var app = {district: Yoakum, depth: depthQueries[0]};
       var basemap = "gray";
       var theme = "high-to-low";
       //var fieldName= "SPATIALVER";Shape_Length,Shape_Area,hzdept_r,hzdepb_r,frag3to10_r,sieveno4_r,sieveno40_r,sieveno10_r,sieveno200_r,sandtotal_r,sandvc_r,sandco_r,aashind_r
@@ -94,7 +98,7 @@
         infoTemplate: popupTemplate});
       var featureLayerStatistics = new FeatureLayerStatistics({layer: featureLayer, visible: false});
       
-      featureLayer.setDefinitionExpression(Odessa + " AND hzdept_r < 30 AND hzdepb_r < 30");
+      featureLayer.setDefinitionExpression(app.district + " AND " + app.depth);
       
       map.addLayer(featureLayer);
       
@@ -124,8 +128,9 @@
         featureLayer.on("update-end", function() {
           domStyle.set("loading", "visibility", "hidden");
         });
-	    
-      smartMapping.createColorRenderer({
+	    //TODO: enable this block of code
+	    /*
+      smartMapping.createColorRenderer({//default render
         layer: featureLayer,
         field: fieldName,
         showOthers: false,
@@ -139,7 +144,17 @@
         }
         featureLayer.setRenderer(colorRenderer.renderer);
         featureLayer.redraw();
-      });
+        map.addLayer(featureLayer);
+      });*/
+     dom.byId("depths").onchange = function(){
+      	var e = document.getElementById("depths");
+      	var val = e.options[e.selectedIndex].value;
+      	app.depth = depthQueries[val];
+      	updateDefinitionExpression();
+      };
+      function updateDefinitionExpression(){
+      	featureLayer.setDefinitionExpression(app.district + " AND " + app.depth);
+      }
       dom.byId("sliderZoomButton").onchange = function(){
       	fieldName = "plasticity";
       	smartMapping.createColorRenderer({
@@ -166,14 +181,28 @@
 	    	var fieldName = registry.byId("fieldNames").get("value") || "frag3to10_r";
 	    	if(registry.byId("fieldNames").item.type[0] == "esriFieldTypeString"){//check if it is numeric
 	    		//case where not numeric, use uniquerender
+	    		//get the unique values
+				queryTask = new QueryTask(url);
+				query = new Query();
+				query.returnGeometry = false;
+				query.outFields = [fieldName];
+				query.returnDistinctValues = true;
+				query.where = fieldName + "<> ''";
+				queryTask.execute(query,getUniqueValues);
 	    		//create symbol for renderer
 	    		var defaultSymbol = new SimpleFillSymbol().setStyle(SimpleFillSymbol.STYLE_NULL);
           		defaultSymbol.outline.setStyle(SimpleLineSymbol.STYLE_NULL);
 	    		//create renderer
+	    		/*
           		var renderer = new UniqueValueRenderer(defaultSymbol, fieldName);
-          		renderer.addValue("Very plastic", new SimpleFillSymbol().setColor(new Color([255, 255, 0, 0.5])));
+          		renderer.addValue("Very plastic", new SimpleFillSymbol().setColor(new Color([255, 0, 0, 0.5])).setOutline(new SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_NULL, new Color([0,0,0]), 0)));
+          		renderer.addValue("Moderately plastic", new SimpleFillSymbol().setColor(new Color([255, 100, 0, 0.5])).setOutline(new SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_NULL, new Color([0,0,0]), 0)));
+          		renderer.addValue("Slightly plastic", new SimpleFillSymbol().setColor(new Color([255, 255, 0, 0.5])).setOutline(new SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_NULL, new Color([0,0,0]), 0)));
+          		renderer.addValue("Non plastic", new SimpleFillSymbol().setColor(new Color([0, 255, 0, 0.5])).setOutline(new SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_NULL, new Color([0,0,0]), 0)));
           		featureLayer.setRenderer(renderer);
           		featureLayer.redraw();
+          		*/
+          		domStyle.set("loading", "visibility", "hidden");
           		if(typeof legend == "string"){
 		        	legend = new Legend({
 		            map : map,
@@ -223,6 +252,25 @@
 		        domStyle.set("loading", "visibility", "hidden");
 		      });
 	    	}
+	    }
+	    function getUniqueValues(results){
+	    	var zone;
+	        var renderer = new UniqueValueRenderer(null, results.fields[0].name);
+	        var red, green;
+
+	        //Loop through the QueryTask results and populate an array with the unique values
+	        var features = results.features;
+	        var ammount = features.length - 1;
+	        dojo.forEach (features, function(feature, i) {
+	          zone = feature.attributes;
+	          red = Math.floor((255 * i) / ammount);
+	          green = Math.floor((255 * (ammount - i)) / ammount);
+	          renderer.addValue(zone[Object.keys(zone)[0]], new SimpleFillSymbol().setColor(new Color([red, green, 0, 0.5])).setOutline(new SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_NULL, new Color([0,0,0]), 0)));
+	        });
+	        featureLayer.setRenderer(renderer);
+      		featureLayer.redraw();
+      		domStyle.set("loading", "visibility", "hidden");
+      		legend.refresh([{layer:map.getLayer("soil")}]);
 	    }
 
     });
