@@ -1,69 +1,39 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
-    <title>Texas' Stickiness</title>
-    <link rel="stylesheet" href="//js.arcgis.com/3.17/dijit/themes/claro/claro.css">
-    <link rel="stylesheet" href="//js.arcgis.com/3.17/esri/css/esri.css">
-<!--    <link rel="stylesheet" href="./css/styles.css" /> -->
-  </head>
-  <body class="claro">
-    <div id="esri-map-container"></div>
-    <div id="esri-basemapgallery-container" class="esriBasemapGallery"></div>
-    <div id="esri-colorinfoslider-container">
-      <div id="title"></div>
-      <hr>
-      <div>
-        Depth (ft):
-        <select id="depths">
-          <option value="0" selected>0-1</option>
-          <option value="1">1-2</option>
-          <option value="2">2-3</option>
-          <option value="3">3+</option>
-        </select>
-        District:
-        <select id="District">
-          <option value="0" selected>Abilene</option>
-          <option value="1">Amarillo</option>
-          <option value="2">Atlanta</option>
-          <option value="3">Austin</option>
-          <option value="4">Beaumont</option>
-          <option value="5">Brownwood</option>
-          <option value="6">Bryan</option>
-          <option value="7">Childress</option>
-          <option value="8">Corpus Christi</option>
-          <option value="9">Dallas</option>
-          <option value="10">El Paso</option>
-          <option value="11">Fort Worth</option>
-          <option value="12">Houston</option>
-          <option value="13">Laredo</option>
-          <option value="14">Lubbock</option>
-          <option value="15">Lufkin</option>
-          <option value="16">Odessa</option>
-          <option value="17">Paris</option>
-          <option value="18">Pharr</option>
-          <option value="19">San Angelo</option>
-          <option value="20">San Antonio</option>
-          <option value="21">Tyler</option>
-          <option value="22">Waco</option>
-          <option value="23">Wichita Falls</option>
-          <option value="24">Yoakum</option>
-        </select>
-      </div>
-      <div>
-      	<label for="fieldNames">Render based on: </label>
-            <select id="fieldNames" name="baseSym"
-                    data-dojo-type="dijit/form/FilteringSelect"
-                    data-dojo-props="style:'width:200px;'">
-            </select>
-            <img id="loading" src="https://dl.dropboxusercontent.com/u/2142726/esrijs-samples/loading_black.gif" />
-      </div>
-      <div id="legendDiv"></div>
-    </div>
-  </body>
-  <script src="//js.arcgis.com/3.17/"></script>
-  <script src="js/districts.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Change attribute used for a renderer</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.17/dijit/themes/tundra/tundra.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/3.17/esri/css/esri.css">
+    <style>
+      html, body { height: 100%; width: 100%; margin: 0; padding: 0; }
+      h3 { margin: 0 0 5px 0; border-bottom: 1px solid #444; text-align: center; }
+      .shadow {
+        -moz-box-shadow: 0 0 5px #888;
+        -webkit-box-shadow: 0 0 5px #888;
+        box-shadow: 0 0 5px #888;
+      }
+      #map{ margin: 0; padding: 0; }
+      #feedback {
+        background: #fff;
+        color: #444;
+        font-family: arial;
+        left: 30px;
+        margin: 5px;
+        padding: 10px;
+        position: absolute;
+        top: 30px;
+        width: 300px;
+        z-index: 40;
+      }
+      #note { font-size: 80%; font-weight: 700; padding: 0 0 10px 0; }
+      #loading { visibility: hidden; }
+      #legendDiv { padding: 10px 0 0 0; }
+    </style>
+
+    <script src="https://js.arcgis.com/3.17/"></script>
+    <script src="js/districts.js"></script>
   <script src="js/depths.js"></script>
   <script>
     require([
@@ -95,6 +65,8 @@
       "esri/tasks/QueryTask",
       "dijit/registry",
       "dojo/data/ItemFileReadStore",
+      "dijit/layout/BorderContainer",
+      "dijit/layout/ContentPane",
       "dijit/form/FilteringSelect",
       "dojo/domReady!"
     ], function (
@@ -112,7 +84,7 @@
 
       var perUrl = "http://irpsrvgis37.utep.edu/arcgis/rest/services/Texas/Perimeters_joined/MapServer/0";
       var url = "http://irpsrvgis34.utep.edu/arcgis/rest/services/Texas/Stickiness_state/MapServer/0";
-      var mapOptions = {basemap: basemap, center: [districts[0].center[1], districts[0].center[0]], zoom: 9, level: 9};
+      var mapOptions = {basemap: basemap, center: [districts[0].center[1], districts[0].center[0]], zoom: 9, level: 9, slider: false};
       var map = new Map("esri-map-container", mapOptions);
 
       var popupTemplate = new PopupTemplate({
@@ -202,6 +174,7 @@
       	updateDefinitionExpression();
       };
       function updateDefinitionExpression(){
+      	domStyle.set("loading", "visibility", "visible");
       	featureLayer.setDefinitionExpression(app.district.sql + " AND " + app.depth);
       }
 
@@ -242,7 +215,6 @@
           		featureLayer.setRenderer(renderer);
           		featureLayer.redraw();
           		*/
-          		domStyle.set("loading", "visibility", "hidden");
           		if(typeof legend == "string"){
 		        	legend = new Legend({
 		            map : map,
@@ -316,4 +288,72 @@
 
     });
   </script>
+  </head>
+
+  <body class="tundra">
+    <div data-dojo-type="dijit/layout/BorderContainer"
+         data-dojo-props="design:'headline',gutters:false"
+         style="width: 100%; height: 100%; margin: 0;">
+      <div id="esri-map-container"
+           data-dojo-type="dijit/layout/ContentPane"
+           data-dojo-props="region:'center'">
+
+        <div id="feedback" class="shadow">
+          <h3>Texas Interactive Map for Soil Categorization</h3>
+          <div id="info">
+            <div id="note">
+              Select an attribute to view the locations in the map.
+            </div>
+            <div>
+            	<label for="District">District: </label>
+		        <select id="District">
+		          <option value="0" selected>Abilene</option>
+		          <option value="1">Amarillo</option>
+		          <option value="2">Atlanta</option>
+		          <option value="3">Austin</option>
+		          <option value="4">Beaumont</option>
+		          <option value="5">Brownwood</option>
+		          <option value="6">Bryan</option>
+		          <option value="7">Childress</option>
+		          <option value="8">Corpus Christi</option>
+		          <option value="9">Dallas</option>
+		          <option value="10">El Paso</option>
+		          <option value="11">Fort Worth</option>
+		          <option value="12">Houston</option>
+		          <option value="13">Laredo</option>
+		          <option value="14">Lubbock</option>
+		          <option value="15">Lufkin</option>
+		          <option value="16">Odessa</option>
+		          <option value="17">Paris</option>
+		          <option value="18">Pharr</option>
+		          <option value="19">San Angelo</option>
+		          <option value="20">San Antonio</option>
+		          <option value="21">Tyler</option>
+		          <option value="22">Waco</option>
+		          <option value="23">Wichita Falls</option>
+		          <option value="24">Yoakum</option>
+		        </select><br/>
+		        <label for="fieldNames">Parameter: </label>
+	            <select id="fieldNames" name="baseSym"
+	                    data-dojo-type="dijit/form/FilteringSelect"
+	                    data-dojo-props="style:'width:200px;'">
+	            </select><br/>
+		        <label for="depths">Depth level: </label>
+		        <select id="depths">
+		          <option value="0" selected>0-1</option>
+		          <option value="1">1-2</option>
+		          <option value="2">2-3</option>
+		          <option value="3">3+</option>
+		        </select><br/>
+      </div>
+
+            <img id="loading" src="https://dl.dropboxusercontent.com/u/2142726/esrijs-samples/loading_black.gif" />
+
+            <div id="legendDiv"></div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>
