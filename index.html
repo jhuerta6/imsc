@@ -76,7 +76,7 @@
       SimpleFillSymbol, SimpleLineSymbol, AlgorithmicColorRamp, Query, QueryTask, registry, ItemFileReadStore
     ){
       parser.parse();
-      var app = {district: districts[0], depth: depthQueries[0]};
+      var app = {district: districts[0], depth: depthQueries[0], fieldsAlias: {}};
       var basemap = "gray";
       var theme = "high-to-low";
       //var fieldName= "SPATIALVER";Shape_Length,Shape_Area,hzdept_r,hzdepb_r,frag3to10_r,sieveno4_r,sieveno40_r,sieveno10_r,sieveno200_r,sandtotal_r,sandvc_r,sandco_r,aashind_r
@@ -87,43 +87,7 @@
       var mapOptions = {basemap: basemap, center: [districts[0].center[1], districts[0].center[0]], zoom: 9, level: 9, slider: false};
       var map = new Map("esri-map-container", mapOptions);
 
-      var popupTemplate = new PopupTemplate({
-        title: "Property: " + fieldName,
-        description: "Corrosion Concrete: {corcon}<br>" + "Corrosion Steel: {corsteel}<br>"
-        + "Top Depth: {hzdept_r}<br>" + "Bottom Depth: {hzdepb_r}<br>"
-        + "Rock 3-10: {frag3to10_r}<br>" + "Sieve #4: {sieveno4_r}<br>"
-        + "Sieve #10: {sieveno10_r}<br>" + "Sieve #40: {sieveno40_r}<br>"
-        + "Sieve #200: {sieveno200_r}<br>" + "Total Sand: {sandtotal_r}<br>"
-        + "Very Course Sand: {sandvc_r}<br>" + "Course Sand: {sandco_r}<br>"
-        + "Medium Sand: {sandmed_r}<br>" + "Fine Sand: {sandfine_r}<br>"
-        + "Very Fine Sand: {sandvf_r}<br>" + "Total Silt: {silttotal_r}<br>"
-        + "Coarse Silt: {siltco_r}<br>" + " Fine Silt: {siltfine_r}<br>"
-        + "Total Clay: {claytotal_r}<br>" + "CaCO3 Clay: {claysizedcarb_r}<br>"
-        + "OM: {om_r}<br>" + "Dp: {partdensity}<br>"
-        + "Ksat: {ksat_r}<br>" + "LL: {ll_r}<br>"
-        + "PI: {pi_r}<br>" + "AASHTO Group Index: {aashind_r}<br>"
-        + "K-Factor Whole Soil: {kwfact}<br>" + "K-Factor Rock Free: {kffact}<br>"
-        + "CaCO3: {caco3_r}<br>" + "Gypsum: {gypsum_r}<br>"
-        + "SAR: {sar_r}<br>" + " pH H2O: {ph1to1h2o_r}<br>"
-        + " pH CaCl2: {ph01mcacl2_r}<br>" + "Excav Diff: {excavdifcl}<br>"
-        + "Rupture Moist: {rupresblkmst}<br>" + "Rupture Dry: {rupresblkdry}<br>"
-        + "Rupture Cement: {rupresblkcem}<br>" + "Rupture Plate: {rupresplate}<br>"
-        + "Manner of Failure: {mannerfailure}<br>" + "stickiness: {stickiness}<br>"
-        + "plasticity: {plasticity}<br>"
-      });
-      var perimeter = new FeatureLayer (perUrl, {outFields: ["*"]});
-      var featureLayer = new FeatureLayer(url, {
-      	id: "soil",
-        outFields: ["*"],
-        infoTemplate: popupTemplate});
-      var featureLayerStatistics = new FeatureLayerStatistics({layer: featureLayer, visible: false});
-      
-      featureLayer.setDefinitionExpression(app.district.sql + " AND " + app.depth);
-      
-      map.addLayer(perimeter);
-      map.addLayer(featureLayer);
-      
-      	// get field info
+		// get field info
 		var countyFields = esriRequest({
 		  url: url,
 		  content: {
@@ -137,6 +101,7 @@
 		  fieldNames = { identifier: "value", label: "name", items: [] };
 		  arrayUtils.forEach(resp.fields.slice(8, 58), function(f) { // add some field names to the FS
 		    fieldNames.items.push({ "name": f.alias, "value": f.name, "type": f.type });
+		    app.fieldsAlias[f.name] = f.alias;
 		  });
 		  fieldStore = new ItemFileReadStore({ data: fieldNames });
 		  registry.byId("fieldNames").set("store", fieldStore);
@@ -145,6 +110,22 @@
 		  console.log("failed to get field names: ", err);
 		});
 
+      var popupTemplate = new PopupTemplate({
+        title: "Property: " + fieldName,
+        description: getFeaturesDescription()
+      });
+      var perimeter = new FeatureLayer (perUrl, {outFields: ["*"]});
+      var featureLayer = new FeatureLayer(url, {
+      	id: "soil",
+        outFields: ["*"],
+        infoTemplate: popupTemplate});
+      var featureLayerStatistics = new FeatureLayerStatistics({layer: featureLayer, visible: false});
+      
+      featureLayer.setDefinitionExpression(app.district.sql + " AND " + app.depth);
+      
+      map.addLayer(perimeter);
+      map.addLayer(featureLayer);
+      
 		// hide the loading icon when the counties layer finishes updating
         featureLayer.on("update-end", function() {
           domStyle.set("loading", "visibility", "hidden");
@@ -192,6 +173,8 @@
 	    function getData(){
 	    	domStyle.set("loading", "visibility", "visible");
 	    	var fieldName = registry.byId("fieldNames").get("value") || "frag3to10_r";
+	    	featureLayer.infoTemplate.info.title = app.fieldsAlias[fieldName];
+	    	console.log(featureLayer.infoTemplate);
 	    	if(registry.byId("fieldNames").item.type[0] == "esriFieldTypeString"){//check if it is numeric
 	    		//case where not numeric, use uniquerender
 	    		//get the unique values
@@ -283,6 +266,14 @@
       		featureLayer.redraw();
       		domStyle.set("loading", "visibility", "hidden");
       		legend.refresh([{layer:map.getLayer("soil")}]);
+	    }
+	    function getFeaturesDescription(){
+	    	var str = "";
+	    	for(var k in app.fieldsAlias){
+	    		if(app.fieldsAlias.hasOwnProperty(k)){
+	    			str += app.fieldsAlias[k] + ": {" + k + "}<br/>";
+	    		}
+	    	}
 	    }
 
 
