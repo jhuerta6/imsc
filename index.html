@@ -76,7 +76,7 @@
       SimpleFillSymbol, SimpleLineSymbol, AlgorithmicColorRamp, Query, QueryTask, registry, ItemFileReadStore
     ){
       parser.parse();
-      var app = {district: districts[0], depth: depthQueries[0], fieldsAlias: {}};
+      var app = {district: districts[0], depth: depthQueries[0], fieldsAlias: {}, popupTemplate: {}};
       var basemap = "gray";
       var theme = "high-to-low";
       //var fieldName= "SPATIALVER";Shape_Length,Shape_Area,hzdept_r,hzdepb_r,frag3to10_r,sieveno4_r,sieveno40_r,sieveno10_r,sieveno200_r,sandtotal_r,sandvc_r,sandco_r,aashind_r
@@ -110,15 +110,15 @@
 		  console.log("failed to get field names: ", err);
 		});
 
-      var popupTemplate = new PopupTemplate({
+      app.popupTemplate = new PopupTemplate({
         title: "Property: " + fieldName,
-        description: getFeaturesDescription()
+        description: "Corrosion Concrete: {corcon}<br/>Corrosion Steel: {corsteel}<br/>Mapunit Key: {mukey_1}<br/>Component Key: {cokey}<br/>Top Depth - Representative Value: {hzdept_r}<br/>Bottom Depth - Representative Value: {hzdepb_r}<br/>Rock 3-10 - Representative Value: {frag3to10_r}<br/>Sieve #4 - Representative Value: {sieveno4_r}<br/>Sieve #10 - Representative Value: {sieveno10_r}<br/>Sieve #40 - Representative Value: {sieveno40_r}<br/>Sieve #200 - Representative Value: {sieveno200_r}<br/>Total Sand - Representative Value: {sandtotal_r}<br/>Very Course Sand - Representative Value: {sandvc_r}<br/>Course Sand - Representative Value: {sandco_r}<br/>Medium Sand - Representative Value: {sandmed_r}<br/>Fine Sand - Representative Value: {sandfine_r}<br/>Very Fine Sand - Representative Value: {sandvf_r}<br/>Total Silt - Representative Value: {silttotal_r}<br/>Coarse Silt - Representative Value: {siltco_r}<br/>Fine Silt - Representative Value: {siltfine_r}<br/>Total Clay - Representative Value: {claytotal_r}<br/>CaCO3 Clay - Representative Value: {claysizedcarb_r}<br/>OM - Representative Value: {om_r}<br/>Dp: {partdensity}<br/>Ksat - Representative Value: {ksat_r}<br/>LL - Representative Value: {ll_r}<br/>PI - Representative Value: {pi_r}<br/>AASHTO Group Index - Representative Value: {aashind_r}<br/>K-Factor Whole Soil: {kwfact}<br/>K-Factor Rock Free: {kffact}<br/>CaCO3 - Representative Value: {caco3_r}<br/>Gypsum - Representative Value: {gypsum_r}<br/>SAR - Representative Value: {sar_r}<br/>pH H2O - Representative Value: {ph1to1h2o_r}<br/>pH CaCl2 - Representative Value: {ph01mcacl2_r}<br/>Excav Diff: {excavdifcl}<br/>Component Key: {cokey_1}<br/>Chorizon Key: {chkey}<br/>Rupture Moist: {rupresblkmst}<br/>Rupture Dry: {rupresblkdry}<br/>Rupture Cement: {rupresblkcem}<br/>Rupture Plate: {rupresplate}<br/>Manner of Failure: {mannerfailure}<br/>stickiness: {stickiness}<br/>plasticity: {plasticity}<br/>Chorizon Key: {chkey_1}<br/>"
       });
       var perimeter = new FeatureLayer (perUrl, {outFields: ["*"]});
       var featureLayer = new FeatureLayer(url, {
       	id: "soil",
         outFields: ["*"],
-        infoTemplate: popupTemplate});
+        infoTemplate: app.popupTemplate});
       var featureLayerStatistics = new FeatureLayerStatistics({layer: featureLayer, visible: false});
       
       featureLayer.setDefinitionExpression(app.district.sql + " AND " + app.depth);
@@ -130,7 +130,7 @@
         featureLayer.on("update-end", function() {
           domStyle.set("loading", "visibility", "hidden");
         });
-	    //TODO: enable this block of code
+	    //TODO: enable this block of code, NOT, delet it
 	    /*
       smartMapping.createColorRenderer({//default render
         layer: featureLayer,
@@ -173,8 +173,7 @@
 	    function getData(){
 	    	domStyle.set("loading", "visibility", "visible");
 	    	var fieldName = registry.byId("fieldNames").get("value") || "frag3to10_r";
-	    	featureLayer.infoTemplate.info.title = app.fieldsAlias[fieldName];
-	    	console.log(featureLayer.infoTemplate);
+	    	featureLayer.infoTemplate.info.title = app.fieldsAlias[fieldName] + ": {" + fieldName + "}";
 	    	if(registry.byId("fieldNames").item.type[0] == "esriFieldTypeString"){//check if it is numeric
 	    		//case where not numeric, use uniquerender
 	    		//get the unique values
@@ -274,6 +273,7 @@
 	    			str += app.fieldsAlias[k] + ": {" + k + "}<br/>";
 	    		}
 	    	}
+	    	console.log(str);
 	    }
 
 
