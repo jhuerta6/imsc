@@ -67,6 +67,7 @@
       "dojo/data/ItemFileReadStore",
       "dijit/layout/BorderContainer",
       "dijit/layout/ContentPane",
+      "dijit/TitlePane",
       "dijit/form/FilteringSelect",
       "dojo/domReady!"
     ], function (
@@ -86,6 +87,14 @@
       var url = "http://irpsrvgis34.utep.edu/arcgis/rest/services/Texas/Stickiness_state/MapServer/0";
       var mapOptions = {basemap: basemap, center: [districts[0].center[1], districts[0].center[0]], zoom: 9, level: 9, slider: false};
       var map = new Map("esri-map-container", mapOptions);
+      
+      //add the basemap gallery, in this case we'll display maps from ArcGIS.com including bing maps
+      var basemapGallery = new BasemapGallery({
+        showArcGISBasemaps: true,
+        map: map
+      }, "basemapGallery");
+      basemapGallery.startup();
+
 
 		// get field info
 		var countyFields = esriRequest({
@@ -288,6 +297,16 @@
       <div id="esri-map-container"
            data-dojo-type="dijit/layout/ContentPane"
            data-dojo-props="region:'center'">
+           
+           <div style="position:absolute; right:20px; top:10px; z-Index:999;">
+	        <div data-dojo-type="dijit/TitlePane" 
+	             data-dojo-props="title:'Switch Basemap', closable:false, open:false">
+	          <div data-dojo-type="dijit/layout/ContentPane" style="width:380px; height:280px; overflow:auto;">
+	            <div id="basemapGallery"></div>
+	          </div>
+	        </div>
+	      </div>
+
 
         <div id="feedback" class="shadow">
           <h3>Texas Interactive Map for Soil Categorization</h3>
