@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Simple icons</title>
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        height: 100%;
+      }
+      #wrapper {
+      	height: 100%;
+      	position: relative;
+      }
+	  #over_map {
+	  	position: absolute;
+	  	top: 10px;
+	  	right: 10px;
+	  	z-index: 99;
+	  	background-color: #fff;
+	  	border-radius: 3px;
+	  	border-color: #fff;
+	  	padding: 5px;
+	  }
+    </style>
+  </head>
+  <body>
+  	<div id="wrapper">
+  		<div id="map">
+    	</div>
+    	<div id="over_map">
+	    	<select>
+	    		<option>
+	    			Red
+	    		</option>
+	    	</select>
+	    	<input type="text" placeholder="latitude"/>
+	    	<input type="text" placeholder="longitude"/>
+	    	<button>Insert</button>
+		</div>
+  	</div>
+    <script>
+
+      // This example adds a marker to indicate the position of Bondi Beach in Sydney,
+      // Australia.
+      function initMap() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 4,
+          center: {lat: -33, lng: 151}
+        });
+
+        var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
+        var beachMarker = new google.maps.Marker({
+          position: {lat: -33.890, lng: 151.274},
+          map: map,
+          icon: image
+        });
+        map.addListener('click', function(event) {
+			placeMarker(event.latLng);
+		});
+		function placeMarker(location) {
+		    var marker = new google.maps.Marker({
+		        position: location, 
+		        map: map
+		    });
+		}
+      }
+      console.log(map);
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key= AIzaSyCY0B3_Fr1vRpgJDdbvNmrVyXmoOOtiq64 &callback=initMap">
+    </script>
+  </body>
+</html>
