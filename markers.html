@@ -13,37 +13,10 @@
       #map {
         height: 100%;
       }
-      #wrapper {
-      	height: 100%;
-      	position: relative;
-      }
-	  #over_map {
-	  	position: absolute;
-	  	top: 10px;
-	  	right: 10px;
-	  	z-index: 99;
-	  	background-color: #fff;
-	  	border-radius: 3px;
-	  	border-color: #fff;
-	  	padding: 5px;
-	  }
     </style>
   </head>
   <body>
-  	<div id="wrapper">
-  		<div id="map">
-    	</div>
-    	<div id="over_map">
-	    	<select>
-	    		<option>
-	    			Red
-	    		</option>
-	    	</select>
-	    	<input type="text" placeholder="latitude"/>
-	    	<input type="text" placeholder="longitude"/>
-	    	<button>Insert</button>
-		</div>
-  	</div>
+  	<div id="map"></div>
     <script>
 
       // This example adds a marker to indicate the position of Bondi Beach in Sydney,
@@ -65,27 +38,6 @@
 	            icon: image
 	        });
 	       }
-        map.addListener('click', function(event) {
-			placeMarker(event.latLng);
-		});
-		function placeMarker(location) {
-		    var marker = new google.maps.Marker({
-		        position: location, 
-		        map: map
-		    });
-		}
-      }
-      function toDeg(string){
-      	var ret = [];
-      	for(var i = 0; i < string.length; i++){
-      		var latlng = string[i].split(" ");
-	      	var lat = latlng[0].split(RegExp("[°'\"]"));
-	      	var lng = latlng[1].split(RegExp("[°'\"]"));
-	      	var latD = parseFloat(lat[0]) + parseFloat(lat[1])/60 + parseFloat(lat[2])/3600;
-	      	var lngD = -1* parseFloat(lng[0]) + parseFloat(lng[1])/60 + parseFloat(lng[2])/3600;
-	      	ret.push([latD, lngD])
-      	}
-      	return ret;
       }
     </script>
     <script async defer
