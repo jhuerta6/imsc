@@ -52,6 +52,7 @@
         "dijit/layout/BorderContainer", "dijit/layout/ContentPane", "dijit/form/FilteringSelect",
         "dojo/domReady!"
       ], function(
+      	Print,
         Map,
         ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer,
         esriRequest, esriConfig,
@@ -78,6 +79,7 @@
           zoom: 6,
           slider: false
         });
+
 
         var basemap = new ArcGISTiledMapServiceLayer("https://services.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer");
         app.map.addLayer(basemap);

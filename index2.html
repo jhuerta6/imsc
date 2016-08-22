@@ -48,6 +48,7 @@
       "esri/dijit/Basemap",
       "esri/dijit/BasemapGallery",
       "esri/dijit/PopupTemplate",
+      "esri/dijit/Print",
       "esri/dijit/Legend",
       "esri/dijit/util/busyIndicator",
       "esri/geometry/Point",
@@ -72,7 +73,7 @@
       "dojo/domReady!"
     ], function (
       arrayUtils, dom, domStyle, number, on,
-      parser, esriBasemaps, Color, Basemap, BasemapGallery, PopupTemplate, Legend, busyIndicator, Point,
+      parser, esriBasemaps, Color, Basemap, BasemapGallery, PopupTemplate, Print, Legend, busyIndicator, Point,
       InfoTemplate, FeatureLayer, Map, FeatureLayerStatistics, esriRequest, smartMapping, UniqueValueRenderer,
       SimpleFillSymbol, SimpleLineSymbol, AlgorithmicColorRamp, Query, QueryTask, registry, ItemFileReadStore
     ){
@@ -94,6 +95,12 @@
         map: map
       }, "basemapGallery");
       basemapGallery.startup();
+      
+      var printer = new Print({
+        map: map,
+        url: "http://irpsrvgis37.utep.edu/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
+      }, dom.byId("printButton"));
+      printer.startup();
 
 
 		// get field info
@@ -106,7 +113,7 @@
 		});
 		countyFields.then(function(resp) {
 		  var fieldNames, fieldStore;
-		  var suggested = {'rupresblkmst':"Moist Block Strength", 'rupresblkdry':"Dry Block Strength", 'rupresblkcem':"Submerged Block Strength", 'rupresplate':"Dry Plate Strength", 'frag3to10_r':"Percent Bouler", 'sieveno4_r':"Percent Passing No. 4 Sieve", 'sieveno10_r':"Percent Passing No. 10 Sieve", 'sieveno40_r':"Percent Passing No. 40 Sieve", 'sieveno200_r':"Percent Passing No. 200 Sieve", 'sandtotal_r':"% Total Sand in Fine Fraction (P#10)", 'sandvc_r':"% V. Coarse Sand in Fine Fraction (P#10)", 'sandco_r':"% Coarse Sand in Fine Fraction (P#10)", 'sandmed_r':"% Med Sand in Fine Fraction (P#10)", 'sandfine_r':"% Fine Sand in Fine Fraction (P#10)", 'sandvf_r':"% V. Fine Sand in Fine Fraction (P#10)", 'silttotal_r':"% Total Silt in Fine Fraction (P#10)", 'siltco_r':"% Coarse Silt in Fine Fraction (P#10)", 'siltfine_r':"% Fine Silt in Fine Fraction (P#10)", 'claytotal_r':"% Total Clay  in Fine Fraction (P#10)", 'claysizedcarb_r':"% Carbonate Clay  in Fine Fraction (P#10)", 'om_r':"% Organic Content in Fine Fraction (P#10)", 'partdensity':"Specific Gravity", 'ksat_r':"Saturated Hydraulic Conductivity", 'll_r':"Liquid Limit", 'pi_r':"Plasticity Index", 'kffact':"Erodibility Factor", 'caco3_r':"% Calcium Carbonate Content in Fine Fraction (P#10)", 'gypsum_r':"% Gypsum Content in Fraction Passing 0.75 in. Sieve", 'ph1to1h2o_r':"pH 1:1 Soil-water ratio", 'ph01mcacl2_r':"pH using 0.01 CaCl2 in 1:2 soil solution ratio", 'excavdifcl':"Excavation Difficulty Index", 'corcon':"Corrosivity of Concrete", 'corsteel':"Corrosivity of Steel"};
+		  var suggested = {'rupresblkmst':"Moist Block Strength", 'rupresblkdry':"Dry Block Strength", 'rupresblkcem':"Submerged Block Strength", 'rupresplate':"Dry Plate Strength", 'frag3to10_r':"Percent Boulder", 'sieveno4_r':"Percent Passing No. 4 Sieve", 'sieveno10_r':"Percent Passing No. 10 Sieve", 'sieveno40_r':"Percent Passing No. 40 Sieve", 'sieveno200_r':"Percent Passing No. 200 Sieve", 'sandtotal_r':"% Total Sand in Fine Fraction (P#10)", 'sandvc_r':"% V. Coarse Sand in Fine Fraction (P#10)", 'sandco_r':"% Coarse Sand in Fine Fraction (P#10)", 'sandmed_r':"% Med Sand in Fine Fraction (P#10)", 'sandfine_r':"% Fine Sand in Fine Fraction (P#10)", 'sandvf_r':"% V. Fine Sand in Fine Fraction (P#10)", 'silttotal_r':"% Total Silt in Fine Fraction (P#10)", 'siltco_r':"% Coarse Silt in Fine Fraction (P#10)", 'siltfine_r':"% Fine Silt in Fine Fraction (P#10)", 'claytotal_r':"% Total Clay  in Fine Fraction (P#10)", 'claysizedcarb_r':"% Carbonate Clay  in Fine Fraction (P#10)", 'om_r':"% Organic Content in Fine Fraction (P#10)", 'partdensity':"Specific Gravity", 'ksat_r':"Saturated Hydraulic Conductivity", 'll_r':"Liquid Limit", 'pi_r':"Plasticity Index", 'kffact':"Erodibility Factor", 'caco3_r':"% Calcium Carbonate Content in Fine Fraction (P#10)", 'gypsum_r':"% Gypsum Content in Fraction Passing 0.75 in. Sieve", 'ph1to1h2o_r':"pH 1:1 Soil-water ratio", 'ph01mcacl2_r':"pH using 0.01 CaCl2 in 1:2 soil solution ratio", 'excavdifcl':"Excavation Difficulty Index", 'corcon':"Corrosivity of Concrete", 'corsteel':"Corrosivity of Steel"};
 		  fieldNames = { identifier: "value", label: "name", items: [] };
 		  arrayUtils.forEach(resp.fields.slice(8, 63), function(f) { // add some field names to the FS
 		  	if(suggested.hasOwnProperty(f.name)){
@@ -307,6 +314,11 @@
 	          <div data-dojo-type="dijit/layout/ContentPane" style="width:380px; height:280px; overflow:auto;">
 	            <div id="basemapGallery"></div>
 	          </div>
+	        </div>
+	      </div>
+	      <div style="position:absolute; right:180px; top:5px; z-Index:999;">
+	        <div data-dojo-type="dijit/layout/ContentPane">
+	            <div id="printButton"></div>
 	        </div>
 	      </div>
 
