@@ -29,7 +29,13 @@
       }
       #note { font-size: 80%; font-weight: 700; padding: 0 0 10px 0; }
       #loading { visibility: hidden; }
-      #legendDiv { padding: 10px 0 0 0; }
+      #legendDiv { top: -35px; }
+      #printButton {
+	    left: 210px;
+	    position: relative;
+	    bottom: 10px;
+	    width: 80px;
+	}
     </style>
 
     <script src="https://js.arcgis.com/3.17/"></script>
@@ -79,7 +85,7 @@
     ){
       parser.parse();
       var app = {district: districts[0], depth: depthQueries[0], fieldsAlias: {}, popupTemplate: {}};
-      var basemap = "gray";
+      var basemap = "streets";
       var theme = "high-to-low";
       //var fieldName= "SPATIALVER";Shape_Length,Shape_Area,hzdept_r,hzdepb_r,frag3to10_r,sieveno4_r,sieveno40_r,sieveno10_r,sieveno200_r,sandtotal_r,sandvc_r,sandco_r,aashind_r
       var fieldName = "frag3to10_r";
@@ -136,6 +142,7 @@
       });
       var perimeter = new FeatureLayer (perUrl, {outFields: ["*"]});
       var featureLayer = new FeatureLayer(url, {
+      	opacity: 0.7,
       	id: "soil",
         outFields: ["*"],
         infoTemplate: app.popupTemplate});
@@ -277,7 +284,7 @@
 	          zone = feature.attributes;
 	          red = Math.floor((255 * i) / ammount);
 	          green = Math.floor((255 * (ammount - i)) / ammount);
-	          renderer.addValue(zone[Object.keys(zone)[0]], new SimpleFillSymbol().setColor(new Color([red, green, 0, 0.5])).setOutline(new SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_NULL, new Color([0,0,0]), 0)));
+	          renderer.addValue(zone[Object.keys(zone)[0]], new SimpleFillSymbol().setColor(new Color([red, green, 0, 1])).setOutline(new SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_NULL, new Color([0,0,0]), 0)));
 	        });
 	        featureLayer.setRenderer(renderer);
       		featureLayer.redraw();
@@ -315,15 +322,8 @@
 	          </div>
 	        </div>
 	      </div>
-	      <div style="position:absolute; right:180px; top:5px; z-Index:999;">
-	        <div data-dojo-type="dijit/layout/ContentPane">
-	            <div id="printButton"></div>
-	        </div>
-	      </div>
-
 
         <div id="feedback" class="shadow">
-          <h3>Texas Interactive Map for Soil Categorization</h3>
           <div id="info">
             <div id="note">
               Select an attribute to view the locations in the map.
@@ -375,6 +375,9 @@
             <img id="loading" src="https://dl.dropboxusercontent.com/u/2142726/esrijs-samples/loading_black.gif" />
 
             <div id="legendDiv"></div>
+            <div data-dojo-type="dijit/layout/ContentPane">
+	            <div id="printButton"></div>
+	        </div>
 
           </div>
         </div>
