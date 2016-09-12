@@ -92,7 +92,7 @@
 
       var perUrl = "http://irpsrvgis37.utep.edu/arcgis/rest/services/Texas/Perimeters_joined/MapServer/0";
       var url = "http://irpsrvgis37.utep.edu/arcgis/rest/services/Texas/Texas_complete/MapServer/0";
-      var mapOptions = {basemap: basemap, center: [districts[0].center[1], districts[0].center[0]], zoom: 9, level: 9, slider: false};
+      var mapOptions = {basemap: basemap, center: [districts[5].center[1], districts[5].center[0]], zoom: 6, level: 6, slider: false, navigationMode: 'css-transforms', force3DTransforms: true};
       var map = new Map("esri-map-container", mapOptions);
       
       //add the basemap gallery, in this case we'll display maps from ArcGIS.com including bing maps
@@ -122,9 +122,9 @@
 		  var suggested = {'rupresblkmst':"Moist Block Strength", 'rupresblkdry':"Dry Block Strength", 'rupresblkcem':"Submerged Block Strength", 'rupresplate':"Dry Plate Strength", 'frag3to10_r':"Percent Boulder", 'sieveno4_r':"Percent Passing No. 4 Sieve", 'sieveno10_r':"Percent Passing No. 10 Sieve", 'sieveno40_r':"Percent Passing No. 40 Sieve", 'sieveno200_r':"Percent Passing No. 200 Sieve", 'sandtotal_r':"% Total Sand in Fine Fraction (P#10)", 'sandvc_r':"% V. Coarse Sand in Fine Fraction (P#10)", 'sandco_r':"% Coarse Sand in Fine Fraction (P#10)", 'sandmed_r':"% Med Sand in Fine Fraction (P#10)", 'sandfine_r':"% Fine Sand in Fine Fraction (P#10)", 'sandvf_r':"% V. Fine Sand in Fine Fraction (P#10)", 'silttotal_r':"% Total Silt in Fine Fraction (P#10)", 'siltco_r':"% Coarse Silt in Fine Fraction (P#10)", 'siltfine_r':"% Fine Silt in Fine Fraction (P#10)", 'claytotal_r':"% Total Clay  in Fine Fraction (P#10)", 'claysizedcarb_r':"% Carbonate Clay  in Fine Fraction (P#10)", 'om_r':"% Organic Content in Fine Fraction (P#10)", 'partdensity':"Specific Gravity", 'ksat_r':"Saturated Hydraulic Conductivity", 'll_r':"Liquid Limit", 'pi_r':"Plasticity Index", 'kffact':"Erodibility Factor", 'caco3_r':"% Calcium Carbonate Content in Fine Fraction (P#10)", 'gypsum_r':"% Gypsum Content in Fraction Passing 0.75 in. Sieve", 'ph1to1h2o_r':"pH 1:1 Soil-water ratio", 'ph01mcacl2_r':"pH using 0.01 CaCl2 in 1:2 soil solution ratio", 'excavdifcl':"Excavation Difficulty Index", 'corcon':"Corrosivity of Concrete", 'corsteel':"Corrosivity of Steel"};
 		  fieldNames = { identifier: "value", label: "name", items: [] };
 		  arrayUtils.forEach(resp.fields.slice(8, 63), function(f) { // add some field names to the FS
+		  	//if theres a better name for the property use it instead
 		  	if(suggested.hasOwnProperty(f.name)){
 		  		f.alias = suggested[f.name];
-		  		console.log(f.alias);
 		  	}
 		    fieldNames.items.push({ "name": f.alias, "value": f.name, "type": f.type });
 		    app.fieldsAlias[f.name] = f.alias;
@@ -146,7 +146,6 @@
       	id: "soil",
         outFields: ["*"],
         infoTemplate: app.popupTemplate});
-      var featureLayerStatistics = new FeatureLayerStatistics({layer: featureLayer, visible: false});
       
       featureLayer.setDefinitionExpression(app.district.sql + " AND " + app.depth);
       
@@ -156,7 +155,6 @@
 		// hide the loading icon when the counties layer finishes updating
         featureLayer.on("update-end", function() {
           domStyle.set("loading", "visibility", "hidden");
-          console.log(registry.byId("fieldNames").item.type[0]);
           if(registry.byId("fieldNames").item.type[0] != "esriFieldTypeString"){
           	document.getElementsByClassName('esriLegendLayer')[0].style.display = 'none';
           }
@@ -164,6 +162,7 @@
         featureLayer.on("update-start", function() {
           domStyle.set("loading", "visibility", "visible");
         });
+        /*
      dom.byId("depths").onchange = function(){
       	var e = document.getElementById("depths");
       	if(e.selectedIndex < 4){
@@ -175,11 +174,14 @@
       		featureLayer.setDefinitionExpression(app.district.sql);
       	}
       };
+      */
+      var runButton = document.getElementById("run");
+      runButton.onClick = getData;
       function updateDefinitionExpression(){
       	domStyle.set("loading", "visibility", "visible");
       	featureLayer.setDefinitionExpression(app.district.sql + " AND " + app.depth);
       }
-
+      /*
 		dom.byId("District").onchange = function(){
 			var e = document.getElementById("District");
 	      	var val = e.options[e.selectedIndex].value;
@@ -187,11 +189,31 @@
 	      	map.centerAndZoom(new Point(app.district.center[1], app.district.center[0]), 8);
 	      	updateDefinitionExpression();
 		};
+		*/
 
-	  	registry.byId("fieldNames").on("change", getData);
+	  	//registry.byId("fieldNames").on("change", getData);
 	    registry.byId("fieldNames").set("value", "frag3to10_r"); // triggers getData()
 	    var legend = "";
 	    function getData(){
+	    	
+	    	//districts portion
+	    	var e = document.getElementById("District");
+	      	var val = e.options[e.selectedIndex].value;
+	      	app.district = districts[val];
+	      	map.centerAndZoom(new Point(app.district.center[1], app.district.center[0]), 8);
+	      	//updateDefinitionExpression();
+	      	//depths portion
+	      	var e = document.getElementById("depths");
+	      	if(e.selectedIndex < 4){
+	      		var val = e.options[e.selectedIndex].value;
+		      	app.depth = depthQueries[val];
+		      	//updateDefinitionExpression();
+	      	}
+	      	else{
+	      		featureLayer.setDefinitionExpression(app.district.sql);
+	      	}
+	      	updateDefinitionExpression();
+	      	//data portion
 	    	domStyle.set("loading", "visibility", "visible");
 	    	var fieldName = registry.byId("fieldNames").get("value") || "frag3to10_r";
 	    	featureLayer.infoTemplate.info.title = app.fieldsAlias[fieldName] + ": {" + fieldName + "}";
@@ -370,11 +392,12 @@
 		          <option value="3">3+</option>
 		          <option value="4">All</option>
 		        </select><br/>
+		        <button type="button" id="run">Run</button>
       </div>
 
             <img id="loading" src="https://dl.dropboxusercontent.com/u/2142726/esrijs-samples/loading_black.gif" />
 
-            <div id="legendDiv"></div>
+            <div id="legendDiv" style="margin-top: 12px; z-index: 99999"></div>
             <div data-dojo-type="dijit/layout/ContentPane">
 	            <div id="printButton"></div>
 	        </div>
