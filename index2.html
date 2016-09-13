@@ -142,26 +142,24 @@
       });
       var perimeter = new FeatureLayer (perUrl, {outFields: ["*"]});
       var featureLayer = new FeatureLayer(url, {
-      	opacity: 0.7,
-      	id: "soil",
-        outFields: ["*"],
-        infoTemplate: app.popupTemplate});
-      
-      featureLayer.setDefinitionExpression(app.district.sql + " AND " + app.depth);
+	      	opacity: 0.7,
+	      	id: "soil",
+	        outFields: ["*"],
+	        infoTemplate: app.popupTemplate});
+	    featureLayer.setDefinitionExpression(app.district.sql + " AND " + app.depth);
+	    map.addLayer(featureLayer);
       
       map.addLayer(perimeter);
-      map.addLayer(featureLayer);
+      featureLayer.on("update-end", function() {
+	      domStyle.set("loading", "visibility", "hidden");
+	      if(registry.byId("fieldNames").item.type[0] != "esriFieldTypeString"){
+	      	document.getElementsByClassName('esriLegendLayer')[0].style.display = 'none';
+	      }
+	    });
+	    featureLayer.on("update-start", function() {
+	      domStyle.set("loading", "visibility", "visible");
+	    });
       
-		// hide the loading icon when the counties layer finishes updating
-        featureLayer.on("update-end", function() {
-          domStyle.set("loading", "visibility", "hidden");
-          if(registry.byId("fieldNames").item.type[0] != "esriFieldTypeString"){
-          	document.getElementsByClassName('esriLegendLayer')[0].style.display = 'none';
-          }
-        });
-        featureLayer.on("update-start", function() {
-          domStyle.set("loading", "visibility", "visible");
-        });
         /*
      dom.byId("depths").onchange = function(){
       	var e = document.getElementById("depths");
@@ -175,8 +173,7 @@
       	}
       };
       */
-      var runButton = document.getElementById("run");
-      runButton.onClick = getData;
+      document.getElementById("run").onclick = getData;
       function updateDefinitionExpression(){
       	domStyle.set("loading", "visibility", "visible");
       	featureLayer.setDefinitionExpression(app.district.sql + " AND " + app.depth);
@@ -195,6 +192,7 @@
 	    registry.byId("fieldNames").set("value", "frag3to10_r"); // triggers getData()
 	    var legend = "";
 	    function getData(){
+	    	console.log("Get data started");
 	    	
 	    	//districts portion
 	    	var e = document.getElementById("District");
