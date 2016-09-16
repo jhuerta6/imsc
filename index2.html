@@ -146,7 +146,7 @@
 	      	id: "soil",
 	        outFields: ["*"],
 	        infoTemplate: app.popupTemplate});
-	    featureLayer.setDefinitionExpression(app.district.sql + " AND " + app.depth);
+	    featureLayer.setDefinitionExpression("AREASYMBOL LIKE 'TX0943'");
 	    map.addLayer(featureLayer);
       
       map.addLayer(perimeter);
