@@ -28,16 +28,40 @@
         });
         var colors = ["blue", "brown", "darkgreen", "green", "orange", "paleblue", "pink", "purple", "red", "yellow"];
         var letters = ["A", "B", "C", "D", "E","F","G","H", "I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
-        var markers = [[31.937701, -106.544111], [31.730277, -106.227591], [35.524910, -101.888498], [26.292309, -98.522712], [27.838116, -97.501795], [29.606647, -98.583521], [30.809843, -97.668949], [31.115671, -97.452027], [33.310098, -96.559639], [33.243846, -97.791945], [31.861091, -101.592272], [31.695392, -99.013568], [34.433620, -92.857608], [33.777749, -94.182715], [34.115039, -95.377172], [34.121163, -95.348870], [34.768674, -98.395727], [33.018856, -98.416897], [33.220116, -98.138738], [32.828409, -97.373572], [32.763779, -97.349626], [32.674748, -97.104080]];
-	      for( i = 0; i < markers.length; i++ ) {
-	        var position = new google.maps.LatLng(markers[i][0], markers[i][1]);
-	        var image = "img/markers/" + colors[i%colors.length] + "_Marker" + letters[i%letters.length] + ".png";
+        var markers = {};
+        markers.finished =  [[31.937701, -106.544111], [31.730277, -106.227591], [35.524910, -101.888498], [26.292309, -98.522712], [27.838116, -97.501795], [29.606647, -98.583521], [30.809843, -97.668949], [31.115671, -97.452027], [33.310098, -96.559639], [33.243846, -97.791945], [31.861091, -101.592272], [31.695392, -99.013568], [34.433620, -92.857608], [33.777749, -94.182715], [34.115039, -95.377172], [34.121163, -95.348870], [34.768674, -98.395727], [33.018856, -98.416897], [33.220116, -98.138738], [32.828409, -97.373572], [32.763779, -97.349626], [32.674748, -97.104080]];
+        markers.notfinished = [];
+        markers.concrete = [];
+        var i = 0;
+	      for( i = 0; i < markers.finished.length; i++ ) {
+	        var position = new google.maps.LatLng(markers.finished[i][0], markers.finished[i][1]);
+	        var image = "img/markers/" + colors[3] + "_Marker" + letters[i%letters.length] + ".png";
 	        marker = new google.maps.Marker({
 	            position: position,
 	            map: map,
 	            icon: image
 	        });
 	       }
+         for(var j = 0 ; j < markers.notfinished.length; j++ ) {
+          var position = new google.maps.LatLng(markers.notfinished[j][0], markers.notfinished[j][1]);
+          var image = "img/markers/" + colors[8] + "_Marker" + letters[i%letters.length] + ".png";
+          marker = new google.maps.Marker({
+              position: position,
+              map: map,
+              icon: image
+          });
+          i++;
+         }
+         for(var j = 0; j < markers.concrete.length; j++ ) {
+          var position = new google.maps.LatLng(markers[j][0], markers[j][1]);
+          var image = "img/markers/" + colors[1] + "_Marker" + letters[i%letters.length] + ".png";
+          marker = new google.maps.Marker({
+              position: position,
+              map: map,
+              icon: image
+          });
+          i++;
+         }
       }
     </script>
     <script async defer
