@@ -24,6 +24,7 @@
 		
 		<!--switches-->
 		<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/css-toggle-switch/latest/toggle-switch.css" />
+		<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -31,6 +32,21 @@
 		<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
 		<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
 		<![endif]-->
+			<style>
+		      #legend {
+		        font-family: Arial, sans-serif;
+		        background: #fff;
+		        padding: 10px;
+		        margin: 10px;
+		        border: 3px solid #000;
+		      }
+		      #legend h3 {
+		        margin-top: 0;
+		      }
+		      #legend img {
+		        vertical-align: middle;
+		      }
+	    </style>
 
 	</head>
 
@@ -154,10 +170,13 @@
 								</select>
 							</div>
 							<div class="row">
-								<div class="form-control">
-									<button class="btn btn-success" type="button">Run</button>
-								</div>
+								<button class="btn btn-success form-control" type="button" id="run" onClick="getPolygons()">Run</button>
 							</div>
+						</div>
+					</div>
+					<div id="legend">
+						<h3>Legend</h3>
+						<div>
 						</div>
 					</div>
 				</div>
@@ -168,33 +187,67 @@
 		<script src="js/jquery.js"></script>
 		<script src="js/bootstrap.js"></script>
 		<script src="js/jquery.autocomplete.min.js"></script>
+		<script src="js/properties.js"></script>
 		<script>
-			var properties = [
-				{value: 'Plasticity', data: 'PI'}
-			];
-			$('#autocomplete').autocomplete({
-				lookup: properties,
-				onSelect: function (suggestion) {
-				console.log('You selected: ' + suggestion.value + ', ' + suggestion.data);
-				}
+			var app = {map:null, properties:[]};
+			//var suggested = all the aliases of the properties, note: not all properties have an alias
+			$(document).ready(function(){
+				//start here
+				$.post('polygonHandler.php', {'columns': true}, function(result){
+					//do stuff with the result
+					var properties;
+					if(result.hasOwnProperty('columns')){
+						properties = $.map(result.columns, function(val, i){
+							return {value: null, data: val[0]};
+						});
+					}
+					properties.forEach(function(e){
+						if(suggested.hasOwnProperty(e.data)){
+							e.value = suggested[e.data];
+						}
+						else{
+							e.value = e.data;
+						}
+					});
+					console.log(properties);
+					//create the autocomplete with the data
+					$('#autocomplete').autocomplete({
+						lookup: properties,
+						onSelect: function (suggestion) {
+						console.log('You selected: ' + suggestion.value + ', ' + suggestion.data);
+						}
+					});
+				});
 			});
+			function getPolygons(){
+				$('#legend').not('h3').empty();
+				for(var i = 1053983; i < 1053983 + 100000; i+=150){
+		        	insertPolygon(i);
+		        }
+		        var pointStr = $('#target option:selected').val();
+		        var coords = pointStr.split(" ");
+		        panPoint = {lat: parseFloat(coords[0]), lng: parseFloat(coords[1])};
+		        app.map.panTo(panPoint);
+		        app.map.setZoom(10);
+		        var div = document.createElement('div');
+		        div.innerHTML = '<h3>Legend</h3><img src="img/redsquare.png"  height="10px"/>Plasticity';
+		        var legend = document.getElementById('legend');
+		        legend.appendChild(div);
+
+			}
 			//implements local autocomplete for the search mode
-			var app = {map:null};
 			function initMap() {
 		        app.map = new google.maps.Map(document.getElementById('map'), {
 		          zoom: 5,
 		          center: {lat: 31.31610138349565, lng: -99.11865234375},
 		          mapTypeId: 'terrain'
 		        });
-		        for(var i = 1100923; i < 1100923 + 100; i++){
-		        	insertPolygon(i);
-		        }
 		    }
-		    function insertPolygon(objectIds){
-		    	$.get('polygonHandler.php', {'districts':objectIds}).done(function(data){
-		    		for(var i = 0; i < data.polygons.length; i++){
+		    function insertPolygon(objectId){
+		    	$.get('polygonHandler.php', {'district':objectId}).done(function(data){
+		    		if(data.hasOwnProperty('coords')){
 		    			var polygon = new google.maps.Polygon({
-							paths: toLatLngLiteral(data.polygons[i]),
+							paths: toLatLngLiteral(data.coords),
 							strokeColor: '#FF0000',
 					        strokeOpacity: 0.8,
 					        strokeWeight: 2,
@@ -202,15 +255,17 @@
 					        fillOpacity: 0.35
 						});
 						polygon.setMap(app.map);
+						google.maps.event.addListener(polygon, 'click', function(e){
+				        	app.map.panTo(e.latLng);
+				        	app.map.setZoom(15);
+				       });
 		    		}
 				});
 		    }
 		    function toLatLngLiteral(coords){
-		    	console.log(coords);
 		    	var arr = $.map(coords, function(n, i){
 		    		return {lat: parseFloat(n[0]), lng: parseFloat(n[1])};
 		    	});
-		    	console.log(arr);
 		    	return arr;
 		    }
 		</script>

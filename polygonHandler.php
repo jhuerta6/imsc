@@ -10,9 +10,14 @@
 		$district = $_GET['district'];
 		$sql = "CALL getCoordinates($district)";
 		$result = $conn->query($sql);
-		if($result){
+		if($result AND $result->num_rows < 400){
 			$toReturn['coords'] = $result->fetch_all();
 		}
+	}
+	else if(isset($_POST['columns'])){
+		$sql = "SELECT * FROM attributes";
+		$result = $conn->query($sql);
+		$toReturn['columns'] = $result->fetch_all();
 	}
 	header('Content-Type: application/json');
 	echo json_encode($toReturn);
