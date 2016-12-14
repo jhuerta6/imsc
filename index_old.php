@@ -86,28 +86,28 @@
 							<div class="row">
 								<div class="input-group">
 									<span class="input-group-addon glyphicon glyphicon-search" id="basic-addon"></span>
-									<input type="text" class="form-control" placeholder="Ground Property" aria-describedby="basic-addon" id="autocomplete">
+									<input type="text" class="form-control" placeholder="Ground Property" aria-describedby="basic-addon" id="autocomplete" autocomplete="off">
 								</div>
 							</div>
 							<div class="row">
 								<label>District:</label>
 								<select id="target" class="form-control">
-									<option value="32.43561304116276,-100.1953125">
+									<option value="32.43561304116276,-100.1953125" data-district="abeline">
 										Abilene
 									</option>
-									<option value="35.764343479667176,-101.49169921875">
+									<option value="35.764343479667176,-101.49169921875" data-district="amarillo">
 										Amarillo
 									</option>
-									<option value="32.69651010951669, -94.691162109375">
+									<option value="32.69651010951669, -94.691162109375" data-district="atlanta">
 										Atlanta
 									</option>
-									<option value="30.25391637229704, -98.23212890625">
+									<option value="30.25391637229704, -98.23212890625" data-district="austin">
 										Austin
 									</option>
 									<option value="30.40211367909724, -94.39453125" data-district="beaumont">
 										Beaumont
 									</option>
-									<option value="31.765537409484374, -99.140625">
+									<option value="31.765537409484374, -99.140625" data-district="brownwood">
 										Brownwood
 									</option>
 									<option value="30.894611546632302, -96.30615234375" data-district="bryan">
@@ -119,16 +119,16 @@
 									<option value="28.110748760633534, -97.71240234375" data-district="corpus">
 										Corpus Christi
 									</option>
-									<option value="32.54681317351514, -96.85546875">
+									<option value="32.54681317351514, -96.85546875" data-district="dallas">
 										Dallas
 									</option>
-									<option value="30.694611546632302, -104.52392578125">
+									<option value="30.694611546632302, -104.52392578125" data-district="elPaso">
 										El Paso
 									</option>
-									<option value="32.62087018318113, -97.75634765625">
+									<option value="32.62087018318113, -97.75634765625" data-district="fortWorth">
 										Fort Worth
 									</option>
-									<option value="29.661670115197377, -95.33935546875">
+									<option value="29.661670115197377, -95.33935546875" data-district="houston">
 										Houston
 									</option>
 									<option value="28.613459424004418, -99.90966796875" data-district="laredo">
@@ -137,34 +137,34 @@
 									<option value="33.43144133557529, -101.93115234375" data-district="lubbock">
 										Lubbock
 									</option>
-									<option value="31.203404950917395, -94.7021484375">
+									<option value="31.203404950917395, -94.7021484375" data-district="lufkin">
 										Lufkin
 									</option>
 									<option value="31.203404950917395, -102.568359375" data-district="odessa">
 										Odessa
 									</option>
-									<option value="33.43144133557529, -95.625">
+									<option value="33.43144133557529, -95.625" data-district="paris">
 										Paris
 									</option>
 									<option value="26.951453083498258, -98.32763671875" data-district="pharr">
 										Pharr
 									</option>
-									<option value="31.10819929911196, -100.48095703125">
+									<option value="31.10819929911196, -100.48095703125" data-district="sanAngelo">
 										San Angelo
 									</option>
 									<option value="29.13297013087864, -98.89892578125" data-district="sanAntonio">
 										San Antonio
 									</option>
-									<option value="32.222095840502334, -95.33935546875">
+									<option value="32.222095840502334, -95.33935546875" data-district="tyler">
 										Tyler
 									</option>
-									<option value="31.403404950917395, -97.119140625">
+									<option value="31.403404950917395, -97.119140625" data-district="waco">
 										Waco
 									</option>
-									<option value="33.77914733128647, -98.37158203125">
+									<option value="33.77914733128647, -98.37158203125" data-district="wichitaFalls">
 										Wichita Falls
 									</option>
-									<option value="29.05616970274342, -96.8115234375">
+									<option value="29.05616970274342, -96.8115234375" data-district="yoakum">
 										Yoakum
 									</option>
 								</select>
@@ -189,10 +189,10 @@
 		<script src="js/jquery.autocomplete.min.js"></script>
 		<script src="js/properties.js"></script>
 		<script>
-			var app = {map:null, properties:[]};
+			var app = {map:null, polygons:null, payload:{getMode:"polygons", property:null, district:null}};
 			//var suggested = all the aliases of the properties, note: not all properties have an alias
 			$(document).ready(function(){
-				//start here
+				//start here, get the properties
 				$.post('polygonHandler.php', {'columns': true}, function(result){
 					//do stuff with the result
 					var properties;
@@ -209,40 +209,76 @@
 							e.value = e.data;
 						}
 					});
-					console.log(properties);
 					//create the autocomplete with the data
 					$('#autocomplete').autocomplete({
 						lookup: properties,
 						onSelect: function (suggestion) {
-						console.log('You selected: ' + suggestion.value + ', ' + suggestion.data);
+							app.payload.property = suggestion.data;
 						}
 					});
+					$('#target').on('change', setDistrict);
 				});
+				app.payload.district = $('#target').children("option:selected").data('district');
 			});
 			function getPolygons(){
-				$('#legend').not('h3').empty();
-				for(var i = 1053983; i < 1053983 + 100000; i+=150){
-		        	insertPolygon(i);
-		        }
-		        var pointStr = $('#target option:selected').val();
+				if(app.payload.property && app.payload.district){
+					//get the polygons
+					$.get('polygonHandler.php', app.payload, function(data){
+						//draw the stuff on the map
+						if(data.hasOwnProperty('coords')){
+							removePolygons();
+							for(var i = 0; i < data.coords.length; i++){
+								var polygon = new google.maps.Polygon({
+									paths: toLatLngLiteral(data.coords[i]),
+									strokeColor: '#FF0000',
+							        strokeOpacity: 0.8,
+							        strokeWeight: 2,
+							        fillColor: '#FF0000',
+							        fillOpacity: 0.35
+								});
+								app.polygons.push(polygon);
+								polygon.setMap(app.map);
+							}
+			    		}
+					}).done(function(data){
+						//draw the legend
+						$('#legend').not('h3').empty();
+				        var div = document.createElement('div');
+				        div.innerHTML = '<h3>Legend</h3><img src="img/redsquare.png" height="10px"/> ' + $('#autocomplete').val();;
+				        var legend = document.getElementById('legend');
+				        legend.appendChild(div);
+					});
+				}
+				else{
+					alert("Please select a property and a district.");
+				}
+			}
+			function setDistrict(){
+				app.payload.district = $('#target').children("option:selected").data('district');
+				var pointStr = $('#target option:selected').val();
 		        var coords = pointStr.split(" ");
-		        panPoint = {lat: parseFloat(coords[0]), lng: parseFloat(coords[1])};
+		        panPoint = new google.maps.LatLng(parseFloat(coords[0]), parseFloat(coords[1]));
 		        app.map.panTo(panPoint);
 		        app.map.setZoom(10);
-		        var div = document.createElement('div');
-		        div.innerHTML = '<h3>Legend</h3><img src="img/redsquare.png"  height="10px"/>Plasticity';
-		        var legend = document.getElementById('legend');
-		        legend.appendChild(div);
-
-			}
-			//implements local autocomplete for the search mode
+		    }
+			//this is the callback when the map loads
 			function initMap() {
 		        app.map = new google.maps.Map(document.getElementById('map'), {
 		          zoom: 5,
-		          center: {lat: 31.31610138349565, lng: -99.11865234375},
+		          center: new google.maps.LatLng(31.31610138349565, -99.11865234375),
 		          mapTypeId: 'terrain'
 		        });
+		        //setDistrict();
 		    }
+		    function removePolygons(){
+		    	if(app.polygons){
+		    		for(var i = 0; i < app.polygons.length; i++){
+		    			app.polygons[i].setMap(null);
+		    		}
+		    	}
+		    	app.polygons = [];
+		    }
+		    /*
 		    function insertPolygon(objectId){
 		    	$.get('polygonHandler.php', {'district':objectId}).done(function(data){
 		    		if(data.hasOwnProperty('coords')){
@@ -262,6 +298,7 @@
 		    		}
 				});
 		    }
+		    */
 		    function toLatLngLiteral(coords){
 		    	var arr = $.map(coords, function(n, i){
 		    		return {lat: parseFloat(n[0]), lng: parseFloat(n[1])};
@@ -269,6 +306,6 @@
 		    	return arr;
 		    }
 		</script>
-		<script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCHNhO0Yz2Nm75cEMsPpF7n2CdTMGvbhW0&callback=initMap"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCY0B3_Fr1vRpgJDdbvNmrVyXmoOOtiq64&callback=initMap"></script>
 	</body>
 </html>
