@@ -172,6 +172,9 @@
 							<div class="row">
 								<button class="btn btn-success form-control" type="button" id="run" onClick="getPolygons()">Run</button>
 							</div>
+							<div class="row">
+								<button class="btn btn-warning form-control" type="button" id="clear" onClick="removePolygons()">Clear</button>
+							</div>
 						</div>
 					</div>
 					<div id="legend">
@@ -223,28 +226,33 @@
 			function getPolygons(){
 				if(app.payload.property && app.payload.district){
 					//get the polygons
+					var getparams = app.payload;
+					var bounds = app.map.getBounds();
+					getparams.NE = bounds.getNorthEast().toJSON(); //north east corner
+					getparams.SW = bounds.getSouthWest().toJSON(); //north east corner
 					$.get('polygonHandler.php', app.payload, function(data){
 						//draw the stuff on the map
 						if(data.hasOwnProperty('coords')){
 							removePolygons();
-							for(var i = 0; i < data.coords.length; i++){
-								var polygon = new google.maps.Polygon({
-									paths: toLatLngLiteral(data.coords[i]),
-									strokeColor: '#FF0000',
-							        strokeOpacity: 0.8,
-							        strokeWeight: 2,
-							        fillColor: '#FF0000',
-							        fillOpacity: 0.35
-								});
-								app.polygons.push(polygon);
-								polygon.setMap(app.map);
+							for(key in data.coords){
+								if(data.coords.hasOwnProperty(key)){
+									var polygon = new google.maps.Polygon({
+										paths: toLatLngLiteral(data.coords[key]),
+										strokeColor: '#FF0000',
+								        strokeOpacity: 0.8,
+								        strokeWeight: 2,
+								        fillColor: '#FF0000',
+								        fillOpacity: 0.35
+									});
+									app.polygons.push(polygon);
+									polygon.setMap(app.map);
+								}
 							}
 			    		}
 					}).done(function(data){
 						//draw the legend
-						$('#legend').not('h3').empty();
 				        var div = document.createElement('div');
-				        div.innerHTML = '<h3>Legend</h3><img src="img/redsquare.png" height="10px"/> ' + $('#autocomplete').val();;
+				        div.innerHTML = '<img src="img/redsquare.png" height="10px"/> ' + $('#autocomplete').val();;
 				        var legend = document.getElementById('legend');
 				        legend.appendChild(div);
 					});
@@ -268,6 +276,9 @@
 		          center: new google.maps.LatLng(31.31610138349565, -99.11865234375),
 		          mapTypeId: 'terrain'
 		        });
+		        app.map.addListener('click', function(e) {
+		          console.log(e.latLng.toString());
+		        });
 		        //setDistrict();
 		    }
 		    function removePolygons(){
@@ -277,6 +288,7 @@
 		    		}
 		    	}
 		    	app.polygons = [];
+		    	$('#legend').find('*').not('h3').remove();
 		    }
 		    /*
 		    function insertPolygon(objectId){
