@@ -15,7 +15,7 @@
 		$lat1 = $_GET['SW']['lat'];
 		$lng2 = $_GET['NE']['lng'];
 		$lng1 = $_GET['SW']['lng']; 
-		$sql = "CALL getBoundedCoordinates('$district', '$property', $lat1, $lat2, $lng1, $lng2)";
+		$sql = "CALL getBoundedCoordinates('$district', '$property', $lat1, $lat2, $lng1, $lng2);";
 		$result = $conn->multi_query($sql);
 		$ids = array();
 		$coords= array();
@@ -23,46 +23,14 @@
 	        /* store first result set */
 	        if ($result = $conn->store_result()) {
 	            while ($row = $result->fetch_row()) {
-	            	if(!in_array($row[2], $ids)){
-	            		$ids[$row[2]][] = array($row[0], $row[1]);
+	            	if(!in_array($row[0], $ids)){
+	            		$ids[$row[0]][] = array($row[1], $row[2]);
 	            	}
 	            }
 	            $result->free();
 	        }
 	    } while ($conn->next_result());
 		$toReturn['coords'] = $ids;
-		$sql = "";
-		$total = count($ids);
-		$max = 5000;
-		/*
-		if(isset($_GET['max'])){
-			$max = $_GET['max'];
-		}
-		$step = 1;
-		if($total > $max){
-			$step = $total / $max;
-		}
-		for($i = 0; $i < $total; $i += $step){
-			$id = $ids[$i][0];
-			$sql .= "CALL getCoordinates($id, );";
-		}
-		//echo $sql;
-		$result = $conn->multi_query($sql);
-		$coords = array();
-		do {
-	        //* store first result set /
-	        if ($result = $conn->store_result()) {
-	        	$polygon = array();
-	            while ($row = $result->fetch_row()) {
-	                array_push($polygon, $row);
-	            }
-				array_push($coords, $polygon);
-	            $result->free();
-	        }
-	    } while ($conn->next_result());
-	    $toReturn['coords'] = $coords;
-		*/
-		
 	}
 	else if(isset($_GET['district'])){
 		$district = $_GET['district'];
