@@ -454,6 +454,11 @@
 			mapTypeId: 'terrain'
 		});
 		app.infoWindow = new google.maps.InfoWindow;
+		/*var testLayer = new google.maps.KmlLayer({ //var testLayer = new google.maps.KmlLayer({ //testing the kml layer, should draw colored lines for a transportation system route in chicago
+	  		url: 'https://casoilresource.lawr.ucdavis.edu/soil_web/kml/SoilWeb.kmz', //url: 'https://casoilresource.lawr.ucdavis.edu/soil_web/kml/SoilWeb.kmz', //url: 'http://googlemaps.github.io/js-v2-samples/ggeoxml/cta.kml',
+	      map: map
+	   });
+		testLayer.setMap(app.map); //testing layers 13/03/18*/
 		app.map.addListener('click', function(e) {
 			// console.log(e.latLng.toString());
 		});
@@ -503,6 +508,7 @@
       printContainer.remove();
       patchedStyle.remove();
     }
+
 	/*
 	function insertPolygon(objectId){
 	$.get('polygonHandler.php', {'district':objectId}).done(function(data){
@@ -554,6 +560,6 @@ function wktFormatter(poly){
 
 // ***********
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCY0B3_Fr1vRpgJDdbvNmrVyXmoOOtiq64&callback=initMap"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCY0B3_Fr1vRpgJDdbvNmrVyXmoOOtiq64&callback=initMap"></script>
 </body>
 </html>
