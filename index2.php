@@ -46,6 +46,7 @@
 	#legend img {
 		vertical-align: middle;
 	}
+
 	</style>
 
 </head>
@@ -80,22 +81,14 @@
 						<center><h3 class="panel-title">Toolbar</h3></center>
 					</div>
 					<div class="panel-body">
-						<div class="row">
-							Search
-						</div>
-						<div class="row">
-							<div class="input-group">
-								<span class="input-group-addon glyphicon glyphicon-search" id="basic-addon"></span>
-								<input type="text" class="form-control" placeholder="Ground Property" aria-describedby="basic-addon" id="autocomplete" autocomplete="off">
-							</div>
-						</div>
+
 						<div class="row">
 							<label>District:</label>
 							<select id="target" class="form-control">
-								<option value="32.43561304116276,-100.1953125" data-district="abeline">
+								<option value="32.43561304116276, -100.1953125" data-district="abeline">
 									Abilene
 								</option>
-								<option value="35.764343479667176,-101.49169921875" data-district="amarillo">
+								<option value="35.764343479667176, -101.49169921875" data-district="amarillo">
 									Amarillo
 								</option>
 								<option value="32.69651010951669, -94.691162109375" data-district="atlanta">
@@ -169,12 +162,26 @@
 								</option>
 							</select>
 						</div>
+						<p> </p> <!--sepator-->
+						<div class="row"> <!--search-->
+							<label> Search: </label>
+						</div>
+						<div class="row"> <!--search-->
+							<div class="input-group">
+								<span class="input-group-addon glyphicon glyphicon-search" id="basic-addon"></span>
+								<input type="text" class="form-control" placeholder="Ground Property" aria-describedby="basic-addon" id="autocomplete" autocomplete="off">
+							</div>
+						</div>
+						<div> <p> </p> </div> <!--separate-->
 						<div class="row">
 							<button class="btn btn-success form-control" type="button" id="run" onClick="getPolygons()">Run</button>
 						</div>
+						<p>  </p> <!--separator-->
 						<div class="row">
 							<button class="btn btn-warning form-control" type="button" id="clear" onClick="removePolygons()">Clear</button>
 						</div>
+						<p>  </p> <!--separator-->
+						<button type="button" class="map-print" id="print" onClick="printMaps()">Print</button> <!-- to print map -->
 					</div>
 				</div>
 				<div id="legend">
@@ -201,22 +208,16 @@
 			var properties;
 			if(result.hasOwnProperty('columns')){
 				properties = $.map(result.columns, function(val, i){
-					return {value: null, data: val[0]};
+					return {value: val[2], data: val[1], table: val[3]};
 				});
 			}
-			properties.forEach(function(e){
-				if(suggested.hasOwnProperty(e.data)){
-					e.value = suggested[e.data];
-				}
-				else{
-					e.value = e.data;
-				}
-			});
 			//create the autocomplete with the data
 			$('#autocomplete').autocomplete({
 				lookup: properties,
 				onSelect: function (suggestion) {
 					app.payload.property = suggestion.data;
+					app.payload.table = suggestion.table;
+					app.payload.value = suggestion.value;
 				}
 			});
 			$('#target').on('change', setDistrict);
@@ -224,9 +225,9 @@
 		app.payload.district = $('#target').children("option:selected").data('district');
 	});
 	function getPolygons(){
-		app.payload.property = "plasticity";
 		if(app.payload.property && app.payload.district){
 			//get the polygons
+			// console.log(app.payload);
 			var getparams = app.payload;
 			var bounds = app.map.getBounds();
 			getparams.NE = bounds.getNorthEast().toJSON(); //north east corner
@@ -235,17 +236,190 @@
 				//draw the stuff on the map
 				if(data.hasOwnProperty('coords')){
 					removePolygons();
+					// GRAY, RED, SKY BLUE, BRIGHT GREEN, PURPLE, ORANGE, BRIGHT PINK, NAVY BLUE, LILAC, YELLOW
+					shapecolor = ["#84857B", "#FF0000", "#009BFF", "#13FF00", "#6100FF", "#f1a50c", "#F20DD6", "#0051FF", "#AB77FF", "#EBF20D"];
+					shapeoutline = ["#000000", "#c10000", "#007fd1", "#0b9b00", "#310082", "#d18f0a", "#bc0ba7", "#0037ad", "#873dff", "#aaaf0a"];
+					colorSelector = 0;
+					newzIndex = 0;
+					legendText = "";
 					for(key in data.coords){
-						// poly = mktFormatter(data.coords[key]['POLYGON']);
 						if(data.coords.hasOwnProperty(key)){
+							var polyCoordis = [];
+							if(app.payload.table == "chorizon_r"){
+								legendText = "<img src='img/graysquare.png' height='10px'/> <= 0<br>\
+															<img src='img/redsquare.png' height='10px'/>  1 to 20<br>\
+															<img src='img/skybluesquare.png' height='10px'/> 21 to 40<br>\
+															<img src='img/brightgreensquare.png' height='10px'/> 41 to 60<br>\
+															<img src='img/purplesquare.png' height='10px'/> 61 to 80<br>\
+															<img src='img/orangesquare.png' height='10px'/> 81 to 100";
+								var amountIn = data.coords[key][app.payload.property];
+								switch (true) {
+									case (amountIn <= 0): // LESS THAN OR EQUAL TO 0
+										colorSelector = 0;
+										newzIndex = 0;
+										break;
+									case (amountIn > 0 && amountIn < 21): // BETWEEN 0 AND 21
+										colorSelector = 1;
+										newzIndex = 1;
+										break;
+									case (amountIn > 20 && amountIn < 41): // BETWEEN 21 AND 40
+										colorSelector = 2;
+										newzIndex = 2;
+										break;
+									case (amountIn > 40 && amountIn < 61): // BETWEEN 41 AND 60
+										colorSelector = 3;
+										newzIndex = 3;
+										break;
+									case (amountIn > 60 && amountIn < 81): // BETWEEN 61 AND 80
+										colorSelector = 4;
+										newzIndex = 4;
+										break;
+									case (amountIn > 80 && amountIn < 101): // BETWEEN 81 AND 100
+										colorSelector = 5;
+										newzIndex = 5;
+										break;
+								}
+							}else if(app.payload.table == "chconsistence_r"){
+								var description = data.coords[key][app.payload.property];
+
+								if(app.payload.property == "plasticity"){
+									legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
+																<img src='img/redsquare.png' height='10px'/>  Moderately Plastic<br>\
+																<img src='img/skybluesquare.png' height='10px'/> Nonplastic<br>\
+																<img src='img/brightgreensquare.png' height='10px'/> Slightly Plastic<br>\
+																<img src='img/purplesquare.png' height='10px'/> Very Plastic";
+								}
+
+								if(app.payload.property == "stickiness"){
+									legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
+																<img src='img/redsquare.png' height='10px'/>  Moderately Sticky<br>\
+																<img src='img/skybluesquare.png' height='10px'/> Non Sticky<br>\
+																<img src='img/brightgreensquare.png' height='10px'/> Slightly Sticky<br>\
+																<img src='img/purplesquare.png' height='10px'/> Very Sticky";
+								}
+
+								if(app.payload.property == "rupresplate"){
+									legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
+																<img src='img/redsquare.png' height='10px'/> Very Weak";
+								}
+
+								if(app.payload.property == "rupresblkmst"){
+									legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
+																<img src='img/redsquare.png' height='10px'/>  Extremely Firm<br>\
+																<img src='img/skybluesquare.png' height='10px'/> Firm<br>\
+																<img src='img/brightgreensquare.png' height='10px'/> Friable<br>\
+																<img src='img/purplesquare.png' height='10px'/> Loose<br>\
+																<img src='img/orangesquare.png' height='10px'/> Very Firm<br>\
+																<img src='img/brightpinksquare.png' height='10px'/> Very Friable";
+								}
+
+								if(app.payload.property == "rupresblkdry"){
+									legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
+																<img src='img/redsquare.png' height='10px'/>  Extremely Hard<br>\
+																<img src='img/skybluesquare.png' height='10px'/> Hard<br>\
+																<img src='img/brightgreensquare.png' height='10px'/> Hard When Dry<br>\
+																<img src='img/purplesquare.png' height='10px'/> Loose<br>\
+																<img src='img/orangesquare.png' height='10px'/> Moderately Hard<br>\
+																<img src='img/brightpinksquare.png' height='10px'/> Rigid<br>\
+																<img src='img/navybluesquare.png' height='10px'/> Slightly Hard<br>\
+																<img src='img/lilacsquare.png' height='10px'/> Soft<br>\
+																<img src='img/yellowsquare.png' height='10px'/> Very Hard";
+								}
+
+								if(app.payload.property == "rupresblkcem"){
+									legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
+																<img src='img/redsquare.png' height='10px'/>  Extremely Weakly Cemented<br>\
+																<img src='img/skybluesquare.png' height='10px'/> Indurated<br>\
+																<img src='img/brightgreensquare.png' height='10px'/> Moderately Cemented<br>\
+																<img src='img/purplesquare.png' height='10px'/> Noncemented<br>\
+																<img src='img/orangesquare.png' height='10px'/> Strongly Cemented<br>\
+																<img src='img/brightpinksquare.png' height='10px'/> Very Strongly Cemented<br>\
+																<img src='img/navybluesquare.png' height='10px'/> Weakly Cemented";
+								}
+
+								if(app.payload.property == "mannerfailure"){
+									legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
+																<img src='img/redsquare.png' height='10px'/>  Brittle<br>\
+																<img src='img/skybluesquare.png' height='10px'/> Deformable<br>\
+																<img src='img/brightgreensquare.png' height='10px'/> Moderately Fluid<br>\
+																<img src='img/purplesquare.png' height='10px'/> Nonfluid<br>\
+																<img src='img/orangesquare.png' height='10px'/> Semideformable<br>\
+																<img src='img/brightpinksquare.png' height='10px'/> Slightly Fluid<br>\
+																<img src='img/navybluesquare.png' height='10px'/> Very Fluid";
+								}
+
+
+								switch (true) {
+									// All properties in chconsistence_r have empty string values, in this case it will be colored and drew on the map
+									case (description == ""):
+										colorSelector = 0;
+										newzIndex = 0;
+										break;
+									/* Since all properties in chconsistence_r have different descriptions we will group them by colors.
+										 For instance, property rupresblkmst hast the following possible values: "" (empty string), Extremely firm,
+										 Extremely firm*, Firm, Friable, Loose, Very firm, Very friable. Property rupresblkcem has "" (empty string),
+										 Extremely weakly cemented, Indurated, Moderately cemented, Noncemented, Strongly cemented, Very Strongly cemented,
+										 and Weakly cemented. So the first (after empty string) possible value for each property will be under the same color.
+										 Since we only draw one property at a time this allows us to automate this as much as possible.
+										 NOTE: property rupresblkmst has two repeated values with a slight variation (an asterisk); in this case or if it WHERE
+										 to occur in another possible value, then just group it within the same condition.
+									*/
+
+									case (description == "Extremely firm" || description == "Extremely firm*" || description == "Extremely hard" || description == "Extremely weakly cemented" || description == "Very weak" || description == "Brittle" || description == "Moderately plastic" || description == "Moderately sticky"):
+										colorSelector = 1;
+										newzIndex = 1;
+										break;
+									case (description == "Firm" || description == "Hard" || description == "Indurated" || description == "Nonsticky" || description == "Deformable" || description == "Nonplastic"):
+										colorSelector = 2;
+										newzIndex = 2;
+										break;
+									case (description == "Friable" || description == "Hard when dry" || description == "Moderately cemented" || description == "Slightly sticky" || description == "Moderately fluid" || description == "Slightly plastic"):
+										colorSelector = 3;
+										newzIndex = 3;
+										break;
+									case (description == "Loose" || description == "Loose" || description == "Noncemented" || description == "Very sticky" || description == "Nonfluid" || description == "Very plastic"):
+										colorSelector = 4;
+										newzIndex = 4;
+										break;
+									case (description == "Very firm" || description == "Moderately hard" || description == "Strongly cemented" || description == "Semideformable"):
+										colorSelector = 5;
+										newzIndex = 5;
+										break;
+									case (description == "Very friable" || description == "Rigid" || description == "Very strongly cemented" || description == "Slightly fluid"):
+										colorSelector = 6;
+										newzIndex = 6;
+										break;
+									case (description == "Slightly hard" || description == "Weakly cemented" || description == "Very fluid"):
+										colorSelector = 7;
+										newzIndex = 7;
+										break;
+									case (description == "Soft"):
+										colorSelector = 8;
+										newzIndex = 8;
+										break;
+									case (description == "Very hard"):
+										colorSelector = 9;
+										newzIndex = 9;
+										break;
+								}
+							}
+							temp = wktFormatter(data.coords[key]['POLYGON']);
+							for (var i = 0; i < temp.length; i++) {
+								polyCoordis.push(temp[i]);
+							}
 							var polygon = new google.maps.Polygon({
-								paths:  mktFormatter(data.coords[key]['POLYGON']),
-								strokeColor: '#FF0000',
+								description: app.payload.value,
+								description_value: data.coords[key][app.payload.property],
+								paths: polyCoordis,
+								strokeColor: shapeoutline[colorSelector],
 								strokeOpacity: 0.8,
 								strokeWeight: 2,
-								fillColor: '#FF0000',
+								fillColor: shapecolor[colorSelector],
 								fillOpacity: 0.35
 							});
+							polygon.setOptions({ zIndex: newzIndex });
+							polygon.addListener('click', polyInfo);
+
 							app.polygons.push(polygon);
 							polygon.setMap(app.map);
 						}
@@ -254,7 +428,8 @@
 			}).done(function(data){
 				//draw the legend
 				var div = document.createElement('div');
-				div.innerHTML = '<img src="img/redsquare.png" height="10px"/> ' + $('#autocomplete').val();;
+				// div.innerHTML = '<img src="img/redsquare.png" height="10px"/> ' + $('#autocomplete').val();;
+				div.innerHTML = "<strong>" + $('#autocomplete').val() + "</strong><br>" + legendText;
 				var legend = document.getElementById('legend');
 				legend.appendChild(div);
 			});
@@ -278,8 +453,9 @@
 			center: new google.maps.LatLng(31.31610138349565, -99.11865234375),
 			mapTypeId: 'terrain'
 		});
+		app.infoWindow = new google.maps.InfoWindow;
 		app.map.addListener('click', function(e) {
-			console.log(e.latLng.toString());
+			// console.log(e.latLng.toString());
 		});
 		//setDistrict();
 	}
@@ -292,6 +468,41 @@
 		app.polygons = [];
 		$('#legend').find('*').not('h3').remove();
 	}
+
+	function printMaps() { <!--testing printing a map-->
+      var body               = $('body');
+      var mapContainer       = $('#map');
+      var mapContainerParent = mapContainer.parent();
+      var printContainer     = $('<div>');
+
+      printContainer
+        .addClass('print-container')
+        .css('position', 'relative')
+        .height(mapContainer.height())
+        .append(mapContainer)
+        .prependTo(body);
+
+      var content = body
+        .children()
+        .not('script')
+        .not(printContainer)
+        .detach();
+
+      // Patch for some Bootstrap 3.3.x `@media print` styles. :|
+      var patchedStyle = $('<style>')
+        .attr('media', 'print')
+        .text('img { max-width: none !important; }' +
+              'a[href]:after { content: ""; }')
+        .appendTo('head');
+
+      window.print();
+
+      body.prepend(content);
+      mapContainerParent.prepend(mapContainer);
+
+      printContainer.remove();
+      patchedStyle.remove();
+    }
 	/*
 	function insertPolygon(objectId){
 	$.get('polygonHandler.php', {'district':objectId}).done(function(data){
@@ -316,16 +527,29 @@ app.map.setZoom(15);
 
 // ***********
 
-function mktFormatter(poly){
+function polyInfo(event){
+	text = this.description + ": " + this.description_value;
+	app.infoWindow.setContent(text);
+	app.infoWindow.setPosition(event.latLng);
+
+	app.infoWindow.open(app.map);
+}
+
+function wktFormatter(poly){
 	new_poly = poly.slice(9,-2);
-	new_poly = new_poly.split(",");
-	var polyCoordi = [];
-	for(i = 0; i<new_poly.length; i++){
-		new_poly[i] = new_poly[i].split(" ");
-		polyCoordi.push({lat: parseFloat(new_poly[i][1]), lng: parseFloat(new_poly[i][0])});
+	new_poly = new_poly.split("),(");
+	len = new_poly.length;
+	shape_s = [];
+	for (var j = 0; j < len; j++) {
+		polyCoordi = [];
+		polyTemp = new_poly[j].split(",");
+		for(i = 0; i<polyTemp.length; i++){
+			temp = polyTemp[i].split(" ");
+			polyCoordi.push({lat: parseFloat(temp[1]), lng: parseFloat(temp[0])});
+		}
+		shape_s[j] = polyCoordi;
 	}
-	console.log(polyCoordi);
-	return polyCoordi;
+	return shape_s;
 }
 
 // ***********

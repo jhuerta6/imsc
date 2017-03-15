@@ -94,14 +94,14 @@
       var url = "http://irpsrvgis37.utep.edu/arcgis/rest/services/Texas/Texas_complete/MapServer/0";
       var mapOptions = {basemap: basemap, center: [districts[5].center[1], districts[5].center[0]], zoom: 6, level: 6, slider: false, navigationMode: 'css-transforms', force3DTransforms: true};
       var map = new Map("esri-map-container", mapOptions);
-      
+
       //add the basemap gallery, in this case we'll display maps from ArcGIS.com including bing maps
       var basemapGallery = new BasemapGallery({
         showArcGISBasemaps: true,
         map: map
       }, "basemapGallery");
       basemapGallery.startup();
-      
+
       var printer = new Print({
         map: map,
         url: "http://irpsrvgis37.utep.edu/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
@@ -129,7 +129,7 @@
 		    fieldNames.items.push({ "name": f.alias, "value": f.name, "type": f.type });
 		    app.fieldsAlias[f.name] = f.alias;
 		  });
-		  
+
 		  fieldStore = new ItemFileReadStore({ data: fieldNames });
 		  registry.byId("fieldNames").set("store", fieldStore);
 		  registry.byId("fieldNames").set("value", "frag3to10_r"); // set a value
@@ -148,7 +148,7 @@
 	        infoTemplate: app.popupTemplate});
 	    featureLayer.setDefinitionExpression("AREASYMBOL LIKE 'TX0943'");
 	    map.addLayer(featureLayer);
-      
+
       map.addLayer(perimeter);
       featureLayer.on("update-end", function() {
 	      domStyle.set("loading", "visibility", "hidden");
@@ -159,14 +159,14 @@
 	    featureLayer.on("update-start", function() {
 	      domStyle.set("loading", "visibility", "visible");
 	    });
-      
+
         /*
      dom.byId("depths").onchange = function(){
       	var e = document.getElementById("depths");
       	if(e.selectedIndex < 4){
       		var val = e.options[e.selectedIndex].value;
 	      	app.depth = depthQueries[val];
-	      	updateDefinitionExpression();      		
+	      	updateDefinitionExpression();
       	}
       	else{
       		featureLayer.setDefinitionExpression(app.district.sql);
@@ -193,7 +193,7 @@
 	    var legend = "";
 	    function getData(){
 	    	console.log("Get data started");
-	    	
+
 	    	//districts portion
 	    	var e = document.getElementById("District");
 	      	var val = e.options[e.selectedIndex].value;
@@ -263,7 +263,7 @@
 		        theme: theme
 		        }).then(function (colorRenderer){
 		        //console.log("create color renderer is generated", colorRenderer);
-		
+
 		        if (!featureLayer.visible) {
 		          featureLayer.show();
 		        }
@@ -333,9 +333,9 @@
       <div id="esri-map-container"
            data-dojo-type="dijit/layout/ContentPane"
            data-dojo-props="region:'center'">
-           
+
            <div style="position:absolute; right:20px; top:10px; z-Index:999;">
-	        <div data-dojo-type="dijit/TitlePane" 
+	        <div data-dojo-type="dijit/TitlePane"
 	             data-dojo-props="title:'Switch Basemap', closable:false, open:false">
 	          <div data-dojo-type="dijit/layout/ContentPane" style="width:380px; height:280px; overflow:auto;">
 	            <div id="basemapGallery"></div>
@@ -391,6 +391,7 @@
 		          <option value="4">All</option>
 		        </select><br/>
 		        <button type="button" id="run">Run</button>
+            
       </div>
 
             <img id="loading" src="https://dl.dropboxusercontent.com/u/2142726/esrijs-samples/loading_black.gif" />
@@ -404,5 +405,6 @@
         </div>
       </div>
     </div>
+
   </body>
 </html>

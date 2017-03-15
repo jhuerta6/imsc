@@ -9,7 +9,7 @@
 		<meta name="description" content="">
 		<meta name="author" content="">
 
-		<title>TX-IMSC</title>
+		<title>TX-IMSC - OLD</title>
 		<!-- Interactive Map for Soil Categorization -->
 
 		<!-- Bootstrap Core CSS -->
@@ -21,7 +21,7 @@
 
 		<!-- Custom Fonts -->
 		<link href="css/font-awesome.css" rel="stylesheet" type="text/css">
-		
+
 		<!--switches-->
 		<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/css-toggle-switch/latest/toggle-switch.css" />
 		<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -185,7 +185,7 @@
 				</div>
 			</div>
 		</div>
-		
+
 		<!-- Bootstrap Core JavaScript -->
 		<script src="js/jquery.js"></script>
 		<script src="js/bootstrap.js"></script>
