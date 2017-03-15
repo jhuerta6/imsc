@@ -1,4 +1,4 @@
-.glyphicon {
+/*.glyphicon {
   top: 1px;
   display: inline-block;
   font-family: 'Glyphicons Halflings';
@@ -8,14 +8,15 @@
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
+}*/
 
  #map {
-	height: 700px;
-	width: 90%;
+	height: 500px;
+	width: 100%;
 }
 
 #print{
+  width:100%;
 	display: inline-block;
   padding: 6px 12px;
   margin-bottom: 0;
@@ -33,7 +34,6 @@
       -ms-user-select: none;
           user-select: none;
   background-image: none;
-  border: 1px solid transparent;
   border-radius: 4px;
 	color: #fff;
 	background-color: #5bc0de;
