@@ -429,10 +429,7 @@
 								fillColor: shapecolor[colorSelector],
 								fillOpacity: 0.35
 							});
-<<<<<<< HEAD
 							console.log("Testing description: "+app.payload.value); //the descriptor for the propierty, for example: "Gypsum"
-=======
->>>>>>> 44ab33ebe8239e0531b472de0645ea4e32e1dc92
 							polygon.setOptions({ zIndex: newzIndex });
 							polygon.addListener('click', polyInfo);
 
@@ -450,7 +447,7 @@
 					h3.innerHTML = gypsum;
 
 					var div = document.createElement('div');
-					div.innerHTML = "<br> <strong>" + gypsum + "</strong> <br>" + gypsumText + "<br>";
+					div.innerHTML = "<br> <strong>" + gypsum + "</strong> <br>" + gypsumText + "<br> <br>";
 					var descriptor = document.getElementById('description');
 					descriptor.appendChild(div);
 				}
@@ -470,7 +467,6 @@
 				//g.id = 'someId';
 				//draw the legend
 				var div = document.createElement('div');
-<<<<<<< HEAD
 				//div = document.getElementsByTagName("H3")[0].setAttribute("class", "col-md-3");
 				//div.attribute('class', 'col-md-3');
 				// div.innerHTML = '<img src="img/redsquare.png" height="10px"/> ' + $('#autocomplete').val();;
@@ -479,11 +475,6 @@
 				var legend = document.createElement('div');
 				legend = document.getElementById('legend');
 				document.getElementById('legend').style.visibility = "visible";
-=======
-				// div.innerHTML = '<img src="img/redsquare.png" height="10px"/> ' + $('#autocomplete').val();;
-				div.innerHTML = "<strong>" + $('#autocomplete').val() + "</strong><br>" + legendText;
-				var legend = document.getElementById('legend');
->>>>>>> 44ab33ebe8239e0531b472de0645ea4e32e1dc92
 				legend.appendChild(div);
 			});
 		}
@@ -529,11 +520,7 @@
 		$('#description').find('*').not('h3').remove();
 	}
 
-<<<<<<< HEAD
 	function printMaps() { //testing printing a map
-=======
-	function printMaps() { <!--testing printing a map-->
->>>>>>> 44ab33ebe8239e0531b472de0645ea4e32e1dc92
       var body               = $('body');
       var mapContainer       = $('#map');
       var mapContainerParent = mapContainer.parent();
@@ -568,14 +555,11 @@
       patchedStyle.remove();
     }
 
-<<<<<<< HEAD
 		/*function descriptor(){
 
 
 		}*/
 
-=======
->>>>>>> 44ab33ebe8239e0531b472de0645ea4e32e1dc92
 	/*
 	function insertPolygon(objectId){
 	$.get('polygonHandler.php', {'district':objectId}).done(function(data){
