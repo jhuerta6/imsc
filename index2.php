@@ -447,7 +447,7 @@
 					h3.innerHTML = gypsum;
 
 					var div = document.createElement('div');
-					div.innerHTML = "<br> <strong>" + gypsum + "</strong> <br>" + gypsumText + "<br>";
+					div.innerHTML = "<br> <strong>" + gypsum + "</strong> <br>" + gypsumText + "<br> <br>";
 					var descriptor = document.getElementById('description');
 					descriptor.appendChild(div);
 				}
