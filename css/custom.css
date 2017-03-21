@@ -11,7 +11,11 @@
 }*/
 
  #map {
+<<<<<<< HEAD
+	height: 560px;
+=======
 	height: 500px;
+>>>>>>> 44ab33ebe8239e0531b472de0645ea4e32e1dc92
 	width: 100%;
 }
 
