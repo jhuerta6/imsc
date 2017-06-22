@@ -11,9 +11,14 @@
 
 	<title>TX-IMSC</title>
 	<!-- Interactive Map for Soil Categorization -->
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<!--<link rel="stylesheet" href="/resources/demos/style.css">-->
+
 
 	<!-- Bootstrap Core CSS -->
 	<link href="css/bootstrap.css" rel="stylesheet">
+	<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">-->
+	<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script> -->
 
 	<!-- Custom CSS -->
 	<link href="css/custom.css" rel="stylesheet" type="text/css">
@@ -46,7 +51,6 @@
 	#legend img {
 		vertical-align: middle;
 	}
-
 	</style>
 
 </head>
@@ -73,7 +77,9 @@
 
 		<div class="row">
 			<div class="col-md-9">
+				<!--<h1> testing </h1>-->
 				<div id="map"></div>
+				<div id="description"></div>
 			</div>
 			<div class="col-md-3">
 				<div class="panel panel-default">
@@ -85,6 +91,7 @@
 						<div class="row">
 							<label>District:</label>
 							<select id="target" class="form-control">
+								<option value="" disabled selected>Select a district</option>
 								<option value="32.43561304116276, -100.1953125" data-district="abeline">
 									Abilene
 								</option>
@@ -164,14 +171,43 @@
 						</div>
 						<p> </p> <!--sepator-->
 						<div class="row"> <!--search-->
-							<label> Search: </label>
+							<label> Soil Property: </label>
 						</div>
 						<div class="row"> <!--search-->
 							<div class="input-group">
+								<!--<span class="input-group-addon glyphicon glyphicon-search" id="basic-addon"></span>
+								<input type="text" class="form-control" placeholder="Ground Property" aria-describedby="basic-addon" id="autocomplete" autocomplete="off">-->
 								<span class="input-group-addon glyphicon glyphicon-search" id="basic-addon"></span>
-								<input type="text" class="form-control" placeholder="Ground Property" aria-describedby="basic-addon" id="autocomplete" autocomplete="off">
+								<select type="text" class="form-control" placeholder="Ground Property" aria-describedby="basic-addon" id="selectProp">
+									<option value="" disabled selected>Select a ground property</option>
+								</select>
+							</div> <br>
 							</div>
-						</div>
+							<!-- Depth methods-->
+							<div class="row">
+								<div class="col-md-5 col-md-offset-0">
+									<label> Depth:</label> <br>
+									<div class="input-group">
+										<!-- <label> Depth:</label> <br> -->
+										<span class="input-group-addon" id="basic-addon3">inch</span>
+										<input type="number" class="form-control" value="0" placeholder="...inches" id="depth" aria-describedby="basic-addon3">
+										<!-- <input type="text" value="0" id="depth" placeholder=" ...inches" style="color: black;"> -->
+										<!--<p> Top = <input type="text" value="" id="depth_top" placeholder="...inches" style="color: black;"></p>
+										<p> Bottom = <input type="text" value="" id="depth_bottom" placeholder="...inches" style="color: black;"></p>-->
+									</div>
+								</div>
+								<div class="col-md-5 col-md-offset-2">
+									<label> Method:</label> <br>
+									<select id="methods" class="form-control">
+										<option value="" disabled selected>Select method</option>
+										<option value="1" id="max_method">Max</option>
+										<option value="2" id="min_method">Min</option>
+										<option value="3" id="med_method">Median</option>
+										<option value="4" id="weight_method">Weighted average</option>
+									</select>
+								</div>
+							</div>
+							<!-- End depth methods -->
 						<div> <p> </p> </div> <!--separate-->
 						<div class="row">
 							<button class="btn btn-success form-control" type="button" id="run" onClick="getPolygons()">Run</button>
@@ -182,578 +218,1482 @@
 						</div>
 						<p>  </p> <!--separator-->
 						<button type="button" class="map-print" id="print" onClick="printMaps()">Print</button> <!-- to print map -->
+						<div id="load"> </div>
 					</div>
 				</div>
 				<!--<div id="legend"> -->
 				<!--<h3>Legend</h3> -->
 				<div id="legend" style='visibility: hidden'>
-					<h3>Legend</h3>
+					<h3 style="text-align: center;">Legend: </h3>
 					<div>
 						<!-- just for division -->
 					</div>
 				</div>
 			</div> <!-- end for class "col-md-3" -->
-			<div class="col-md-9">
-				<div id="description">
-				</div>
+			<!--<div class="col-md-9">
+			<div id="description">
+		</div>
+	</div> -->
+</div>
+</div>
+<br> <br>
+
+<div class="row">
+	<div class = "col-md-5">
+
+		<div class="col-md-4">
+			<label> Legend Definition </label>
+			<br>
+			<div class="input-group">
+				<span class="input-group-addon" id="basic-addon3"># of labels</span>
+				<input type="number" class="form-control" value="0" placeholder="...inches" id="labels" aria-describedby="basic-addon3">
+			</div>
+			<br>
+			<div class="input-group">
+				<span class="input-group-addon" id="basic-addon3">value</span>
+				<input type="number" class="form-control" value="0" placeholder="...inches" id="value" aria-describedby="basic-addon3">
 			</div>
 		</div>
+		<div class="col-md-3">
+			<br> <br>
+			<button class="btn btn-default" onClick="spawn()">Get the legend</button>
+			<!-- <div class="input-group">
+				<span class="input-group-addon" id="basic-addon3"># of labels</span>
+				<input type="number" class="form-control" value="0" placeholder="...inches" id="depth" aria-describedby="basic-addon3">
+			</div> -->
+		</div>
 	</div>
-	<p></p>
-	<!--Description text-->
-	<div class="row">
+	<div class = "col-md-5">
+		<label> Legend Testing</label>
+		<div class="col-md-3">
+			<br>
+			<div id="legendSpawner">
 
+			</div>
+			<!--<div class="input-group">
+				<span class="input-group-addon" id="basic-addon3"># of labels</span>
+				<input type="number" class="form-control" value="0" placeholder="...inches" id="depth" aria-describedby="basic-addon3">
+			</div>
+			<br>
+			<div class="input-group">
+				<span class="input-group-addon" id="basic-addon3">value</span>
+				<input type="number" class="form-control" value="0" placeholder="...inches" id="depth" aria-describedby="basic-addon3">
+			</div> -->
+
+		</div>
 	</div>
+</div>
 
-	<!-- Bootstrap Core JavaScript -->
-	<script src="js/jquery.js"></script>
-	<script src="js/bootstrap.js"></script>
-	<script src="js/jquery.autocomplete.min.js"></script>
-	<script src="js/properties.js"></script>
-	<script>
-	var app = {map:null, polygons:null, payload:{getMode:"polygons", property:null, district:null}};
-	//var suggested = all the aliases of the properties, note: not all properties have an alias
-	$(document).ready(function(){
-		//start here, get the properties
-		$.post('polygonHandler.php', {'columns': true}, function(result){
-			//do stuff with the result
-			var properties;
-			if(result.hasOwnProperty('columns')){
-				properties = $.map(result.columns, function(val, i){
-					return {value: val[2], data: val[1], table: val[3]};
-				});
-			}
-			//create the autocomplete with the data
-			$('#autocomplete').autocomplete({
-				lookup: properties,
-				onSelect: function (suggestion) {
-					console.log(suggestion.data + "  " + suggestion.table + "  " + suggestion.value);
-					app.payload.property = suggestion.data;
-					app.payload.table = suggestion.table;
-					app.payload.value = suggestion.value;
-				}
+<p></p>
+<!--Description text-->
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<!--<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>-->
+
+<script src="js/jquery.js"></script>
+<script src="js/bootstrap.js"></script>
+
+<script src="js/jquery.autocomplete.min.js"></script>
+<script src="js/properties.js"></script>
+<script>
+
+var app = {map:null, polygons:null, payload:{getMode:"polygons", property:null, district:null, depth:null, depth_method:null}}; //added value for depth method
+var hecho = false;
+//var suggested = all the aliases of the properties, note: not all properties have an alias
+$(document).ready(function(){//esto pasa recien cargada la pagina
+	//start here, get the properties
+	$.post('polygonHandler.php', {'columns': true}, function(result){//esto pasa recien cargada la pagina tambien
+		//do stuff with the result
+		var properties;
+		if(result.hasOwnProperty('columns')){
+			properties = $.map(result.columns, function(val, i){
+				return {value: val[2], data: val[1], table: val[3]};
 			});
-			$('#target').on('change', setDistrict);
-		});
-		app.payload.district = $('#target').children("option:selected").data('district');
-	});
-	function getPolygons(){
-		if(app.payload.property && app.payload.district){
-			//get the polygons
-			// console.log(app.payload);
-			var getparams = app.payload;
-			var bounds = app.map.getBounds();
-			getparams.NE = bounds.getNorthEast().toJSON(); //north east corner
-			getparams.SW = bounds.getSouthWest().toJSON(); //north east corner
-			$.get('polygonHandler.php', app.payload, function(data){
-				//draw the stuff on the map
-				if(data.hasOwnProperty('coords')){
-					removePolygons();
-					// GRAY, RED, SKY BLUE, BRIGHT GREEN, PURPLE, ORANGE, BRIGHT PINK, NAVY BLUE, LILAC, YELLOW
-					shapecolor = ["#84857B", "#FF0000", "#009BFF", "#13FF00", "#6100FF", "#f1a50c", "#F20DD6", "#0051FF", "#AB77FF", "#EBF20D"];
-					shapeoutline = ["#000000", "#c10000", "#007fd1", "#0b9b00", "#310082", "#d18f0a", "#bc0ba7", "#0037ad", "#873dff", "#aaaf0a"];
-					colorSelector = 0;
-					newzIndex = 0;
-					legendText = "";
-					for(key in data.coords){
-						if(data.coords.hasOwnProperty(key)){
-							var polyCoordis = [];
-							if(app.payload.table == "chorizon_r"){
-								console.log("Testing new legend: "+app.payload.property);
-								if(app.payload.property == "caco3_r"){ //Testing legend and logic for drawing for this specific property
-									console.log(app.payload.property);
-									//shapecolor = ["#84857B", "#FF0000", "#009BFF", "#13FF00", "#6100FF", "#f1a50c", "#F20DD6", "#0051FF", "#AB77FF", "#EBF20D"];
-									//shapeoutline = ["#000000", "#c10000", "#007fd1", "#0b9b00", "#310082", "#d18f0a", "#bc0ba7", "#0037ad", "#873dff", "#aaaf0a"];
-									//colorSelector = 0;
-									//newzIndex = 0;
-									legendText = "<img src='img/graysquare.png' height='10px'/> <= 7<br>\
-									<img src='img/redsquare.png' height='10px'/>  > 7 and <= 17<br>\
-									<img src='img/skybluesquare.png' height='10px'/> > 17 and <= 36<br>\
-									<img src='img/brightgreensquare.png' height='10px'/> > 36 and <= 55<br>\
-									<img src='img/purplesquare.png' height='10px'/> > 55 and <= 65<br>\
-									<img src='img/whitesquare.png' height='10px'/> Not rated or not available";
+		}
+		var selectProp = document.getElementById("selectProp");
+		var prop = [{number: 0, value: null, data: null, table: null},
+			{number: 1, value: null, data: null, table: null},
+			{number: 2, value: null, data: null, table: null},
+			{number: 3, value: null, data: null, table: null},
+			{number: 4, value: null, data: null, table: null},
+			{number: 5, value: null, data: null, table: null},
+			{number: 6, value: null, data: null, table: null},
+			{number: 7, value: null, data: null, table: null},
+			{number: 8, value: null, data: null, table: null},
+			{number: 9, value: null, data: null, table: null},
+			{number: 10, value: null, data: null, table: null},
+			{number: 11, value: null, data: null, table: null},
+			{number: 12, value: null, data: null, table: null},
+			{number: 13, value: null, data: null, table: null},
+			{number: 14, value: null, data: null, table: null},
+			{number: 15, value: null, data: null, table: null},
+			{number: 16, value: null, data: null, table: null},
+			{number: 17, value: null, data: null, table: null},
+			{number: 18, value: null, data: null, table: null},
+			{number: 19, value: null, data: null, table: null},
+			{number: 20, value: null, data: null, table: null},
+			{number: 21, value: null, data: null, table: null},
+			{number: 22, value: null, data: null, table: null},
+			{number: 23, value: null, data: null, table: null},
+			{number: 24, value: null, data: null, table: null},
+			{number: 25, value: null, data: null, table: null},
+			{number: 26, value: null, data: null, table: null},
+			{number: 27, value: null, data: null, table: null},
+			{number: 28, value: null, data: null, table: null},
+			{number: 29, value: null, data: null, table: null},
+			{number: 30, value: null, data: null, table: null},
+			{number: 31, value: null, data: null, table: null},
+			{number: 32, value: null, data: null, table: null},
+			{number: 33, value: null, data: null, table: null},
+			{number: 34, value: null, data: null, table: null},
+			{number: 35, value: null, data: null, table: null},
+			{number: 36, value: null, data: null, table: null},
+			{number: 37, value: null, data: null, table: null}
+		];
 
-									var amountIn = parseFloat(data.coords[key][app.payload.property]);
-									console.log(amountIn);
-									//var amountIn = data.coords[key][app.payload.property];
-									//console.log(amountIn);
-									switch (true) {
-										case (amountIn <= 7): // LESS THAN OR EQUAL TO 0
-										colorSelector = 1; //not black or gray
-										newzIndex = 1;
-										break;
-										case (amountIn > 7 && amountIn <= 17): // BETWEEN 0 AND 21
-										colorSelector = 2;
-										newzIndex = 2;
-										break;
-										case (amountIn > 17 && amountIn <= 36): // BETWEEN 21 AND 40
-										colorSelector = 3;
-										newzIndex = 3;
-										break;
-										case (amountIn > 36 && amountIn <= 55): // BETWEEN 41 AND 60
-										colorSelector = 4;
-										newzIndex = 4;
-										break;
-										case (amountIn > 55 && amountIn <= 65): // BETWEEN 61 AND 80
-										colorSelector = 5;
-										newzIndex = 5;
-										break;
-										case (amountIn > 80 && amountIn < 101): // BETWEEN 81 AND 100
-										colorSelector = 6;
-										newzIndex = 6;
-										break;
-									}
-								}
-								else if(app.payload.property == "sandtotal_r"){ //Testing legend and logic for drawing for this specific property
-									console.log(app.payload.property);
-									//shapecolor = ["#84857B", "#FF0000", "#009BFF", "#13FF00", "#6100FF", "#f1a50c", "#F20DD6", "#0051FF", "#AB77FF", "#EBF20D"];
-									//shapeoutline = ["#000000", "#c10000", "#007fd1", "#0b9b00", "#310082", "#d18f0a", "#bc0ba7", "#0037ad", "#873dff", "#aaaf0a"];
-									//colorSelector = 0;
-									//newzIndex = 0;
-									legendText = "<img src='img/graysquare.png' height='10px'/> <= 11.8<br>\
-									<img src='img/redsquare.png' height='10px'/>  > 11.8 and <= 26.1<br>\
-									<img src='img/skybluesquare.png' height='10px'/> > 26.1 and <= 39.3<br>\
-									<img src='img/purplesquare.png' height='10px'/> > 39.3 and <= 57.8<br>\
-									<img src='img/whitesquare.png' height='10px'/> > 57.8 and <= 90.2<br>\
-									<img src='img/blacksquare.png height='10px'/> Not rated or not available ";
+for (var i = 0; i < 37; i++) {
+	prop[i].number = i;
+	prop[i].value = properties[i].value;
+	prop[i].data = properties[i].data;
+	prop[i].table = properties[i].table;
+}
+for(var i = 0; i < prop.length-1; i++) {
+	var propr = prop[i].number;
+	//console.log("En loop (value): " + propr);
+	var elem = document.createElement("option");
+	elem.textContent = prop[i].value;
+	elem.value = propr;
+	//console.log("En loop (value): " + propr);
+	elem.data = prop[i].data;
+	//console.log("En loop (data): " + prop[i].data);
+	elem.table = prop[i].table;
+	//console.log("En loop (table): " + prop[i].table);
+	selectProp.appendChild(elem);
+}
+$("#selectProp").change(function(){
+	app.payload.property =  prop[this.value].data;
+	app.payload.table =  prop[this.value].table;
+	app.payload.value =  prop[this.value].value;
+});
+//create the autocomplete with the data
+$('#autocomplete').autocomplete({
+	lookup: properties,
+	onSelect: function (suggestion) {
+		console.log(suggestion.data + "  " + suggestion.table + "  " + suggestion.value);
+		app.payload.property = suggestion.data;
+		app.payload.table = suggestion.table;
+		app.payload.value = suggestion.value;
+	}
+});
+$('#target').on('change', setDistrict);
+});
+app.payload.district = $('#target').children("option:selected").data('district');
 
-									var amountIn = parseFloat(data.coords[key][app.payload.property]);
-									console.log(amountIn);
-									//var amountIn = data.coords[key][app.payload.property];
-									//console.log(amountIn);
-									switch (true) {
-										case (amountIn <= 11.8): // LESS THAN OR EQUAL TO 0
-										colorSelector = 1; //not black or gray
-										newzIndex = 1;
-										break;
-										case (amountIn > 11.8 && amountIn <= 26.1): // BETWEEN 0 AND 21
-										colorSelector = 2;
-										newzIndex = 2;
-										break;
-										case (amountIn > 26.1 && amountIn <= 39.3): // BETWEEN 21 AND 40
-										colorSelector = 3;
-										newzIndex = 3;
-										break;
-										case (amountIn > 39.3 && amountIn <= 57.8): // BETWEEN 41 AND 60
-										colorSelector = 4;
-										newzIndex = 4;
-										break;
-										case (amountIn > 57.8 && amountIn <= 90.2): // BETWEEN 61 AND 80
-										colorSelector = 5;
-										newzIndex = 5;
-										break;
-										case (amountIn > 80 && amountIn < 101): // BETWEEN 81 AND 100
-										colorSelector = 6;
-										newzIndex = 6;
-										break;
-									}
-								}
-								/*else if{ //another property inside this table (chorizon_r) that handles its own colors and logic
+/*
+Si es minimo o maximo, necesitamos depth a ese punto. Si es weighted average
+no necesitamos considerar o saber depth. Tambien para median necesitamos saber.
+*/
+$("#methods").change(function(){ //0: max / 1: min / 2: median / 3: weight/
+	app.payload.depth_method = this.value;
+});
 
-							}*/
-							else{ //General legend text for all unspecified propierty
-								legendText = "<img src='img/graysquare.png' height='10px'/> <= 0<br>\
-								<img src='img/redsquare.png' height='10px'/>  1 to 20<br>\
-								<img src='img/skybluesquare.png' height='10px'/> 21 to 40<br>\
-								<img src='img/brightgreensquare.png' height='10px'/> 41 to 60<br>\
-								<img src='img/purplesquare.png' height='10px'/> 61 to 80<br>\
-								<img src='img/orangesquare.png' height='10px'/> 81 to 100";
-								var amountIn = data.coords[key][app.payload.property];
-								switch (true) {
-									case (amountIn <= 0): // LESS THAN OR EQUAL TO 0
-									colorSelector = 0;
-									newzIndex = 0;
-									break;
-									case (amountIn > 0 && amountIn < 21): // BETWEEN 0 AND 21
-									colorSelector = 1;
-									newzIndex = 1;
-									break;
-									case (amountIn > 20 && amountIn < 41): // BETWEEN 21 AND 40
-									colorSelector = 2;
-									newzIndex = 2;
-									break;
-									case (amountIn > 40 && amountIn < 61): // BETWEEN 41 AND 60
-									colorSelector = 3;
-									newzIndex = 3;
-									break;
-									case (amountIn > 60 && amountIn < 81): // BETWEEN 61 AND 80
-									colorSelector = 4;
-									newzIndex = 4;
-									break;
-									case (amountIn > 80 && amountIn < 101): // BETWEEN 81 AND 100
-									colorSelector = 5;
-									newzIndex = 5;
-									break;
-								} //end switch
-							}//end else statement that handles the general legend for unspecified properties
-						}//end the else statement that identifies the table
-						else if(app.payload.table == "chconsistence_r"){
-							var description = data.coords[key][app.payload.property];
-
-							if(app.payload.property == "plasticity"){
-								legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
-								<img src='img/redsquare.png' height='10px'/>  Moderately Plastic<br>\
-								<img src='img/skybluesquare.png' height='10px'/> Nonplastic<br>\
-								<img src='img/brightgreensquare.png' height='10px'/> Slightly Plastic<br>\
-								<img src='img/purplesquare.png' height='10px'/> Very Plastic";
-							}
-
-							if(app.payload.property == "stickiness"){
-								legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
-								<img src='img/redsquare.png' height='10px'/>  Moderately Sticky<br>\
-								<img src='img/skybluesquare.png' height='10px'/> Non Sticky<br>\
-								<img src='img/brightgreensquare.png' height='10px'/> Slightly Sticky<br>\
-								<img src='img/purplesquare.png' height='10px'/> Very Sticky";
-							}
-
-							if(app.payload.property == "rupresplate"){
-								legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
-								<img src='img/redsquare.png' height='10px'/> Very Weak";
-							}
-
-							if(app.payload.property == "rupresblkmst"){
-								legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
-								<img src='img/redsquare.png' height='10px'/>  Extremely Firm<br>\
-								<img src='img/skybluesquare.png' height='10px'/> Firm<br>\
-								<img src='img/brightgreensquare.png' height='10px'/> Friable<br>\
-								<img src='img/purplesquare.png' height='10px'/> Loose<br>\
-								<img src='img/orangesquare.png' height='10px'/> Very Firm<br>\
-								<img src='img/brightpinksquare.png' height='10px'/> Very Friable";
-							}
-
-							if(app.payload.property == "rupresblkdry"){
-								legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
-								<img src='img/redsquare.png' height='10px'/>  Extremely Hard<br>\
-								<img src='img/skybluesquare.png' height='10px'/> Hard<br>\
-								<img src='img/brightgreensquare.png' height='10px'/> Hard When Dry<br>\
-								<img src='img/purplesquare.png' height='10px'/> Loose<br>\
-								<img src='img/orangesquare.png' height='10px'/> Moderately Hard<br>\
-								<img src='img/brightpinksquare.png' height='10px'/> Rigid<br>\
-								<img src='img/navybluesquare.png' height='10px'/> Slightly Hard<br>\
-								<img src='img/lilacsquare.png' height='10px'/> Soft<br>\
-								<img src='img/yellowsquare.png' height='10px'/> Very Hard";
-							}
-
-							if(app.payload.property == "rupresblkcem"){
-								legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
-								<img src='img/redsquare.png' height='10px'/>  Extremely Weakly Cemented<br>\
-								<img src='img/skybluesquare.png' height='10px'/> Indurated<br>\
-								<img src='img/brightgreensquare.png' height='10px'/> Moderately Cemented<br>\
-								<img src='img/purplesquare.png' height='10px'/> Noncemented<br>\
-								<img src='img/orangesquare.png' height='10px'/> Strongly Cemented<br>\
-								<img src='img/brightpinksquare.png' height='10px'/> Very Strongly Cemented<br>\
-								<img src='img/navybluesquare.png' height='10px'/> Weakly Cemented";
-							}
-
-							if(app.payload.property == "mannerfailure"){
-								legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
-								<img src='img/redsquare.png' height='10px'/>  Brittle<br>\
-								<img src='img/skybluesquare.png' height='10px'/> Deformable<br>\
-								<img src='img/brightgreensquare.png' height='10px'/> Moderately Fluid<br>\
-								<img src='img/purplesquare.png' height='10px'/> Nonfluid<br>\
-								<img src='img/orangesquare.png' height='10px'/> Semideformable<br>\
-								<img src='img/brightpinksquare.png' height='10px'/> Slightly Fluid<br>\
-								<img src='img/navybluesquare.png' height='10px'/> Very Fluid";
-							}
+});
 
 
+function getPolygons(){//this is run button
+	//Ricardo
+	hecho = false;
+	var depth = document.getElementById("depth").value;
+	//console.log(depth);
+	depth = parseFloat(depth);
+	//console.log(depth);
+
+	app.payload.depth = depth;
+	if(app.payload.property && app.payload.district && (isNaN(depth)==false)){//to make sure a property is selected
+		//get the polygons
+		// console.log(app.payload);
+		var getparams = app.payload;
+		var bounds = app.map.getBounds();
+		getparams.NE = bounds.getNorthEast().toJSON(); //north east corner
+		getparams.SW = bounds.getSouthWest().toJSON(); //north east corner
+
+		$(document.body).css({'cursor': 'wait'});
+		$.get('polygonHandler.php', app.payload, function(data){
+
+
+		if(depth < 0 || depth * 2.54 > 204 || isNaN(depth)){
+			alert("Please make sure depth is a numerical value and it is between 0 and 79 inches.");
+			hecho = true;
+		}
+		if(data.hasOwnProperty('coords')){
+			removePolygons();
+			//               0           1           2          3          4         5          6           7         8          9        10        11        12          13         14         15        16          17
+			//              GRAY,       RED,     SKY BLUE, BRIGHT GREEN, PURPLE,   ORANGE,  BRIGHT PINK,NAVY BLUE,  LILAC,     YELLOW    maroon    cyan     navygreen    peach      flesh      brown    neongreen   neonpurple
+			shapecolor = ["#84857B", "#FF0000", "#009BFF", "#13FF00", "#6100FF", "#fe9253", "#F20DD6", "#0051FF", "#AB77FF", "#EBF20D", "#8C0909", "#07FDCA", "#008C35", "FFDBA5", "#B57777", "#6D3300", "#D0FF00", "#5900FF"];
+			shapeoutline = ["#000000", "#c10000", "#007fd1", "#0b9b00", "#310082", "#d18f0a", "#bc0ba7", "#0037ad", "#873dff", "#aaaf0a", "8c0909", "36c9bd", "#008c35", "#ffdba5", "#B57777", "#6D3300", "#D0FF00", "#5900FF"];
+			colorSelector = 0;
+			newzIndex = 0;
+			legendText = "";
+			for(key in data.coords){
+				if(data.coords.hasOwnProperty(key)){
+					var polyCoordis = [];
+					if(app.payload.table == "chorizon_r"){
+						if(app.payload.property == "caco3_r"){ //Testing legend and logic for drawing for this specific property
+							legendText = "<img src='img/redsquare.png' height='10px'/> <= 7<br>\
+							<img src='img/skybluesquare.png' height='10px'/>  > 7 and <= 17<br>\
+							<img src='img/brightgreensquare.png' height='10px'/> > 17 and <= 36<br>\
+							<img src='img/purplesquare.png' height='10px'/> > 36 and <= 55<br>\
+							<img src='img/orangesquare.png' height='10px'/> > 55 and <= 65<br>\
+							<img src='img/graysquare.png' height='10px'/> Not rated or not available";
+							var amountIn = parseFloat(data.coords[key][app.payload.property]);
+							//console.log(amountIn);
+							//var amountIn = data.coords[key][app.payload.property];
+							//console.log(amountIn);
 							switch (true) {
-								// All properties in chconsistence_r have empty string values, in this case it will be colored and drew on the map
-								case (description == ""):
-								colorSelector = 0;
-								newzIndex = 0;
-								break;
-								/* Since all properties in chconsistence_r have different descriptions we will group them by colors.
-								For instance, property rupresblkmst hast the following possible values: "" (empty string), Extremely firm,
-								Extremely firm*, Firm, Friable, Loose, Very firm, Very friable. Property rupresblkcem has "" (empty string),
-								Extremely weakly cemented, Indurated, Moderately cemented, Noncemented, Strongly cemented, Very Strongly cemented,
-								and Weakly cemented. So the first (after empty string) possible value for each property will be under the same color.
-								Since we only draw one property at a time this allows us to automate this as much as possible.
-								NOTE: property rupresblkmst has two repeated values with a slight variation (an asterisk); in this case or if it WHERE
-								to occur in another possible value, then just group it within the same condition.
-								*/
-
-								case (description == "Extremely firm" || description == "Extremely firm*" || description == "Extremely hard" || description == "Extremely weakly cemented" || description == "Very weak" || description == "Brittle" || description == "Moderately plastic" || description == "Moderately sticky"):
-								colorSelector = 1;
+								case (amountIn <= 7): // LESS THAN OR EQUAL TO 0
+								colorSelector = 1; //not black or gray
 								newzIndex = 1;
 								break;
-								case (description == "Firm" || description == "Hard" || description == "Indurated" || description == "Nonsticky" || description == "Deformable" || description == "Nonplastic"):
+								case (amountIn > 7 && amountIn <= 17): // BETWEEN 0 AND 21
 								colorSelector = 2;
 								newzIndex = 2;
 								break;
-								case (description == "Friable" || description == "Hard when dry" || description == "Moderately cemented" || description == "Slightly sticky" || description == "Moderately fluid" || description == "Slightly plastic"):
+								case (amountIn > 17 && amountIn <= 36): // BETWEEN 21 AND 40
 								colorSelector = 3;
 								newzIndex = 3;
 								break;
-								case (description == "Loose" || description == "Loose" || description == "Noncemented" || description == "Very sticky" || description == "Nonfluid" || description == "Very plastic"):
+								case (amountIn > 36 && amountIn <= 55): // BETWEEN 41 AND 60
 								colorSelector = 4;
 								newzIndex = 4;
 								break;
-								case (description == "Very firm" || description == "Moderately hard" || description == "Strongly cemented" || description == "Semideformable"):
+								case (amountIn > 55 && amountIn <= 65): // BETWEEN 61 AND 80
 								colorSelector = 5;
 								newzIndex = 5;
 								break;
-								case (description == "Very friable" || description == "Rigid" || description == "Very strongly cemented" || description == "Slightly fluid"):
+								case (amountIn > 80 && amountIn < 101): // BETWEEN 81 AND 100
 								colorSelector = 6;
 								newzIndex = 6;
 								break;
-								case (description == "Slightly hard" || description == "Weakly cemented" || description == "Very fluid"):
-								colorSelector = 7;
-								newzIndex = 7;
+							}
+						}
+						else if(app.payload.property == "sandtotal_r"){ //Testing legend and logic for drawing for this specific property
+							//console.log(app.payload.property);
+							//shapecolor = ["#84857B", "#FF0000", "#009BFF", "#13FF00", "#6100FF", "#f1a50c", "#F20DD6", "#0051FF", "#AB77FF", "#EBF20D"];
+							//shapeoutline = ["#000000", "#c10000", "#007fd1", "#0b9b00", "#310082", "#d18f0a", "#bc0ba7", "#0037ad", "#873dff", "#aaaf0a"];
+							//colorSelector = 0;
+							//newzIndex = 0;
+							legendText = "<img src='img/redsquare.png' height='10px'/> <= 11.8<br>\
+							<img src='img/skybluesquare.png' height='10px'/>  > 11.8 and <= 26.1<br>\
+							<img src='img/brightgreensquare.png' height='10px'/> > 26.1 and <= 39.3<br>\
+							<img src='img/purplesquare.png' height='10px'/> > 39.3 and <= 57.8<br>\
+							<img src='img/orangesquare.png' height='10px'/> > 57.8 and <= 90.2<br>\
+							<img src='img/graysquare.png' height='10px'/> Not rated or not available ";
+							var amountIn = parseFloat(data.coords[key][app.payload.property]);
+							//console.log(amountIn);
+							//var amountIn = data.coords[key][app.payload.property];
+							//console.log(amountIn);
+							switch (true) {
+								case (amountIn <= 11.8): // LESS THAN OR EQUAL TO 0
+								colorSelector = 1; //not black or gray
+								newzIndex = 1;
 								break;
-								case (description == "Soft"):
-								colorSelector = 8;
-								newzIndex = 8;
+								case (amountIn > 11.8 && amountIn <= 26.1): // BETWEEN 0 AND 21
+								colorSelector = 2;
+								newzIndex = 2;
 								break;
-								case (description == "Very hard"):
-								colorSelector = 9;
-								newzIndex = 9;
+								case (amountIn > 26.1 && amountIn <= 39.3): // BETWEEN 21 AND 40
+								colorSelector = 3;
+								newzIndex = 3;
+								break;
+								case (amountIn > 39.3 && amountIn <= 57.8): // BETWEEN 41 AND 60
+								colorSelector = 4;
+								newzIndex = 4;
+								break;
+								case (amountIn > 57.8 && amountIn <= 90.2): // BETWEEN 61 AND 80
+								colorSelector = 5;
+								newzIndex = 5;
+								break;
+								default: // BETWEEN 81 AND 100
+								colorSelector = 0;
+								newzIndex = 0;
 								break;
 							}
 						}
-						temp = wktFormatter(data.coords[key]['POLYGON']);
-						for (var i = 0; i < temp.length; i++) {
-							polyCoordis.push(temp[i]);
+						else if(app.payload.property == "gypsum_r"){ //Testing legend and logic for drawing for this specific property
+							//console.log(app.payload.property);
+							//shapecolor = ["#84857B", "#FF0000", "#009BFF", "#13FF00", "#6100FF", "#f1a50c", "#F20DD6", "#0051FF", "#AB77FF", "#EBF20D"];
+							//shapeoutline = ["#000000", "#c10000", "#007fd1", "#0b9b00", "#310082", "#d18f0a", "#bc0ba7", "#0037ad", "#873dff", "#aaaf0a"];
+							//colorSelector = 0;
+							//newzIndex = 0;
+							legendText = "<img src='img/redsquare.png' height='10px'/> <= 0 <br>\
+							<img src='img/skybluesquare.png' height='10px'/> > 0 and <= 2 <br>\
+							<img src='img/brightgreensquare.png' height='10px'/> Greater than 8% <br>\
+							<img src='img/graysquare.png' height='10px'/> Not rated or not available ";
+							var amountIn = parseFloat(data.coords[key][app.payload.property]);
+							//console.log(amountIn);
+							//var amountIn = data.coords[key][app.payload.property];
+							//console.log(amountIn);
+							switch (true) {
+								case (amountIn <= 0): // LESS THAN OR EQUAL TO 0
+								colorSelector = 1;
+								newzIndex = 1;
+								break;
+								case (amountIn > 0 && amountIn <=2): // BETWEEN 0 AND 21
+								colorSelector = 2;
+								newzIndex = 2;
+								break;
+								/*case (amountIn > 8): // BETWEEN 21 AND 40
+								colorSelector = 3;
+								newzIndex = 3;
+								break;*/
+								default: // Not rated
+								colorSelector = 0;
+								newzIndex = 0;
+								break;
+							}
 						}
-						var polygon = new google.maps.Polygon({
-							description: app.payload.value,
-							description_value: data.coords[key][app.payload.property],
-							paths: polyCoordis,
-							strokeColor: shapeoutline[colorSelector],
-							strokeOpacity: 0.8,
-							strokeWeight: 2,
-							fillColor: shapecolor[colorSelector],
-							fillOpacity: 0.35
-						});
-						console.log("Testing description: "+app.payload.value); //the descriptor for the propierty, for example: "Gypsum"
-						polygon.setOptions({ zIndex: newzIndex });
-						polygon.addListener('click', polyInfo);
-
-						app.polygons.push(polygon);
-						polygon.setMap(app.map);
+					 	else if(app.payload.property == "pi_r"){ //Testing legend and logic for drawing for this specific property
+							//console.log(app.payload.property);
+							//shapecolor = ["#84857B", "#FF0000", "#009BFF", "#13FF00", "#6100FF", "#f1a50c", "#F20DD6", "#0051FF", "#AB77FF", "#EBF20D"];
+							//shapeoutline = ["#000000", "#c10000", "#007fd1", "#0b9b00", "#310082", "#d18f0a", "#bc0ba7", "#0037ad", "#873dff", "#aaaf0a"];
+							//colorSelector = 0;
+							//newzIndex = 0;
+							legendText = "<img src='img/redsquare.png' height='10px'/> <= 9.4<br>\
+							<img src='img/skybluesquare.png' height='10px'/>  > 9.4 and <= 21.0<br>\
+							<img src='img/brightgreensquare.png' height='10px'/> > 21.0 and <= 30.6<br>\
+							<img src='img/purplesquare.png' height='10px'/> > 30.6 and <= 37.5<br>\
+							<img src='img/orangesquare.png' height='10px'/> > 37.5 and <= 54.1<br>\
+							<img src='img/graysquare.png' height='10px'/> Not rated or not available ";
+							// GRAY, RED, SKY BLUE, BRIGHT GREEN, PURPLE, ORANGE, BRIGHT PINK, NAVY BLUE, LILAC, YELLOW
+							var amountIn = parseFloat(data.coords[key][app.payload.property]);
+							//console.log(amountIn);
+							//
+							//console.log(amountIn);
+							//var amountIn = data.coords[key][app.payload.property];
+							//console.log(amountIn);
+							switch (true) {
+								case (amountIn <= 9.4): // LESS THAN OR EQUAL TO
+								colorSelector = 1; //red
+								newzIndex = 1;
+								break;
+								case (amountIn > 9.4 && amountIn <= 21.0): // BETWEEN 0 AND 21
+								colorSelector = 2; //skybluesquare
+								newzIndex = 2
+								break;
+								case (amountIn > 21.0 && amountIn <= 30.6): // BETWEEN 21 AND 40
+								colorSelector = 3; //brightgreensquare
+								newzIndex = 3;
+								break;
+								case (amountIn > 30.6 && amountIn <= 37.5): // BETWEEN 41 AND 60
+								colorSelector = 4; //purplesquare
+								newzIndex = 4;
+								break;
+								case (amountIn > 37.5 && amountIn <= 60): // BETWEEN 41 AND 60
+								colorSelector = 5; //orangesquare
+								newzIndex = 5;
+								break;
+								default: // Not rated
+								colorSelector = 0; //gray
+								newzIndex = 0;
+								break;
+							}
+						}
+						else if(app.payload.property == "sar_r"){ //Testing legend and logic for drawing for this specific property
+							//console.log(app.payload.property);
+							//shapecolor = ["#84857B", "#FF0000", "#009BFF", "#13FF00", "#6100FF", "#f1a50c", "#F20DD6", "#0051FF", "#AB77FF", "#EBF20D"];
+							//shapeoutline = ["#000000", "#c10000", "#007fd1", "#0b9b00", "#310082", "#d18f0a", "#bc0ba7", "#0037ad", "#873dff", "#aaaf0a"];
+							// 								GRAY, 			RED, 			SKY BLUE, BRIGHT GREEN, PURPLE, ORANGE, 	BRIGHT PINK, NAVY BLUE, LILAC, YELLOW
+							//colorSelector = 0;
+							//newzIndex = 0;
+							legendText = "<img src='img/redsquare.png' height='10px'/> <= 0.3<br>\
+							<img src='img/skybluesquare.png' height='10px'/>  > 0.3 and <= 0.9<br>\
+							<img src='img/brightgreensquare.png' height='10px'/> > 0.9 and <= 1.8<br>\
+							<img src='img/purplesquare.png' height='10px'/> > 1.8 and <= 5.9<br>\
+							<img src='img/orangesquare.png' height='10px'/> > 5.9 and <= 17.5<br>\
+							<img src='img/graysquare.png' height='10px'/> Not rated or not available ";
+							var amountIn = parseFloat(data.coords[key][app.payload.property]);
+							//console.log(amountIn);
+							//var amountIn = data.coords[key][app.payload.property];
+							//console.log(amountIn);
+							switch (true) {
+								case (amountIn <= 0.3): // LESS THAN OR EQUAL TO 0
+								colorSelector = 1; //not black or gray
+								newzIndex = 1;
+								break;
+								case (amountIn > 0.3 && amountIn <= 0.9): // BETWEEN 21 AND 40
+								colorSelector = 2;
+								newzIndex = 2;
+								break;
+								case (amountIn > 0.9 && amountIn <= 1.8): // BETWEEN 0 AND 21
+								colorSelector = 3;
+								newzIndex = 3;
+								break;
+								case (amountIn > 1.8 && amountIn <= 5.9): // BETWEEN 21 AND 40
+								colorSelector = 4;
+								newzIndex = 4;
+								break;
+								case (amountIn > 5.9 && amountIn <= 17.5): // BETWEEN 41 AND 60
+								colorSelector = 5;
+								newzIndex = 5;
+								break;
+								default: // Not rated
+								colorSelector = 0;
+								newzIndex = 0;
+								break;
+							}
+						}
+						else if(app.payload.property == "ksat_r"){ //Testing legend and logic for drawing for this specific property
+							//console.log(app.payload.property);
+							//shapecolor = ["#84857B", "#FF0000", "#009BFF", "#13FF00", "#6100FF", "#f1a50c", "#F20DD6", "#0051FF", "#AB77FF", "#EBF20D"];
+							//shapeoutline = ["#000000", "#c10000", "#007fd1", "#0b9b00", "#310082", "#d18f0a", "#bc0ba7", "#0037ad", "#873dff", "#aaaf0a"];
+							//colorSelector = 0;
+							//newzIndex = 0;
+							legendText = "<img src='img/redsquare.png' height='10px'/> Very Low (0.0 - 0.01)<br>\
+							<img src='img/skybluesquare.png' height='10px'/>  Low (0.01 - 0.1)<br>\
+							<img src='img/brightgreensquare.png' height='10px'/> Moderately Low (0.1 - 1)<br>\
+							<img src='img/purplesquare.png' height='10px'/> Moderately High (1 - 10)<br>\
+							<img src='img/orangesquare.png' height='10px'/> High (10 - 100)<br>\
+							<img src='img/brightpinksquare.png' height='10px'/> Very High (100 - 705)<br>\
+							<img src='img/graysquare.png' height='10px'/> Not rated or not available ";
+							var amountIn = parseFloat(data.coords[key][app.payload.property]);
+							//console.log(amountIn);
+							//var amountIn = data.coords[key][app.payload.property];
+							//console.log(amountIn);
+							switch (true) {
+								case (amountIn > 0.0 && amountIn <= 0.01): // LESS THAN OR EQUAL TO 0
+								colorSelect = 1;
+								newzIndex = 1;
+								break;
+								case (amountIn > 0.01 && amountIn <= 0.1): // BETWEEN 21 AND 40
+								colorSelector = 2;
+								newzIndex = 2;
+								break;
+								case (amountIn > 0.1 && amountIn <= 1): // BETWEEN 41 AND 60
+								colorSelector = 3;
+								newzIndex = 3;
+								break;
+								case (amountIn > 1 && amountIn <= 10): // BETWEEN 41 AND 60
+								colorSelector = 4;
+								newzIndex = 4;
+								break;
+								case (amountIn > 10 && amountIn <= 100): // BETWEEN 41 AND 60
+								colorSelector = 5;
+								newzIndex = 5;
+								break;
+								case (amountIn > 100 && amountIn <= 705): // BETWEEN 41 AND 60
+								colorSelector = 6;
+								newzIndex = 6;
+								break;
+								default: // Not rated
+								colorSelector = 0;
+								newzIndex = 0;
+								break;
+							}
+						}
+						else if(app.payload.property == "sandfine_r"){ //Testing legend and logic for drawing for this specific property
+							//console.log(app.payload.property);
+							//shapecolor = ["#84857B", "#FF0000", "#009BFF", "#13FF00", "#6100FF", "#f1a50c", "#F20DD6", "#0051FF", "#AB77FF", "#EBF20D"];
+							//shapeoutline = ["#000000", "#c10000", "#007fd1", "#0b9b00", "#310082", "#d18f0a", "#bc0ba7", "#0037ad", "#873dff", "#aaaf0a"];
+							//colorSelector = 0;
+							//newzIndex = 0;
+							legendText = "<img src='img/brightpinksquare.png' height='10px'/> <br>\
+							<img src='img/redsquare.png' height='10px'/> <br>\
+							<img src='img/skybluesquare.png' height='10px'/> <br>\
+							<img src='img/purplesquare.png' height='10px'/> <br>\
+							<img src='img/orangesquare.png' height='10px'/> <br>\
+							<img src='img/brightgreensquare.png' height='10px'/> <br>\
+							<img src='img/graysquare.png' height='10px'/> Not rated or not available ";
+							var amountIn = parseFloat(data.coords[key][app.payload.property]);
+							//console.log(amountIn);
+							//var amountIn = data.coords[key][app.payload.property];
+							//console.log(amountIn);
+							switch (true) {
+								case (amountIn > 0.0 && amountIn <= 0.01): // LESS THAN OR EQUAL TO 0
+								colorSelect = 2;
+								newzIndex = 2;
+								break;
+								case (amountIn > 0.01 && amountIn <= 0.1): // BETWEEN 21 AND 40
+								colorSelector = 3;
+								newzIndex = 3;
+								break;
+								case (amountIn > 0.1 && amountIn <= 1): // BETWEEN 41 AND 60
+								colorSelector = 4;
+								newzIndex = 4;
+								break;
+								case (amountIn > 1 && amountIn <= 10): // BETWEEN 41 AND 60
+								colorSelector = 5;
+								newzIndex = 5;
+								break;
+								case (amountIn > 10 && amountIn <= 100): // BETWEEN 41 AND 60
+								colorSelector = 6;
+								newzIndex = 6;
+								break;
+								case (amountIn > 100 && amountIn <= 705): // BETWEEN 41 AND 60
+								colorSelector = 7;
+								newzIndex = 7;
+								break;
+								default: // Not rated
+								colorSelector = 8;
+								newzIndex = 8;
+								break;
+							}
+						}
+						else if(app.payload.property == "ph1to1h2o_r"){ //Testing legend and logic for drawing for this specific property
+							//not enough colors for this propierty
+							//console.log(app.payload.property);
+							//shapecolor = ["#84857B", "#FF0000", "#009BFF", "#13FF00", "#6100FF", "#f1a50c", "#F20DD6", "#0051FF", "#AB77FF", "#EBF20D"];
+							//shapeoutline = ["#000000", "#c10000", "#007fd1", "#0b9b00", "#310082", "#d18f0a", "#bc0ba7", "#0037ad", "#873dff", "#aaaf0a"];
+							//colorSelector = 0;
+							//newzIndex = 0;
+							legendText = "<img src='img/redsquare.png' height='10px'/> Ultra acid (ph < 3.5)<br>\
+							<img src='img/skybluesquare.png' height='10px'/> Extremely acid (ph 3.5 - 4.4)<br>\
+							<img src='img/brightgreensquare.png' height='10px'/> Very strongly acid (ph 4.5 - 5.0)<br>\
+							<img src='img/purplesquare.png' height='10px'/> Strongly acid (ph 5.1 - 5.5)<br>\
+							<img src='img/orangesquare.png' height='10px'/> Moderately acid (ph 5.6 - 6.0)<br>\
+							<img src='img/brightpinksquare.png' height='10px'/> Slightly acid (ph 6.1 - 6.5)<br>\
+							<img src='img/navybluesquare.png' height='10px'/> Neutral (ph 6.6 - 7.3)<br>\
+							<img src='img/lilacsquare.png' height='10px'/> Slightly alkaline (ph 7.4 - 7.8)<br>\
+							<img src='img/yellowsquare.png' height='10px'/> Moderately alkaline (ph 7.9 - 8.4)<br>\
+							<img src='img/maroonsquare.png' height='10px'/> Strongly alkaline (ph 8.5 - 9.0)<br>\
+							<img src='img/navygreen.png' height='10px'/> Very strongly alkaline (ph > 9.0)<br>\
+							<img src='img/graysquare.png' height='10px'/> Not rated or not available ";
+							var amountIn = parseFloat(data.coords[key][app.payload.property]);
+							//console.log(amountIn);
+							//var amountIn = data.coords[key][app.payload.property];
+							//console.log(amountIn);
+							switch (true) {
+								case (amountIn < 3.5): // LESS THAN OR EQUAL TO 0
+								colorSelect = 1;
+								newzIndex = 1;
+								break;
+								case (amountIn >= 3.5 && amountIn <= 4.4): // BETWEEN 21 AND 40
+								colorSelector = 2;
+								newzIndex = 2;
+								break;
+								case (amountIn >= 4.5 && amountIn <= 5.0): // BETWEEN 41 AND 60
+								colorSelector = 3;
+								newzIndex = 3;
+								break;
+								case (amountIn >= 5.1 && amountIn <= 5.5): // BETWEEN 41 AND 60
+								colorSelector = 4;
+								newzIndex = 4;
+								break;
+								case (amountIn >= 5.6 && amountIn <= 6.0): // BETWEEN 41 AND 60
+								colorSelector = 5;
+								newzIndex = 5;
+								break;
+								case (amountIn >= 6.1 && amountIn <= 6.5): // BETWEEN 41 AND 60
+								colorSelector = 6;
+								newzIndex = 6;
+								break;
+								case (amountIn >= 6.6 && amountIn <= 7.3): // BETWEEN 41 AND 60
+								colorSelector = 7;
+								newzIndex = 7;
+								break;
+								case (amountIn >= 7.4 && amountIn <= 7.8): // BETWEEN 41 AND 60
+								colorSelector = 8;
+								newzIndex = 8;
+								break;
+								case (amountIn >= 7.9 && amountIn <= 8.4): // BETWEEN 41 AND 60
+								colorSelector = 9;
+								newzIndex = 9;
+								break;
+								case (amountIn >= 8.5 && amountIn <= 9.0): // BETWEEN 41 AND 60
+								colorSelector = 10;
+								newzIndex = 10;
+								break;
+								case (amountIn > 9.0 ): // BETWEEN 41 AND 60
+								colorSelector = 11;
+								newzIndex = 11;
+								break;
+								default: // Not rated
+								colorSelector = 0;
+								newzIndex = 0;
+								break;
+							}
+						}
+						else if(app.payload.property == "aashind_r"){ //Testing legend and logic for drawing for this specific property
+							//console.log(app.payload.property);
+							//shapecolor = ["#84857B", "#FF0000", "#009BFF", "#13FF00", "#6100FF", "#f1a50c", "#F20DD6", "#0051FF", "#AB77FF", "#EBF20D"];
+							//shapeoutline = ["#000000", "#c10000", "#007fd1", "#0b9b00", "#310082", "#d18f0a", "#bc0ba7", "#0037ad", "#873dff", "#aaaf0a"];
+							//colorSelector = 0;
+							//newzIndex = 0;
+							legendText = "<img src='img/redsquare.png' height='10px'/> A-1<br>\
+							<img src='img/skybluesquare.png' height='10px'/> A-1-a<br>\
+							<img src='img/brightgreensquare.png' height='10px'/> A-1-b<br>\
+							<img src='img/purplesquare.png' height='10px'/> A-b<br>\
+							<img src='img/orangesquare.png' height='10px'/> A-2<br>\
+							<img src='img/brightpinksquare.png' height='10px'/> A-2-4<br>\
+							<img src='img/navybluesquare.png' height='10px'/> A-2-5<br>\
+							<img src='img/lilacsquare.png' height='10px'/> A-2-6<br>\
+							<img src='img/yellowsquare.png' height='10px'/> A-2-7<br>\
+							<img src='img/maroonsquare.png' height='10px'/> A-3<br>\
+							<img src='img/cyansquare.png' height='10px'/> A-4<br>\
+							<img src='img/navygreensquare.png' height='10px'/> A-5<br>\
+							<img src='img/peachsquare.png' height='10px'/> A-6<br>\
+							<img src='img/fleshsquare.png' height='10px'/> A-7<br>\
+							<img src='img/brownsquare.png' height='10px'/> A-7-5<br>\
+							<img src='img/neongreen.png' height='10px'/> A-7-6<br>\
+							<img src='img/neonpurple.png' height='10px'/> A-8<br>\
+							<img src='img/graysquare.png' height='10px'/> Not rated or not available ";
+							console.log(amountIn);
+							var amountIn = parseFloat(data.coords[key][app.payload.property]);
+							console.log(amountIn);
+							//console.log(amountIn);
+							//var amountIn = data.coords[key][app.payload.property];
+							//console.log(amountIn);
+							switch (true) {
+								case (amountIn == "A-1-a"): // LESS THAN OR EQUAL TO 0
+								colorSelect = 1;
+								newzIndex = 1;
+								break;
+								case (amountIn == "A-1-b"): // BETWEEN 21 AND 40
+								colorSelector = 2;
+								newzIndex = 2;
+								break;
+								case (amountIn == "A-b"): // BETWEEN 41 AND 60
+								colorSelector = 3;
+								newzIndex = 3;
+								break;
+								case (amountIn == "A-2"): // BETWEEN 41 AND 60
+								colorSelector = 4;
+								newzIndex = 4;
+								break;
+								case (amountIn == "A-2-4"): // BETWEEN 41 AND 60
+								colorSelector = 5;
+								newzIndex = 5;
+								break;
+								case (amountIn == "A-2-5"): // BETWEEN 41 AND 60
+								colorSelector = 6;
+								newzIndex = 6;
+								break;
+								case (amountIn == "A-2-6"): // BETWEEN 41 AND 60
+								colorSelector = 7;
+								newzIndex = 7;
+								break;
+								case (amountIn == "A-2-7"): // BETWEEN 41 AND 60
+								colorSelector = 8;
+								newzIndex = 8;
+								break;
+								case (amountIn == "A-3"): // BETWEEN 41 AND 60
+								colorSelector = 9;
+								newzIndex = 9;
+								break;
+								case (amountIn == "A-4"): // BETWEEN 41 AND 60
+								colorSelector = 10;
+								newzIndex = 10;
+								break;
+								case (amountIn == "A-5" ): // BETWEEN 41 AND 60
+								colorSelector = 11;
+								newzIndex = 11;
+								break;
+								case (amountIn == "A-6" ): // BETWEEN 41 AND 60
+								colorSelector = 12;
+								newzIndex = 12;
+								break;
+								case (amountIn == "A-7" ): // BETWEEN 41 AND 60
+								colorSelector = 13;
+								newzIndex = 13;
+								break;
+								case (amountIn == "A-7-5" ): // BETWEEN 41 AND 60
+								colorSelector = 14;
+								newzIndex = 14;
+								break;
+								case (amountIn == "A-7-6" ): // BETWEEN 41 AND 60
+								colorSelector = 15;
+								newzIndex = 15;
+								break;
+								case (amountIn == "A-8" ): // BETWEEN 41 AND 60
+								colorSelector = 16;
+								newzIndex = 16;
+								break;
+								default: // Not rated
+								colorSelector = 0;
+								newzIndex = 0;
+								break;
+							}
+						}
+						else if(app.payload.property == "ll_r"){ //Testing legend and logic for drawing for this specific property
+							//console.log(app.payload.property);
+							//shapecolor = ["#84857B", "#FF0000", "#009BFF", "#13FF00", "#6100FF", "#f1a50c", "#F20DD6", "#0051FF", "#AB77FF", "#EBF20D"];
+							//shapeoutline = ["#000000", "#c10000", "#007fd1", "#0b9b00", "#310082", "#d18f0a", "#bc0ba7", "#0037ad", "#873dff", "#aaaf0a"];
+							//colorSelector = 0;
+							//newzIndex = 0;
+							legendText = "<img src='img/redsquare.png' height='10px'/> <= 27.2<br>\
+							<img src='img/skybluesquare.png' height='10px'/> > 27.2 and <= 45.8<br>\
+							<img src='img/brightgreensquare.png' height='10px'/> > 45.8 and <= 58.0<br>\
+							<img src='img/purplesquare.png' height='10px'/> > 58.0 and <= 66.0<br>\
+							<img src='img/orangesquare.png' height='10px'/> > 66.0 and <= 75.7<br>\
+							<img src='img/graysquare.png' height='10px'/> Not rated or not available ";
+							var amountIn = parseFloat(data.coords[key][app.payload.property]);
+							//console.log(amountIn);
+							//var amountIn = data.coords[key][app.payload.property];
+							//console.log(amountIn);
+							switch (true) {
+								case (amountIn <= 27.2): // LESS THAN OR EQUAL TO 0
+								colorSelect = 1;
+								newzIndex = 1;
+								break;
+								case (amountIn > 27.2 && amountIn <= 45.8): // BETWEEN 21 AND 40
+								colorSelector = 2;
+								newzIndex = 2;
+								break;
+								case (amountIn > 45.8 && amountIn <= 58.0): // BETWEEN 41 AND 60
+								colorSelector = 3;
+								newzIndex = 3;
+								break;
+								case (amountIn > 58.0 && amountIn <= 66.0): // BETWEEN 41 AND 60
+								colorSelector = 4;
+								newzIndex = 4;
+								break;
+								case (amountIn > 66.0 && amountIn <= 75.7): // BETWEEN 41 AND 60
+								colorSelector = 5;
+								newzIndex = 5;
+								break;
+								default: // Not rated
+								colorSelector = 0;
+								newzIndex = 0;
+								break;
+							}
+						}
+						else if(app.payload.property == "kffact" || app.payload.property == "kwfact" ){ //Testing legend and logic for drawing for this specific property
+							//console.log(app.payload.property);
+							//shapecolor = ["#84857B", "#FF0000", "#009BFF", "#13FF00", "#6100FF", "#f1a50c", "#F20DD6", "#0051FF", "#AB77FF", "#EBF20D"];
+							//shapeoutline = ["#000000", "#c10000", "#007fd1", "#0b9b00", "#310082", "#d18f0a", "#bc0ba7", "#0037ad", "#873dff", "#aaaf0a"];
+							//colorSelector = 0;
+							//newzIndex = 0;
+							legendText = "<img src='img/redsquare.png' height='10px'/> .02<br>\
+							<img src='img/skybluesquare.png' height='10px'/> .05<br>\
+							<img src='img/brightgreensquare.png' height='10px'/> .10<br>\
+							<img src='img/purplesquare.png' height='10px'/> .15<br>\
+							<img src='img/orangesquare.png' height='10px'/> .17<br>\
+							<img src='img/brightpinksquare.png' height='10px'/> .20<br>\
+							<img src='img/navybluesquare.png' height='10px'/> .24<br>\
+							<img src='img/lilacsquare.png' height='10px'/> .28<br>\
+							<img src='img/yellowsquare.png' height='10px'/> .32<br>\
+							<img src='img/maroonsquare.png' height='10px'/> .37<br>\
+							<img src='img/cyansquare.png' height='10px'/> .43<br>\
+							<img src='img/navygreensquare.png' height='10px'/> .49<br>\
+							<img src='img/peachsquare.png' height='10px'/> .55<br>\
+							<img src='img/fleshsquare.png' height='10px'/> .64<br>\
+							<img src='img/graysquare.png' height='10px'/> Not rated or not available ";
+							var amountIn = parseFloat(data.coords[key][app.payload.property]);
+							//console.log(amountIn);
+							//var amountIn = data.coords[key][app.payload.property];
+							//console.log(amountIn);
+							switch (true) {
+								case (amountIn <= 0.02): // LESS THAN OR EQUAL TO 0
+								colorSelect = 1;
+								newzIndex = 1;
+								break;
+								case (amountIn <= 0.05): // BETWEEN 21 AND 40
+								colorSelector = 2;
+								newzIndex = 2;
+								break;
+								case (amountIn <= .10): // BETWEEN 41 AND 60
+								colorSelector = 3;
+								newzIndex = 3;
+								break;
+								case (amountIn <= .15): // BETWEEN 41 AND 60
+								colorSelector = 4;
+								newzIndex = 4;
+								break;
+								case (amountIn <= .17): // BETWEEN 41 AND 60
+								colorSelector = 5;
+								newzIndex = 5;
+								break;
+								case (amountIn <= .20): // BETWEEN 41 AND 60
+								colorSelector = 6;
+								newzIndex = 6;
+								break;
+								case (amountIn <= .24): // BETWEEN 41 AND 60
+								colorSelector = 7;
+								newzIndex = 7;
+								break;
+								case (amountIn <= 0.28): // BETWEEN 41 AND 60
+								colorSelector = 8;
+								newzIndex = 8;
+								break;
+								case (amountIn <= 0.32): // BETWEEN 41 AND 60
+								colorSelector = 9;
+								newzIndex = 9;
+								break;
+								case (amountIn <= 0.37): // BETWEEN 41 AND 60
+								colorSelector = 10;
+								newzIndex = 10;
+								break;
+								case (amountIn <= 0.43): // BETWEEN 41 AND 60
+								colorSelector = 11;
+								newzIndex = 11;
+								break;
+								case (amountIn <= 0.49): // BETWEEN 41 AND 60
+								colorSelector = 12;
+								newzIndex = 12;
+								break;
+								case (amountIn <= 0.55): // BETWEEN 41 AND 60
+								colorSelector = 13;
+								newzIndex = 13;
+								break;
+								case (amountIn <= 0.64): // BETWEEN 41 AND 60
+								colorSelector = 14;
+								newzIndex = 14;
+								break;
+								default: // Not rated
+								colorSelector = 0;
+								newzIndex = 0;
+								break;
+							}
+						}
+						else if(app.payload.property == "ph01mcacl2_r"){ //Testing legend and logic for drawing for this specific property
+							//console.log(app.payload.property);
+							//shapecolor = ["#84857B", "#FF0000", "#009BFF", "#13FF00", "#6100FF", "#f1a50c", "#F20DD6", "#0051FF", "#AB77FF", "#EBF20D"];
+							//shapeoutline = ["#000000", "#c10000", "#007fd1", "#0b9b00", "#310082", "#d18f0a", "#bc0ba7", "#0037ad", "#873dff", "#aaaf0a"];
+							//colorSelector = 0;
+							//newzIndex = 0;
+							legendText = "<img src='img/redsquare.png' height='10px'/> Ultra acid (ph < 3.5)<br>\
+							<img src='img/skybluesquare.png' height='10px'/> Extremely acid (ph 3.5 - 4.4)<br>\
+							<img src='img/brightgreensquare.png' height='10px'/> Very strongly acid (ph 4.5 - 5.0)<br>\
+							<img src='img/purplesquare.png' height='10px'/> Strongly acid (ph 5.1 - 5.5)<br>\
+							<img src='img/orangesquare.png' height='10px'/> Moderately acid (ph 5.6 - 6.0)<br>\
+							<img src='img/brightpinksquare.png' height='10px'/> Slightly acid (ph 6.1 - 6.5)<br>\
+							<img src='img/navybluesquare.png' height='10px'/> Neutral (ph 6.6 - 7.3)<br>\
+							<img src='img/lilacsquare.png' height='10px'/> Slightly alkaline (ph 7.4 - 7.8)<br>\
+							<img src='img/yellowsquare.png' height='10px'/> Moderately alkaline (ph 7.9 - 8.4)<br>\
+							<img src='img/maroonsquare.png' height='10px'/> Strongly alkaline (ph 8.5 - 9.0)<br>\
+							<img src='img/navygreen.png' height='10px'/> Very strongly alkaline (ph > 9.0)<br>\
+							<img src='img/graysquare.png' height='10px'/> Not rated or not available ";
+							var amountIn = parseFloat(data.coords[key][app.payload.property]);
+							//console.log(amountIn);
+							//var amountIn = data.coords[key][app.payload.property];
+							//console.log(amountIn);
+							switch (true) {
+								case (amountIn < 3.5): // LESS THAN OR EQUAL TO 0
+								colorSelect = 1;
+								newzIndex = 1;
+								break;
+								case (amountIn >= 3.5 && amountIn <= 4.4): // BETWEEN 21 AND 40
+								colorSelector = 2;
+								newzIndex = 2;
+								break;
+								case (amountIn >= 4.5 && amountIn <= 5.0): // BETWEEN 41 AND 60
+								colorSelector = 3;
+								newzIndex = 3;
+								break;
+								case (amountIn >= 5.1 && amountIn <= 5.5): // BETWEEN 41 AND 60
+								colorSelector = 4;
+								newzIndex = 4;
+								break;
+								case (amountIn >= 5.6 && amountIn <= 6.0): // BETWEEN 41 AND 60
+								colorSelector = 5;
+								newzIndex = 5;
+								break;
+								case (amountIn >= 6.1 && amountIn <= 6.5): // BETWEEN 41 AND 60
+								colorSelector = 6;
+								newzIndex = 6;
+								break;
+								case (amountIn >= 6.6 && amountIn <= 7.3): // BETWEEN 41 AND 60
+								colorSelector = 7;
+								newzIndex = 7;
+								break;
+								case (amountIn >= 7.4 && amountIn <= 7.8): // BETWEEN 41 AND 60
+								colorSelector = 8;
+								newzIndex = 8;
+								break;
+								case (amountIn >= 7.9 && amountIn <= 8.4): // BETWEEN 41 AND 60
+								colorSelector = 9;
+								newzIndex = 9;
+								break;
+								case (amountIn >= 8.5 && amountIn <= 9.0): // BETWEEN 41 AND 60
+								colorSelector = 10;
+								newzIndex = 10;
+								break;
+								case (amountIn > 9.0 ): // BETWEEN 41 AND 60
+								colorSelector = 11;
+								newzIndex = 11;
+								break;
+								default: // Not rated
+								colorSelector = 0;
+								newzIndex = 0;
+								break;
+							}
+						}
+						else if(app.payload.property == "om_r"){ //Testing legend and logic for drawing for this specific property
+							//console.log(app.payload.property);
+							//shapecolor = ["#84857B", "#FF0000", "#009BFF", "#13FF00", "#6100FF", "#f1a50c", "#F20DD6", "#0051FF", "#AB77FF", "#EBF20D"];
+							//shapeoutline = ["#000000", "#c10000", "#007fd1", "#0b9b00", "#310082", "#d18f0a", "#bc0ba7", "#0037ad", "#873dff", "#aaaf0a"];
+							//colorSelector = 0;
+							//newzIndex = 0;
+							legendText = "<img src='img/redsquare.png' height='10px'/> 0.5% <br>\
+							<img src='img/skybluesquare.png' height='10px'/> 1% <br>\
+							<img src='img/brightgreensquare.png' height='10px'/> 2% <br>\
+							<img src='img/purplesquare.png' height='10px'/> 3% <br>\
+							<img src='img/orangesquare.png' height='10px'/> 4% <br>\
+							<img src='img/brightpinksquare.png' height='10px'/> 5% <br>\
+							<img src='img/navybluesquare.png' height='10px'/> Greater than 5% <br>\
+							<img src='img/graysquare.png' height='10px'/> Not rated or not available ";
+							var amountIn = parseFloat(data.coords[key][app.payload.property]);
+							//console.log(amountIn);
+							//var amountIn = data.coords[key][app.payload.property];
+							//console.log(amountIn);
+							switch (true) {
+								case (amountIn >= 0.5 && amountIn < 1): // LESS THAN OR EQUAL TO 0
+								colorSelect = 1;
+								newzIndex = 1;
+								break;
+								case (amountIn >= 1 && amountIn < 2): // BETWEEN 21 AND 40
+								colorSelector = 2;
+								newzIndex = 2;
+								break;
+								case (amountIn >= 2 && amountIn < 3): // BETWEEN 41 AND 60
+								colorSelector = 3;
+								newzIndex = 3;
+								break;
+								case (amountIn >= 3 && amountIn < 4): // BETWEEN 41 AND 60
+								colorSelector = 4;
+								newzIndex = 4;
+								break;
+								case (amountIn >= 4 && amountIn < 5): // BETWEEN 41 AND 60
+								colorSelector = 5;
+								newzIndex = 5;
+								break;
+								case (amountIn >= 5 && amountIn <= 5.99): // BETWEEN 41 AND 60
+								colorSelector = 6;
+								newzIndex = 6;
+								break;
+								case (amountIn > 5): // BETWEEN 41 AND 60
+								colorSelector = 7;
+								newzIndex = 7;
+								break;
+								default: // Not rated
+								colorSelector = 0;
+								newzIndex = 0;
+								break;
+							}
+						}
+						/*else if{ //another property inside this table (chorizon_r) that handles its own colors and logic
+					}*/
+					else{ //General legend text for all unspecified propierty
+						legendText = "<img src='img/graysquare.png' height='10px'/> <= 0<br>\
+						<img src='img/redsquare.png' height='10px'/>  1 to 20<br>\
+						<img src='img/skybluesquare.png' height='10px'/> 21 to 40<br>\
+						<img src='img/brightgreensquare.png' height='10px'/> 41 to 60<br>\
+						<img src='img/purplesquare.png' height='10px'/> 61 to 80<br>\
+						<img src='img/orangesquare.png' height='10px'/> 81 to 100";
+						var amountIn = data.coords[key][app.payload.property];
+						switch (true) {
+							case (amountIn <= 0): // LESS THAN OR EQUAL TO 0
+							colorSelector = 0;
+							newzIndex = 0;
+							break;
+							case (amountIn > 0 && amountIn < 21): // BETWEEN 0 AND 21
+							colorSelector = 1;
+							newzIndex = 1;
+							break;
+							case (amountIn > 20 && amountIn < 41): // BETWEEN 21 AND 40
+							colorSelector = 2;
+							newzIndex = 2;
+							break;
+							case (amountIn > 40 && amountIn < 61): // BETWEEN 41 AND 60
+							colorSelector = 3;
+							newzIndex = 3;
+							break;
+							case (amountIn > 60 && amountIn < 81): // BETWEEN 61 AND 80
+							colorSelector = 4;
+							newzIndex = 4;
+							break;
+							case (amountIn > 80 && amountIn < 101): // BETWEEN 81 AND 100
+							colorSelector = 5;
+							newzIndex = 5;
+							break;
+						} //end switch
+					}//end else statement that handles the general legend for unspecified properties
+				}//end the else statement that identifies the table
+				else if(app.payload.table == "chconsistence_r"){
+					var description = data.coords[key][app.payload.property];
+					if(app.payload.property == "plasticity"){
+						legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
+						<img src='img/redsquare.png' height='10px'/>  Moderately Plastic<br>\
+						<img src='img/skybluesquare.png' height='10px'/> Nonplastic<br>\
+						<img src='img/brightgreensquare.png' height='10px'/> Slightly Plastic<br>\
+						<img src='img/purplesquare.png' height='10px'/> Very Plastic";
+					}
+					if(app.payload.property == "stickiness"){
+						legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
+						<img src='img/redsquare.png' height='10px'/>  Moderately Sticky<br>\
+						<img src='img/skybluesquare.png' height='10px'/> Non Sticky<br>\
+						<img src='img/brightgreensquare.png' height='10px'/> Slightly Sticky<br>\
+						<img src='img/purplesquare.png' height='10px'/> Very Sticky";
+					}
+					if(app.payload.property == "rupresplate"){
+						legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
+						<img src='img/redsquare.png' height='10px'/> Very Weak";
+					}
+					if(app.payload.property == "rupresblkmst"){
+						legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
+						<img src='img/redsquare.png' height='10px'/>  Extremely Firm<br>\
+						<img src='img/skybluesquare.png' height='10px'/> Firm<br>\
+						<img src='img/brightgreensquare.png' height='10px'/> Friable<br>\
+						<img src='img/purplesquare.png' height='10px'/> Loose<br>\
+						<img src='img/orangesquare.png' height='10px'/> Very Firm<br>\
+						<img src='img/brightpinksquare.png' height='10px'/> Very Friable";
+					}
+					if(app.payload.property == "rupresblkdry"){
+						legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
+						<img src='img/redsquare.png' height='10px'/>  Extremely Hard<br>\
+						<img src='img/skybluesquare.png' height='10px'/> Hard<br>\
+						<img src='img/brightgreensquare.png' height='10px'/> Hard When Dry<br>\
+						<img src='img/purplesquare.png' height='10px'/> Loose<br>\
+						<img src='img/orangesquare.png' height='10px'/> Moderately Hard<br>\
+						<img src='img/brightpinksquare.png' height='10px'/> Rigid<br>\
+						<img src='img/navybluesquare.png' height='10px'/> Slightly Hard<br>\
+						<img src='img/lilacsquare.png' height='10px'/> Soft<br>\
+						<img src='img/yellowsquare.png' height='10px'/> Very Hard";
+					}
+					if(app.payload.property == "rupresblkcem"){
+						legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
+						<img src='img/redsquare.png' height='10px'/>  Extremely Weakly Cemented<br>\
+						<img src='img/skybluesquare.png' height='10px'/> Indurated<br>\
+						<img src='img/brightgreensquare.png' height='10px'/> Moderately Cemented<br>\
+						<img src='img/purplesquare.png' height='10px'/> Noncemented<br>\
+						<img src='img/orangesquare.png' height='10px'/> Strongly Cemented<br>\
+						<img src='img/brightpinksquare.png' height='10px'/> Very Strongly Cemented<br>\
+						<img src='img/navybluesquare.png' height='10px'/> Weakly Cemented";
+					}
+					if(app.payload.property == "mannerfailure"){
+						legendText = "<img src='img/graysquare.png' height='10px'/> 0 or NULL or Empty String<br>\
+						<img src='img/redsquare.png' height='10px'/>  Brittle<br>\
+						<img src='img/skybluesquare.png' height='10px'/> Deformable<br>\
+						<img src='img/brightgreensquare.png' height='10px'/> Moderately Fluid<br>\
+						<img src='img/purplesquare.png' height='10px'/> Nonfluid<br>\
+						<img src='img/orangesquare.png' height='10px'/> Semideformable<br>\
+						<img src='img/brightpinksquare.png' height='10px'/> Slightly Fluid<br>\
+						<img src='img/navybluesquare.png' height='10px'/> Very Fluid";
+					}
+					switch (true) {
+						// All properties in chconsistence_r have empty string values, in this case it will be colored and drawn on the map
+						case (description == ""):
+						colorSelector = 0;
+						newzIndex = 0;
+						break;
+						/* Since all properties in chconsistence_r have different descriptions we will group them by colors.
+						For instance, property rupresblkmst hast the following possible values: "" (empty string), Extremely firm,
+						Extremely firm*, Firm, Friable, Loose, Very firm, Very friable. Property rupresblkcem has "" (empty string),
+						Extremely weakly cemented, Indurated, Moderately cemented, Noncemented, Strongly cemented, Very Strongly cemented,
+						and Weakly cemented. So the first (after empty string) possible value for each property will be under the same color.
+						Since we only draw one property at a time this allows us to automate this as much as possible.
+						NOTE: property rupresblkmst has two repeated values with a slight variation (an asterisk); in this case or if it WHERE
+						to occur in another possible value, then just group it within the same condition.
+						*/
+						case (description == "Extremely firm" || description == "Extremely firm*" || description == "Extremely hard" || description == "Extremely weakly cemented" || description == "Very weak" || description == "Brittle" || description == "Moderately plastic" || description == "Moderately sticky"):
+						colorSelector = 1;
+						newzIndex = 1;
+						break;
+						case (description == "Firm" || description == "Hard" || description == "Indurated" || description == "Nonsticky" || description == "Deformable" || description == "Nonplastic"):
+						colorSelector = 2;
+						newzIndex = 2;
+						break;
+						case (description == "Friable" || description == "Hard when dry" || description == "Moderately cemented" || description == "Slightly sticky" || description == "Moderately fluid" || description == "Slightly plastic"):
+						colorSelector = 3;
+						newzIndex = 3;
+						break;
+						case (description == "Loose" || description == "Loose" || description == "Noncemented" || description == "Very sticky" || description == "Nonfluid" || description == "Very plastic"):
+						colorSelector = 4;
+						newzIndex = 4;
+						break;
+						case (description == "Very firm" || description == "Moderately hard" || description == "Strongly cemented" || description == "Semideformable"):
+						colorSelector = 5;
+						newzIndex = 5;
+						break;
+						case (description == "Very friable" || description == "Rigid" || description == "Very strongly cemented" || description == "Slightly fluid"):
+						colorSelector = 6;
+						newzIndex = 6;
+						break;
+						case (description == "Slightly hard" || description == "Weakly cemented" || description == "Very fluid"):
+						colorSelector = 7;
+						newzIndex = 7;
+						break;
+						case (description == "Soft"):
+						colorSelector = 8;
+						newzIndex = 8;
+						break;
+						case (description == "Very hard"):
+						colorSelector = 9;
+						newzIndex = 9;
+						break;
 					}
 				}
+				else{
+					removePolygons();
+				}
+				temp = wktFormatter(data.coords[key]['POLYGON']);
+				for (var i = 0; i < temp.length; i++) {
+					polyCoordis.push(temp[i]);
+				}
+				var polygon = new google.maps.Polygon({ //we need another value to determine the key
+					description: app.payload.value, //value that appears when you click the map
+					description_value: data.coords[key][app.payload.property],
+					paths: polyCoordis,
+					strokeColor: shapeoutline[colorSelector],
+					strokeOpacity: 0.60,
+					strokeWeight: 0.70,
+					fillColor: shapecolor[colorSelector],
+					fillOpacity: 0.60
+				});
+				polygon.setOptions({ zIndex: newzIndex });
+				polygon.addListener('click', polyInfo);
+				app.polygons.push(polygon);
+				polygon.setMap(app.map);
 			}
-		}).done(function(data){
-			if($('#autocomplete').val() == "Gypsum"){
-				var gypsum = "Description for Gypsum: ";
-				var gypsumText = "The content of gypsum is the percent, by weight, of hydrated calcium sulfates in the fraction of the soil less than 20 millimeters in size. "; // Gypsum is partially soluble in water. Soils high in content of gypsum, such as those with more than 10 percent gypsum, may collapse if the gypsum is removed by percolating water. Gypsum is corrosive to concrete.
-				//For each soil layer, this attribute is actually recorded as three separate values in the database. A low value and a high value indicate the range of this attribute for the soil component. A \"representative\" value indicates the expected value of this attribute for the component. For this soil property, only the representative value is used.";
-				var h3 = document.createElement('h3');
-				h3.innerHTML = gypsum;
-
-				var div = document.createElement('div');
-				div.innerHTML = "<br> <strong>" + gypsum + "</strong> <br>" + gypsumText + "<br> <br>";
-				var descriptor = document.getElementById('description');
-				descriptor.appendChild(div);
-			}
-			else if ($('#autocomplete').val() == "PI"){
-				var prprty = "Description for Plasticity Index: ";
-				var prprtyText = "Plasticity index (PI) is one of the standard Atterberg limits used to indicate the plasticity characteristics of a soil. It is defined as the numerical difference between the liquid limit and plastic limit of the soil. It is the range of water content in which a soil exhibits the characteristics of a plastic solid.";
-				var h3 = document.createElement('h3');
-				h3.innerHTML = prprty;
-
-				var div = document.createElement('div');
-				div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
-				var descriptor = document.getElementById('description');
-				descriptor.appendChild(div);
-			}
-			else if ($('#autocomplete').val() == "CaCO3"){
-				var prprty = "Description for CaCO3: ";
-				var prprtyText = "Calcium carbonate equivalent is the percent of carbonates, by weight, in the fraction of the soil less than 2 millimeters in size. The availability of plant nutrients is influenced by the amount of carbonates in the soil.";
-				var h3 = document.createElement('h3');
-				h3.innerHTML = prprty;
-
-				var div = document.createElement('div');
-				div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
-				var descriptor = document.getElementById('description');
-				descriptor.appendChild(div);
-			}
-			else if ($('#autocomplete').val() == "Total Sand"){
-				var prprty = "Description for Total Sand: ";
-				var prprtyText = "Sand as a soil separate consists of mineral soil particles that are 0.05 millimeter to 2 millimeters in diameter. In the database, the estimated sand content of each soil layer is given as a percentage, by weight, of the soil material that is less than 2 millimeters in diameter. The content of sand, silt, and clay affects the physical behavior of a soil. Particle size is important for engineering and agronomic interpretations, for determination of soil hydrologic qualities, and for soil classification.";
-				var h3 = document.createElement('h3');
-				h3.innerHTML = prprty;
-
-				var div = document.createElement('div');
-				div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
-				var descriptor = document.getElementById('description');
-				descriptor.appendChild(div);
-			}
-			else if ($('#autocomplete').val() == "pH H20"){
-				var prprty = "Description for pH H20: ";
-				var prprtyText = "Soil reaction is a measure of acidity or alkalinity. It is important in selecting crops and other plants, in evaluating soil amendments for fertility and stabilization, and in determining the risk of corrosion.";
-				var h3 = document.createElement('h3');
-				h3.innerHTML = prprty;
-
-				var div = document.createElement('div');
-				div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
-				var descriptor = document.getElementById('description');
-				descriptor.appendChild(div);
-			}
-			else if ($('#autocomplete').val() == "Ksat"){
-				var prprty = "Description for Ksat: ";
-				var prprtyText = "Saturated hydraulic conductivity (Ksat) refers to the ease with which pores in a saturated soil transmit water. The estimates are expressed in terms of micrometers per second. They are based on soil characteristics observed in the field, particularly structure, porosity, and texture. ";
-				var h3 = document.createElement('h3');
-				h3.innerHTML = prprty;
-
-				var div = document.createElement('div');
-				div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
-				var descriptor = document.getElementById('description');
-				descriptor.appendChild(div);
-			}
-
-			/** paste prprtyText here
-
-			*/
-			else if ($('#autocomplete').val() == "AASHTO Group Index"){
-				var prprty = "Description for AASHTO Group Index: ";
-				var prprtyText = "AASHTO group classification is a system that classifies soils specifically for geotechnical engineering purposes that are related to highway and airfield construction. It is based on particle-size distribution and Atterberg limits, such as liquid limit and plasticity index. This classification system is covered in AASHTO Standard No. M 145-82. The classification is based on that portion of the soil that is smaller than 3 inches in diameter.";
-				var h3 = document.createElement('h3');
-				h3.innerHTML = prprty;
-
-				var div = document.createElement('div');
-				div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
-				var descriptor = document.getElementById('description');
-				descriptor.appendChild(div);
-			}
-
-			else if ($('#autocomplete').val() == "pH H2O"){
-				var prprty = "Description for ph H2O: ";
-				var prprtyText = "Soil reaction is a measure of acidity or alkalinity. It is important in selecting crops and other plants, in evaluating soil amendments for fertility and stabilization, and in determining the risk of corrosion. In general, soils that are either highly alkaline or highly acid are likely to be very corrosive to steel. The most common soil laboratory measurement of pH is the 1:1 water method.";
-				var h3 = document.createElement('h3');
-				h3.innerHTML = prprty;
-
-				var div = document.createElement('div');
-				div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
-				var descriptor = document.getElementById('description');
-				descriptor.appendChild(div);
-			}
-			else if ($('#autocomplete').val() == "SAR"){
-				var prprty = "Description for Sodium Absortion Ratio (SAR): ";
-				var prprtyText = "Sodium adsorption ratio is a measure of the amount of sodium (Na) relative to calcium (Ca) and magnesium (Mg) in the water extract from saturated soil paste. It is the ratio of the Na concentration divided by the square root of one-half of the Ca + Mg concentration. Soils that have SAR values of 13 or more may be characterized by an increased dispersion of organic matter and clay particles, reduced saturated hydraulic conductivity (Ksat) and aeration, and a general degradation of soil structure.";
-				var h3 = document.createElement('h3');
-				h3.innerHTML = prprty;
-
-				var div = document.createElement('div');
-				div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
-				var descriptor = document.getElementById('description');
-				descriptor.appendChild(div);
-			}
-			else if ($('#autocomplete').val() == "Kf"){
-				var prprty = "Description for K Factor (Rock Free): ";
-				var prprtyText = "Erosion factor K indicates the susceptibility of a soil to sheet and rill erosion by water. Factor K is one of six factors used in the Universal Soil Loss Equation (USLE) and the Revised Universal Soil Loss Equation (RUSLE) to predict the average annual rate of soil loss by sheet and rill erosion in tons per acre per year. The estimates are based primarily on percentage of silt, sand, and organic matter and on soil structure and saturated hydraulic conductivity (Ksat)." + " Values of K range from 0.02 to 0.69. Other factors being equal, the higher the value, the more susceptible the soil is to sheet and rill erosion by water. "
-				+ "Erosion factor Kf (rock free) indicates the erodibility of the fine-earth fraction, or the material less than 2 millimeters in size.";
-				var h3 = document.createElement('h3');
-				h3.innerHTML = prprty;
-
-				var div = document.createElement('div');
-				div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
-				var descriptor = document.getElementById('description');
-				descriptor.appendChild(div);
-			}
-			else if ($('#autocomplete').val() == "Kw"){
-				var prprty = "Description for K Factor (Whole Soil): ";
-				var prprtyText = "Erosion factor K indicates the susceptibility of a soil to sheet and rill erosion by water. Factor K is one of six factors used in the Universal Soil Loss Equation (USLE) and the Revised Universal Soil Loss Equation (RUSLE) to predict the average annual rate of soil loss by sheet and rill erosion in tons per acre per year. The estimates are based primarily on percentage of silt, sand, and organic matter and on soil structure and saturated hydraulic conductivity (Ksat)."+" Values of K range from 0.02 to 0.69. Other factors being equal, the higher the value, the more susceptible the soil is to sheet and rill erosion by water."
-				+ "'Erosion factor Kw (whole soil)' indicates the erodibility of the whole soil. The estimates are modified by the presence of rock fragments.";
-				var h3 = document.createElement('h3');
-				h3.innerHTML = prprty;
-
-				var div = document.createElement('div');
-				div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
-				var descriptor = document.getElementById('description');
-				descriptor.appendChild(div);
-			}
-			else if ($('#autocomplete').val() == "LL"){
-				var prprty = "Description for Liquid Limit: ";
-				var prprtyText = "Liquid limit (LL) is one of the standard Atterberg limits used to indicate the plasticity characteristics of a soil. It is the water content, on a percent by weight basis, of the soil (passing #40 sieve) at which the soil changes from a plastic to a liquid state. Generally, the amount of clay- and silt-size particles, the organic matter content, and the type of minerals determine the liquid limit. Soils that have a high liquid limit have the capacity to hold a lot of water while maintaining a plastic or semisolid state. Liquid limit is used in classifying soils in the Unified and AASHTO classification systems. For each soil layer, this attribute is actually recorded as three separate values in the database. A low value and a high value indicate the range of this attribute for the soil component. A 'representative' value indicates the expected value of this attribute for the component. For this soil property, only the representative value is used.";
-				var h3 = document.createElement('h3');
-				h3.innerHTML = prprty;
-
-				var div = document.createElement('div');
-				div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
-				var descriptor = document.getElementById('description');
-				descriptor.appendChild(div);
-			}
-			else if ($('#autocomplete').val() == "OM"){
-				var prprty = "Description for Organic Matter (OM): ";
-				var prprtyText = "Organic matter is the plant and animal residue in the soil at various stages of decomposition. The estimated content of organic matter is expressed as a percentage, by weight, of the soil material that is less than 2 millimeters in diameter. <br> The content of organic matter in a soil can be maintained by returning crop residue to the soil. Organic matter has a positive effect on available water capacity, water infiltration, soil organism activity, and tilth. It is a source of nitrogen and other nutrients for crops and soil organisms. An irregular distribution of organic carbon with depth may indicate different episodes of soil deposition or soil formation. Soils that are very high in organic matter have poor engineering properties and subside upon drying.";
-				var h3 = document.createElement('h3');
-				h3.innerHTML = prprty;
-
-				var div = document.createElement('div');
-				div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
-				var descriptor = document.getElementById('description');
-				descriptor.appendChild(div);
-			}
-			else if ($('#autocomplete').val() == "Total Clay"){
-				var prprty = "Description for " + $('#autocomplete').val() + ": ";
-				var prprtyText = "Clay as a soil separate consists of mineral soil particles that are less than 0.002 millimeter in diameter. The estimated clay content of each soil layer is given as a percentage, by weight, of the soil material that is less than 2 millimeters in diameter. The amount and kind of clay affect the fertility and physical condition of the soil and the ability of the soil to adsorb cations and to retain moisture. They influence shrink-swell potential, saturated hydraulic conductivity (Ksat), plasticity, the ease of soil dispersion, and other soil properties. The amount and kind of clay in a soil also affect tillage and earth-moving operations.";
-				var h3 = document.createElement('h3');
-				h3.innerHTML = prprty;
-
-				var div = document.createElement('div');
-				div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
-				var descriptor = document.getElementById('description');
-				descriptor.appendChild(div);
-			}
-			else if ($('#autocomplete').val() == "Total Silt"){
-				var prprty = "Description for " + $('#autocomplete').val() + ": ";
-				var prprtyText = "Silt as a soil separate consists of mineral soil particles that are 0.002 to 0.05 millimeter in diameter. In the database, the estimated silt content of each soil layer is given as a percentage, by weight, of the soil material that is less than 2 millimeters in diameter.";
-				var h3 = document.createElement('h3');
-				h3.innerHTML = prprty;
-
-				var div = document.createElement('div');
-				div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
-				var descriptor = document.getElementById('description');
-				descriptor.appendChild(div);
-			}
-			/* paste text here
-			Silt as a soil separate consists of mineral soil particles that are 0.002 to 0.05 millimeter in diameter. In the database, the estimated silt content of each soil layer is given as a percentage, by weight, of the soil material that is less than 2 millimeters in diameter.
-			*/
-			else{
-			}
-			/** Copy and paste to change properties.
-			else if ($('#autocomplete').val() == "<>"){
-			var prprty = "Description for " + $('#autocomplete').val() + ": ";
-			var prprtyText = "<>";
-			var h3 = document.createElement('h3');
-			h3.innerHTML = prprty;
-
-			var div = document.createElement('div');
-			div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
-			var descriptor = document.getElementById('description');
-			descriptor.appendChild(div);
 		}
-		*/
+	}
+}).done(function(data){
+	$(document.body).css({'cursor': 'auto'});
 
-		/* //original to draw the legend
-		var div = document.createElement('div');
-		div.innerHTML = "<strong>" + $('#autocomplete').val() + "</strong><br>" + legendText;
-		var legend = document.createElement('div');
-		legend = document.getElementById('legend');
-		legend.appendChild(div);
-		*/ //original
-
-		//var g = document.createElement('div');
-		//g.id = 'someId';
-		//draw the legend
-		var div = document.createElement('div');
-		//div = document.getElementsByTagName("H3")[0].setAttribute("class", "col-md-3");
-		//div.attribute('class', 'col-md-3');
-		// div.innerHTML = '<img src="img/redsquare.png" height="10px"/> ' + $('#autocomplete').val();;
-		//div.id = 'legend';
-		div.innerHTML = "<strong>" + $('#autocomplete').val() + "</strong><br>" + legendText;
-		var legend = document.createElement('div');
-		legend = document.getElementById('legend');
-		document.getElementById('legend').style.visibility = "visible";
-		legend.appendChild(div);
-	});
+	if($('#selectProp').val() == 32){ //should have made it like this: if(app.payload.value == "gypsum"){ //but it's too late now
+	var gypsum = "Description for Gypsum: ";
+	var gypsumText = "The content of gypsum is the percent, by weight, of hydrated calcium sulfates in the fraction of the soil less than 20 millimeters in size. "; // Gypsum is partially soluble in water. Soils high in content of gypsum, such as those with more than 10 percent gypsum, may collapse if the gypsum is removed by percolating water. Gypsum is corrosive to concrete.
+	//For each soil layer, this attribute is actually recorded as three separate values in the database. A low value and a high value indicate the range of this attribute for the soil component. A \"representative\" value indicates the expected value of this attribute for the component. For this soil property, only the representative value is used.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = gypsum;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + gypsum + "</strong> <br>" + gypsumText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 27){
+	var prprty = "Description for Plasticity Index: ";
+	var prprtyText = "Plasticity index (PI) is one of the standard Atterberg limits used to indicate the plasticity characteristics of a soil. It is defined as the numerical difference between the liquid limit and plastic limit of the soil. It is the range of water content in which a soil exhibits the characteristics of a plastic solid.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 12){
+	var prprty = "Description for Total Sand: ";
+	var prprtyText = "Sand as a soil separate consists of mineral soil particles that are 0.05 millimeter to 2 millimeters in diameter. In the database, the estimated sand content of each soil layer is given as a percentage, by weight, of the soil material that is less than 2 millimeters in diameter. The content of sand, silt, and clay affects the physical behavior of a soil. Particle size is important for engineering and agronomic interpretations, for determination of soil hydrologic qualities, and for soil classification.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 34){
+	var prprty = "Description for pH H20: ";
+	var prprtyText = "Soil reaction is a measure of acidity or alkalinity. It is important in selecting crops and other plants, in evaluating soil amendments for fertility and stabilization, and in determining the risk of corrosion.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 25){
+	var prprty = "Description for Ksat: ";
+	var prprtyText = "Saturated hydraulic conductivity (Ksat) refers to the ease with which pores in a saturated soil transmit water. The estimates are expressed in terms of micrometers per second. They are based on soil characteristics observed in the field, particularly structure, porosity, and texture. ";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+/** paste prprtyText here
+*/
+else if ($('#selectProp').val() == 28){
+	var prprty = "Description for AASHTO Group Index: ";
+	var prprtyText = "AASHTO group classification is a system that classifies soils specifically for geotechnical engineering purposes that are related to highway and airfield construction. It is based on particle-size distribution and Atterberg limits, such as liquid limit and plasticity index. This classification system is covered in AASHTO Standard No. M 145-82. The classification is based on that portion of the soil that is smaller than 3 inches in diameter.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 34){
+	var prprty = "Description for ph H2O: ";
+	var prprtyText = "Soil reaction is a measure of acidity or alkalinity. It is important in selecting crops and other plants, in evaluating soil amendments for fertility and stabilization, and in determining the risk of corrosion. In general, soils that are either highly alkaline or highly acid are likely to be very corrosive to steel. The most common soil laboratory measurement of pH is the 1:1 water method.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 33){
+	var prprty = "Description for Sodium Absortion Ratio (SAR): ";
+	var prprtyText = "Sodium adsorption ratio is a measure of the amount of sodium (Na) relative to calcium (Ca) and magnesium (Mg) in the water extract from saturated soil paste. It is the ratio of the Na concentration divided by the square root of one-half of the Ca + Mg concentration. Soils that have SAR values of 13 or more may be characterized by an increased dispersion of organic matter and clay particles, reduced saturated hydraulic conductivity (Ksat) and aeration, and a general degradation of soil structure.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 30){
+	var prprty = "Description for K Factor (Rock Free): ";
+	var prprtyText = "Erosion factor K indicates the susceptibility of a soil to sheet and rill erosion by water. Factor K is one of six factors used in the Universal Soil Loss Equation (USLE) and the Revised Universal Soil Loss Equation (RUSLE) to predict the average annual rate of soil loss by sheet and rill erosion in tons per acre per year. The estimates are based primarily on percentage of silt, sand, and organic matter and on soil structure and saturated hydraulic conductivity (Ksat)." + " Values of K range from 0.02 to 0.69. Other factors being equal, the higher the value, the more susceptible the soil is to sheet and rill erosion by water. "
+	+ "Erosion factor Kf (rock free) indicates the erodibility of the fine-earth fraction, or the material less than 2 millimeters in size.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 29){
+	var prprty = "Description for K Factor (Whole Soil): ";
+	var prprtyText = "Erosion factor K indicates the susceptibility of a soil to sheet and rill erosion by water. Factor K is one of six factors used in the Universal Soil Loss Equation (USLE) and the Revised Universal Soil Loss Equation (RUSLE) to predict the average annual rate of soil loss by sheet and rill erosion in tons per acre per year. The estimates are based primarily on percentage of silt, sand, and organic matter and on soil structure and saturated hydraulic conductivity (Ksat)."+" Values of K range from 0.02 to 0.69. Other factors being equal, the higher the value, the more susceptible the soil is to sheet and rill erosion by water."
+	+ "'Erosion factor Kw (whole soil)' indicates the erodibility of the whole soil. The estimates are modified by the presence of rock fragments.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 26){
+	var prprty = "Description for Liquid Limit:  ";
+	var prprtyText = "Liquid limit (LL) is one of the standard Atterberg limits used to indicate the plasticity characteristics of a soil. It is the water content, on a percent by weight basis, of the soil (passing #40 sieve) at which the soil changes from a plastic to a liquid state. Generally, the amount of clay- and silt-size particles, the organic matter content, and the type of minerals determine the liquid limit. Soils that have a high liquid limit have the capacity to hold a lot of water while maintaining a plastic or semisolid state. Liquid limit is used in classifying soils in the Unified and AASHTO classification systems. For each soil layer, this attribute is actually recorded as three separate values in the database. A low value and a high value indicate the range of this attribute for the soil component. A 'representative' value indicates the expected value of this attribute for the component. For this soil property, only the representative value is used.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 23){
+	var prprty = "Description for Organic Matter: ";
+	var prprtyText = "Organic matter percent is the weight of decomposed plant, animal, and microbial residues exclusive of non-decomposed plant and animal residues. It is expressed as a percentage, by weight, of the soil material that is less than 2 mm in diameter.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 7){
+	var prprty = "Description for Rock 3-10: ";
+	var prprtyText = "The percent by weight of the horizon occupied by rock fragments 3 to 10 inches in size.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 8){
+	var prprty = "Description for #4 Sieve: ";
+	var prprtyText = "Soil fraction passing a number 4 sieve (4.70mm square opening) as a weight percentage of the less than 3 inch (76.4mm) fraction.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 9){
+	var prprty = "Description for #10 Sieve: ";
+	var prprtyText = "Soil fraction passing a number 10 sieve (2.00mm square opening) as a weight percentage of less than 3 inch (76.4mm) fraction.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 10){
+	var prprty = "Description for #40 Sieve: ";
+	var prprtyText = "Soil fraction passing a number 40 sieve (0.42mm square opening) as a weight percentage of less than 3 inch (76.4mm) fraction.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 11){
+	var prprty = "Description for #200 Sieve: ";
+	var prprtyText = "Soil fraction passing a number 200 sieve (0.074mm square opening) as a weight percentage of less than 3 inch (76.4mm) fraction.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 13){
+	var prprty = "Description for vcos: ";
+	var prprtyText = "Mineral particles 1.00mm to 2.0mm in equivalent diameter as a weight percentage of the less than 2mm fraction.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 14){
+	var prprty = "Description for cos: ";
+	var prprtyText = "Mineral particles 0.50mm to 1.0mm in equivalent diameter as a weight percentage of the less than 2mm fraction.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 15){
+	var prprty = "Description for ms: ";
+	var prprtyText = "Mineral particles 0.25mm to 0.5mm in equivalent diameter as a weight percentage of the less than 2mm fraction.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 16){
+	var prprty = "Description for fs: ";
+	var prprtyText = "Mineral particles 0.10mm to 0.25mm in equivalent diameter as a weight percentage of the less than 2mm fraction.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 17){
+	var prprty = "Description for vfs: ";
+	var prprtyText = "Mineral particles 0.05mm to 0.10mm in equivalent diameter as a weight percentage of the less than 2mm fraction.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 18){
+	var prprty = "Description for Total Silt: ";
+	var prprtyText = "Mineral particles ranging in size from 0.002 to 0.05mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction."
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 19){
+	var prprty = "Description for Coarse Silt: ";
+	var prprtyText = "Mineral particles ranging in size from 0.02mm to 0.05mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction."
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 20){
+	var prprty = "Description for Fine Silt: ";
+	var prprtyText = "Mineral particles ranging in size from 0.002mm to 0.02mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction."
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 21){
+	var prprty = "Description for Total Clay: ";
+	var prprtyText = "Mineral particles less than 0.002mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction."
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 22){
+	var prprty = "Description for CaCO3 Clay: ";
+	var prprtyText = "Carbonate particles less than 0.002mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction."
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 24){
+	var prprty = "Description for Part Density: ";
+	var prprtyText = "Mass per unit of volume (not including pore space) of the solid soil particle either mineral or organic. Also known as specific gravity.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 31){
+	var prprty = "Description for CaCO3: ";
+	var prprtyText = "The quantity of Carbonate (CO3)in the soil expressed as CaCO3 and as a weight percentage of the less than 2mm size fraction.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 35){
+	var prprty = "Description for ph CaCl2: ";
+	var prprtyText = "The negative logarithm to base of 10 or the hydrogen ion activity in the soil, using the 0.01M CaCl2 method, in a 1:2 soil:solution ratio. A numerical expression of the relative acidity or alkalinity of a soil sample.";
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
+}
+else if ($('#selectProp').val() == 36){
+	var prprty = "Description for Excavation Difficulty: ";
+	var prprtyText = "An estimation of the difficulty of working an excavation into soil layers, horizons, pedons, or geologic layers. In most instances, excavation difficulty is related to and controlled by a water state."
+	var h3 = document.createElement('h3');
+	h3.innerHTML = prprty;
+	var div = document.createElement('div');
+	div.innerHTML = "<br> <strong>" + prprty + "</strong> <br>" + prprtyText + "<br> <br>";
+	var descriptor = document.getElementById('description');
+	descriptor.appendChild(div);
 }
 else{
-	alert("Please select a property and a district.");
+	//removePolygons();
+}
+//draw the legend
+if(!hecho){
+	var div = document.createElement('div');
+	div.innerHTML = "<strong>" + app.payload.value + "</strong><br>" + legendText;
+	var legend = document.createElement('div');
+	legend = document.getElementById('legend');
+	document.getElementById('legend').style.visibility = "visible";
+	legend.appendChild(div);
+}
+else if(hecho){
+	removePolygons();
+	return;
+}
+});
+}
+else{
+	document.getElementById('legend').style.visibility = "hidden";
+	$('#legend').find('*').not('h3').remove();
+	$('#description').find('*').not('h3').remove();
+	alert("Please select a property and a district, and make sure depth is a numerical value.");
+	removePolygons();
 }
 }
+//get polygons "run function" ends here
 function setDistrict(){
 	app.payload.district = $('#target').children("option:selected").data('district');
 	var pointStr = $('#target option:selected').val();
@@ -771,10 +1711,15 @@ function initMap() {
 	});
 	app.infoWindow = new google.maps.InfoWindow;
 	/*var testLayer = new google.maps.KmlLayer({ //var testLayer = new google.maps.KmlLayer({ //testing the kml layer, should draw colored lines for a transportation system route in chicago
-	url: 'https://casoilresource.lawr.ucdavis.edu/soil_web/kml/SoilWeb.kmz', //url: 'https://casoilresource.lawr.ucdavis.edu/soil_web/kml/SoilWeb.kmz', //url: 'http://googlemaps.github.io/js-v2-samples/ggeoxml/cta.kml',
+	url: 'http://ctis.utep.edu/secretsanta/texas_incomplete.kml', //url: 'https://casoilresource.lawr.ucdavis.edu/soil_web/kml/SoilWeb.kmz', //url: 'http://googlemaps.github.io/js-v2-samples/ggeoxml/cta.kml',
+	//url: 'http://ctis.utep.edu/secretsanta/county_texas.kml',
+	//url: 'http://ctis.utep.edu/secretsanta/elpaso.kmz',
+	//url: 'http://ctis.utep.edu/secretsanta/SoilWeb.kmz',
+	//url: 'http://ctis.utep.edu/secretsanta/texas_counties.kmz',
+	//url: 'http://ctis.utep.edu/secretsanta/texas_districts.kml',
 	map: map
 });
-testLayer.setMap(app.map); //testing layers 13/03/18*/
+testLayer.setMap(app.map);*/ //testing layers 13/03/18
 app.map.addListener('click', function(e) {
 	// console.log(e.latLng.toString());
 });
@@ -791,76 +1736,39 @@ function removePolygons(){
 	$('#legend').find('*').not('h3').remove();
 	$('#description').find('*').not('h3').remove();
 }
-
 function printMaps() { //testing printing a map
 	var body               = $('body');
 	var mapContainer       = $('#map');
 	var mapContainerParent = mapContainer.parent();
 	var printContainer     = $('<div>');
-
 	printContainer
 	.addClass('print-container')
 	.css('position', 'relative')
 	.height(mapContainer.height())
 	.append(mapContainer)
 	.prependTo(body);
-
 	var content = body
 	.children()
 	.not('script')
 	.not(printContainer)
 	.detach();
-
 	// Patch for some Bootstrap 3.3.x `@media print` styles. :|
 	var patchedStyle = $('<style>')
 	.attr('media', 'print')
 	.text('img { max-width: none !important; }' +
 	'a[href]:after { content: ""; }')
 	.appendTo('head');
-
 	window.print();
-
 	body.prepend(content);
 	mapContainerParent.prepend(mapContainer);
-
 	printContainer.remove();
 	patchedStyle.remove();
 }
-
-/*function descriptor(){
-
-
-}*/
-
-/*
-function insertPolygon(objectId){
-$.get('polygonHandler.php', {'district':objectId}).done(function(data){
-if(data.hasOwnProperty('coords')){
-var polygon = new google.maps.Polygon({
-paths: toLatLngLiteral(data.coords),
-strokeColor: '#FF0000',
-strokeOpacity: 0.8,
-strokeWeight: 2,
-fillColor: '#FF0000',
-fillOpacity: 0.35
-});
-polygon.setMap(app.map);
-google.maps.event.addListener(polygon, 'click', function(e){
-app.map.panTo(e.latLng);
-app.map.setZoom(15);
-});
-}
-});
-}
-*/
-
-// ***********
 
 function polyInfo(event){
 	text = this.description + ": " + this.description_value;
 	app.infoWindow.setContent(text);
 	app.infoWindow.setPosition(event.latLng);
-
 	app.infoWindow.open(app.map);
 }
 
@@ -881,6 +1789,20 @@ function wktFormatter(poly){
 	return shape_s;
 }
 
+function spawn(){
+	//document.getElementById('legend').style.visibility = "visible";
+	labels = document.getElementById('labels').value;
+	value = document.getElementById('value').value;
+	//console.log(labels);
+	//console.log(value);
+	range = (value/labels);
+	count = 0;
+	while(count<=value){
+		console.log(count);
+		count+=range;
+	}
+
+}
 // ***********
 </script>
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCY0B3_Fr1vRpgJDdbvNmrVyXmoOOtiq64&callback=initMap"></script>
