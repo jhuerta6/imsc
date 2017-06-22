@@ -92,7 +92,57 @@ function getPolygons(){
 	//actual query for retrieving desired polygons
 	//$query = "SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, $simplificaionFactor)) AS POLYGON, x.$data->property FROM polygon AS p JOIN mujoins AS mu ON p.mukey = CAST(mu.mukey AS UNSIGNED) JOIN $data->table AS x ON mu.$key = x.$key WHERE ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE) AND hzdept_r <= $data->depth AND hzdepb_r >= $data->depth";
 
-	if($data->table == "chorizon_r"){ //necesario (por ahora) para no usar layers si la propiedad no es de chorizon
+	if($data->depth_method == 6){
+		$query="SELECT OGR_FID, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM ricky_mujoins NATURAL JOIN polygon AS p NATURAL JOIN chorizon_r as x WHERE x.cokey = ricky_mujoins.cokey AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
+		//"            SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, 1.7625422383727E-6)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.pi_r FROM polygon AS p, chorizon_r as x WHERE x.cokey = 13638933 AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
+		//$query_test = "SELECT OGR_FID, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM polygon AS p, chorizon_r as x WHERE x.cokey = $cokey_usado AND OGR_FID = $ogr_usado AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)"; //just works for chorizon at the momen
+		$toReturn['query2'] = $query;
+		$result = mysqli_query($conn, $query);
+
+		$result = fetchAll($result);
+
+		$polygons = array();
+
+		$id_array = array();
+		$indexes_array = array();
+
+		for($i = 0; $i<sizeof($result); $i++){
+			$id_array[$i]['OGR_FID'] = $result[$i]['OGR_FID'];
+		}
+
+		$unique = array();
+		$unique = array_unique($id_array, SORT_REGULAR);
+
+		$unique_index = array();
+
+		for ($i=0; $i < sizeof($result); $i++) {
+			if(array_key_exists($i, $unique)){
+				array_push($unique_index, $i);
+			}
+		}
+
+
+		if(sizeof($unique_index) == 1){
+			for($i = 0; $i<sizeof($result); $i++){
+				if($data->depth >= $result[$i]['top'] && $data->depth <= $result[$i]['bottom']){ //discriminador de depth
+					$polygons[] = $result[$i];
+				}
+			}
+		}
+		else{
+			for($i = 0; $i<sizeof($unique_index); $i++){
+				//if($data->depth >= $result[$unique_index[$i]]['top'] && $data->depth <= $result[$unique_index[$i]]['bottom']){ //discriminador de depth
+				$polygons[] = $result[$unique_index[$i]];
+				//}
+			}
+		}
+
+		$toReturn['coords'] = $polygons;//fetch all
+
+
+	}
+
+	if($data->table == "chorizon_rtest"){ //necesario (por ahora) para no usar layers si la propiedad no es de chorizon
 
 
 		/*Query for getting either the Series of Miscellaneous area from component"*/
@@ -303,6 +353,7 @@ function getPolygons(){
 		}
 		else{
 			//echo " Nothing selected ";
+			$method_selected = "At";
 		}
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -310,7 +361,8 @@ function getPolygons(){
 			for ($i=0; $i < sizeof($unique_index); $i++) {
 				$cokey_usado = $arr_cokeys[$correctos_test_arr[$i]]['cokey'];
 				$ogr_usado = $arr_cokeys[$correctos_test_arr[$i]]['OGR_FID'];
-				$query_test = "SELECT hzdepb_r AS bottom, OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, 1.7625422383727E-6)) AS POLYGON, hzdept_r AS top, x.cokey, x.$data->property FROM polygon AS p, chorizon_r as x WHERE x.cokey = $cokey_usado AND OGR_FID = $ogr_usado AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)"; //just works for chorizon at the moment
+				//$query_test = "SELECT hzdepb_r AS bottom, OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, 1.7625422383727E-6)) AS POLYGON, hzdept_r AS top, x.cokey, x.$data->property FROM polygon AS p, chorizon_r as x WHERE x.cokey = $cokey_usado AND OGR_FID = $ogr_usado AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)"; //just works for chorizon at the moment
+				$query_test = "SELECT OGR_FID, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.pi_r FROM ricky_mujoins NATURAL JOIN polygon AS p NATURAL JOIN chorizon_r as x WHERE x.cokey = ricky_mujoins.cokey AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
 				//"            SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, 1.7625422383727E-6)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.pi_r FROM polygon AS p, chorizon_r as x WHERE x.cokey = 13638933 AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
 				//$query_test = "SELECT OGR_FID, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM polygon AS p, chorizon_r as x WHERE x.cokey = $cokey_usado AND OGR_FID = $ogr_usado AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)"; //just works for chorizon at the moment
 
@@ -330,7 +382,8 @@ function getPolygons(){
 			for ($i=0; $i < sizeof($unique_index); $i++) {
 				$cokey_usado = $arr_cokeys[$correctos_test_arr[$i]]['cokey'];
 				$ogr_usado = $arr_cokeys[$correctos_test_arr[$i]]['OGR_FID'];
-				$query_test = "SELECT x.$data->property, OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, 1.7625422383727E-6)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM polygon AS p, chorizon_r as x WHERE x.cokey = $cokey_usado AND OGR_FID = $ogr_usado AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)"; //just works for chorizon at the moment
+				//$query_test = "SELECT x.$data->property, OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, 1.7625422383727E-6)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM polygon AS p, chorizon_r as x WHERE x.cokey = $cokey_usado AND OGR_FID = $ogr_usado AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)"; //just works for chorizon at the moment
+				$query_test="SELECT OGR_FID, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM ricky_mujoins NATURAL JOIN polygon AS p NATURAL JOIN chorizon_r as x WHERE x.cokey = ricky_mujoins.cokey AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
 				//"            SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, 1.7625422383727E-6)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.pi_r FROM polygon AS p, chorizon_r as x WHERE x.cokey = 13638933 AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
 				//$query_test = "SELECT OGR_FID, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM polygon AS p, chorizon_r as x WHERE x.cokey = $cokey_usado AND OGR_FID = $ogr_usado AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)"; //just works for chorizon at the moment
 
@@ -553,6 +606,15 @@ function getPolygons(){
 				} //end main for loop
 				break;
 
+			case 'At':
+			for ($j=0; $j < sizeof($array_polygons); $j++) { //This was the method used before. It searches, goes to the depth specified, and gives the value AT that depth.
+				for ($i=0; $i < sizeof($array_polygons[$j]); $i++) {
+					if($data->depth >= $array_polygons[$j][$i]['top'] && $data->depth <= $array_polygons[$j][$i]['bottom']){ //discriminador de depth
+						$polygons[] = $array_polygons[$j][$i];
+					}
+				}
+			}
+				break;
 			default:
 			for ($j=0; $j < sizeof($array_polygons); $j++) { //This was the method used before. It searches, goes to the depth specified, and gives the value AT that depth.
 				for ($i=0; $i < sizeof($array_polygons[$j]); $i++) {
@@ -568,7 +630,8 @@ function getPolygons(){
 	}
 
 	else{
-		$query = "SELECT OGR_FID, p.mukey, ASTEXT(ST_SIMPLIFY(SHAPE, $simplificaionFactor)) AS POLYGON, x.$data->property FROM polygon AS p JOIN mujoins AS mu ON p.mukey = CAST(mu.mukey AS UNSIGNED) JOIN $data->table AS x ON mu.$key = x.$key WHERE ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
+		//$query = "SELECT OGR_FID, p.mukey, ASTEXT(ST_SIMPLIFY(SHAPE, $simplificaionFactor)) AS POLYGON, x.$data->property FROM polygon AS p JOIN mujoins AS mu ON p.mukey = CAST(mu.mukey AS UNSIGNED) JOIN $data->table AS x ON mu.$key = x.$key WHERE ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
+		$query = "SELECT OGR_FID, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM ricky_mujoins NATURAL JOIN polygon AS p NATURAL JOIN chorizon_r as x WHERE x.cokey = ricky_mujoins.cokey AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
 		$toReturn['query2'] = $query;
 		$result = mysqli_query($conn, $query);
 
