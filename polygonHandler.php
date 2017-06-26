@@ -93,7 +93,6 @@ function getPolygons(){
 	//$query = "SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, $simplificaionFactor)) AS POLYGON, x.$data->property FROM polygon AS p JOIN mujoins AS mu ON p.mukey = CAST(mu.mukey AS UNSIGNED) JOIN $data->table AS x ON mu.$key = x.$key WHERE ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE) AND hzdept_r <= $data->depth AND hzdepb_r >= $data->depth";
 
 	if($data->depth_method == 6){
-		//echo "in 6";
 		$query="SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, 1.7625422383727E-6)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM ricky_mujoins NATURAL JOIN polygon AS p NATURAL JOIN chorizon_r as x WHERE x.cokey = ricky_mujoins.cokey AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
 		//"            SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, 1.7625422383727E-6)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.pi_r FROM polygon AS p, chorizon_r as x WHERE x.cokey = 13638933 AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
 		//$query_test = "SELECT OGR_FID, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM polygon AS p, chorizon_r as x WHERE x.cokey = $cokey_usado AND OGR_FID = $ogr_usado AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)"; //just works for chorizon at the momen
@@ -122,25 +121,13 @@ function getPolygons(){
 			}
 		}
 
-
-		if(sizeof($unique_index) == 1){
 			for($i = 0; $i<sizeof($result); $i++){
 				if($data->depth >= $result[$i]['top'] && $data->depth <= $result[$i]['bottom']){ //discriminador de depth
 					$polygons[] = $result[$i];
 				}
 			}
-		}
-		else{
-			for($i = 0; $i<sizeof($unique_index); $i++){
-				//if($data->depth >= $result[$unique_index[$i]]['top'] && $data->depth <= $result[$unique_index[$i]]['bottom']){ //discriminador de depth
-				$polygons[] = $result[$unique_index[$i]];
-				//}
-			}
-		}
-
+		//var_dump($unique_index);
 		$toReturn['coords'] = $polygons;//fetch all
-
-
 	}
 
 	if($data->table == "chorizon_rtest"){ //necesario (por ahora) para no usar layers si la propiedad no es de chorizon

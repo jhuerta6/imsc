@@ -383,7 +383,7 @@ $("#selectProp").change(function(){
 $('#autocomplete').autocomplete({
 	lookup: properties,
 	onSelect: function (suggestion) {
-		console.log(suggestion.data + "  " + suggestion.table + "  " + suggestion.value);
+		//console.log(suggestion.data + "  " + suggestion.table + "  " + suggestion.value);
 		app.payload.property = suggestion.data;
 		app.payload.table = suggestion.table;
 		app.payload.value = suggestion.value;
