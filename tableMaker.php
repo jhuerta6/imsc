@@ -64,15 +64,17 @@ for ($i=0; $i < sizeof($result); $i++) {
   }
 }
 
-$query_noduplicate_series = "CREATE TABLE noduplicate_series";
+$query_noduplicate_series = "CREATE TABLE noduplicate_series(mukey int(11) not null, cokey int(11))";
 $result_noduplicate_series = mysqli_query($conn, $query_noduplicate_series);
 
 $no_duplicate_mukey = 0;
 $no_duplicate_cokey = 0;
 
 for ($i=0; $i < sizeof($noduplicate_series); $i++) {
-  if(){
-
+  if(array_key_exists($i, $noduplicate_series)){
+    $no_duplicate_mukey = $noduplicate_series[$i]['mukey'];
+    $no_duplicate_cokey = $noduplicate_series[$i]['cokey'];
+    $query_insert_noduplicate_series = "INSERT INTO noduplicate_series(mukey, cokey) VALUES($no_duplicate_mukey, $no_duplicate_cokey)";
   }
 }
 
