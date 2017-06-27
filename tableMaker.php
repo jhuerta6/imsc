@@ -75,6 +75,7 @@ for ($i=0; $i < sizeof($noduplicate_series); $i++) {
     $no_duplicate_mukey = $noduplicate_series[$i]['mukey'];
     $no_duplicate_cokey = $noduplicate_series[$i]['cokey'];
     $query_insert_noduplicate_series = "INSERT INTO noduplicate_series(mukey, cokey) VALUES($no_duplicate_mukey, $no_duplicate_cokey)";
+    $result_insert_noduplicate_series = mysqli_query($conn, $query_insert_noduplicate_series);
   }
 }
 
