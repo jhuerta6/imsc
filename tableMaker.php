@@ -59,11 +59,66 @@ $result_noduptax = mysqli_query($conn, $query_noduptax);
 
 $noduplicate_tax = fetchAll($result_noduptax);
 
-$toReturn['result_mujoins3'] = $mujoins3;
-$toReturn['result_nodupmisc'] = $noduplicate_misc;
-$toReturn['result_noduptax'] = $noduplicate_tax;
+//$toReturn['result_mujoins3'] = $mujoins3;
+//$toReturn['result_nodupmisc'] = $noduplicate_misc;
+//$toReturn['result_noduptax'] = $noduplicate_tax;
 
+$final_size = sizeof($mujoins3) + sizeof($noduplicate_misc) + sizeof($noduplicate_tax);
 
+$all = array();
+
+//$query_create_final = "CREATE TABLE mujoins_final(mukey int(11) not null, cokey int(11))";
+//$result_final = mysqli_query($conn, $query_create_final);
+
+$mukey = 0;
+$cokey = 0;
+
+for ($i=0; $i < sizeof($noduplicate_misc); $i++) {
+  $mukey = $noduplicate_misc[$i]['mukey'];
+  $cokey = $noduplicate_misc[$i]['cokey'];
+
+  for ($j=0; $j < sizeof($mujoins3); $j++) {
+    if($mukey == $mujoins3[$j]['mukey']){
+      echo "found";
+    }
+  }
+}
+
+/*for ($i=0; $i < $final_size; $i++) {
+  if(array_key_exists($i, $noduplicate_misc)){
+    $mukey = $noduplicate_misc[$i]['mukey'];
+    $cokey = $noduplicate_misc[$i]['cokey'];
+
+    if(in_array($mukey, $mujoins3)){
+      echo "same at: $i ";
+      echo "mukey: $mukey ";
+      echo "cokey: $cokey ";
+    }
+  }
+}*/
+
+/*for ($i=0; $i < sizeof($noduplicate_misc); $i++) {
+  //if(array_key_exists($i, $noduplicate_misc)){
+  $mukey = $noduplicate_misc[$i]['mukey'];
+  $cokey = $noduplicate_misc[$i]['cokey'];
+  //}
+  for ($j=0; $j < $final_size; $j++) {
+    if(array_key_exists($j, $mujoins3)){
+      if(in_array($mukey, $mujoins3)){
+        echo "same at: $j ";
+        echo "mukey: $mukey ";
+        echo "cokey: $cokey ";
+      }
+      else{
+        //echo "different at: $j ";
+        //echo "mukey: $mukey ";
+        //  echo "cokey: $cokey ";
+      }
+    }
+  }
+}
+
+//echo $final_size;
 
 /*for ($i=0; $i < sizeof($mujoins3); $i++) {
 	$polygons[] = $mujoins3[$i];
