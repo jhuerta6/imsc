@@ -9,6 +9,7 @@ $conn = mysqli_connect('ctis.utep.edu', 'ctis', '19691963', 'imsc');
 $toReturn = array();
 global $conn, $toReturn;
 
+
 /*$query = "SELECT * FROM mujoins3";
 $polygons = array();
 $toReturn['query'] = $query;
@@ -24,6 +25,7 @@ $toReturn['coords'] = $polygons;//fetch all */
 
 /*$query_create = "CREATE TABLE test_php SELECT * FROM only_series";
 $result_create = mysqli_query($conn, $query_create);*/
+
 /*
 $query_tmp_series = "CREATE TABLE tmp_series SELECT * FROM only_series";
 $query_tmp_misc = "CREATE TABLE tmp_misc SELECT * FROM only_misc";
@@ -32,9 +34,9 @@ $query_tmp_tax = "CREATE TABLE temp_tax SELECT * FROM only_tax";
 $result_series = mysqli_query($conn, $query_tmp_series);
 $result_misc = mysqli_query($conn, $query_tmp_tax);
 $result_tax = mysqli_query($conn, $query_tmp_misc);*/
-
+/******************************************************/
 /*
-$query = "SELECT * FROM tmp_misc";
+$query = "SELECT * FROM tmp_tax";
 $polygons = array();
 $toReturn['query'] = $query;
 $result = mysqli_query($conn, $query);
@@ -45,7 +47,7 @@ for ($i=0; $i < sizeof($result); $i++) {
 	$polygons[] = $result[$i];
 }
 
-$toReturn['all tmp_misc'] = $polygons;//fetch all
+$toReturn['all tmp_tax'] = $polygons;//fetch all
 
 $done = 0;
 $mukey = 0;
@@ -57,29 +59,29 @@ for ($i=0; $i < sizeof($result); $i++) {
 $unique = array();
 $unique = array_unique($array_mukey, SORT_REGULAR);
 
-$noduplicate_misc = array();
+$noduplicate_tax = array();
 
 for ($i=0; $i < sizeof($result); $i++) {
   if(array_key_exists($i, $unique)){
-    $noduplicate_misc[$i] = $result[$i];
+    $noduplicate_tax[$i] = $result[$i];
   }
 }
 
-$query_noduplicate_misc = "CREATE TABLE noduplicate_misc(mukey int(11) not null, cokey int(11))";
-$result_noduplicate_misc = mysqli_query($conn, $query_noduplicate_misc);
+$query_noduplicate_tax = "CREATE TABLE noduplicate_tax(mukey int(11) not null, cokey int(11))";
+$result_noduplicate_tax = mysqli_query($conn, $query_noduplicate_tax);
 
 $no_duplicate_mukey = 0;
 $no_duplicate_cokey = 0;
 
-for ($i=0; $i < sizeof($noduplicate_misc); $i++) {
-  if(array_key_exists($i, $noduplicate_misc)){
-    $no_duplicate_mukey = $noduplicate_misc[$i]['mukey'];
-    $no_duplicate_cokey = $noduplicate_misc[$i]['cokey'];
-    $query_insert_noduplicate_misc = "INSERT INTO noduplicate_misc(mukey, cokey) VALUES($no_duplicate_mukey, $no_duplicate_cokey)";
-    $result_insert_noduplicate_misc = mysqli_query($conn, $query_insert_noduplicate_misc);
+for ($i=0; $i < sizeof($noduplicate_tax); $i++) {
+  if(array_key_exists($i, $noduplicate_tax)){
+    $no_duplicate_mukey = $noduplicate_tax[$i]['mukey'];
+    $no_duplicate_cokey = $noduplicate_tax[$i]['cokey'];
+    $query_insert_noduplicate_tax = "INSERT INTO noduplicate_tax(mukey, cokey) VALUES($no_duplicate_mukey, $no_duplicate_cokey)";
+    $result_insert_noduplicate_tax = mysqli_query($conn, $query_insert_noduplicate_tax);
   }
 }
-*/
+
 /*$unique_index = array();
 
 /*for ($i=0; $i < sizeof($result); $i++) {
@@ -90,7 +92,7 @@ for ($i=0; $i < sizeof($noduplicate_misc); $i++) {
 
 //var_dump($array_mukey);
 //var_dump($unique);
-//var_dump($noduplicate_misc);
+//var_dump($noduplicate_tax);
 
 //header('Content-Type: application/json');
 echo json_encode($toReturn);
