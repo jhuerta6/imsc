@@ -33,7 +33,8 @@ $result_series = mysqli_query($conn, $query_tmp_series);
 $result_misc = mysqli_query($conn, $query_tmp_tax);
 $result_tax = mysqli_query($conn, $query_tmp_misc);*/
 
-$query = "SELECT * FROM tmp_series";
+/*
+$query = "SELECT * FROM tmp_misc";
 $polygons = array();
 $toReturn['query'] = $query;
 $result = mysqli_query($conn, $query);
@@ -44,7 +45,7 @@ for ($i=0; $i < sizeof($result); $i++) {
 	$polygons[] = $result[$i];
 }
 
-$toReturn['all tmp_series'] = $polygons;//fetch all
+$toReturn['all tmp_misc'] = $polygons;//fetch all
 
 $done = 0;
 $mukey = 0;
@@ -56,29 +57,29 @@ for ($i=0; $i < sizeof($result); $i++) {
 $unique = array();
 $unique = array_unique($array_mukey, SORT_REGULAR);
 
-$noduplicate_series = array();
+$noduplicate_misc = array();
 
 for ($i=0; $i < sizeof($result); $i++) {
   if(array_key_exists($i, $unique)){
-    $noduplicate_series[$i] = $result[$i];
+    $noduplicate_misc[$i] = $result[$i];
   }
 }
 
-$query_noduplicate_series = "CREATE TABLE noduplicate_series(mukey int(11) not null, cokey int(11))";
-$result_noduplicate_series = mysqli_query($conn, $query_noduplicate_series);
+$query_noduplicate_misc = "CREATE TABLE noduplicate_misc(mukey int(11) not null, cokey int(11))";
+$result_noduplicate_misc = mysqli_query($conn, $query_noduplicate_misc);
 
 $no_duplicate_mukey = 0;
 $no_duplicate_cokey = 0;
 
-for ($i=0; $i < sizeof($noduplicate_series); $i++) {
-  if(array_key_exists($i, $noduplicate_series)){
-    $no_duplicate_mukey = $noduplicate_series[$i]['mukey'];
-    $no_duplicate_cokey = $noduplicate_series[$i]['cokey'];
-    $query_insert_noduplicate_series = "INSERT INTO noduplicate_series(mukey, cokey) VALUES($no_duplicate_mukey, $no_duplicate_cokey)";
-    $result_insert_noduplicate_series = mysqli_query($conn, $query_insert_noduplicate_series);
+for ($i=0; $i < sizeof($noduplicate_misc); $i++) {
+  if(array_key_exists($i, $noduplicate_misc)){
+    $no_duplicate_mukey = $noduplicate_misc[$i]['mukey'];
+    $no_duplicate_cokey = $noduplicate_misc[$i]['cokey'];
+    $query_insert_noduplicate_misc = "INSERT INTO noduplicate_misc(mukey, cokey) VALUES($no_duplicate_mukey, $no_duplicate_cokey)";
+    $result_insert_noduplicate_misc = mysqli_query($conn, $query_insert_noduplicate_misc);
   }
 }
-
+*/
 /*$unique_index = array();
 
 /*for ($i=0; $i < sizeof($result); $i++) {
@@ -89,7 +90,7 @@ for ($i=0; $i < sizeof($noduplicate_series); $i++) {
 
 //var_dump($array_mukey);
 //var_dump($unique);
-//var_dump($noduplicate_series);
+//var_dump($noduplicate_misc);
 
 //header('Content-Type: application/json');
 echo json_encode($toReturn);
