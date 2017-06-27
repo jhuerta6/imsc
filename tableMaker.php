@@ -65,7 +65,7 @@ $noduplicate_tax = fetchAll($result_noduptax);
 
 $final_size = sizeof($mujoins3) + sizeof($noduplicate_misc) + sizeof($noduplicate_tax);
 
-$all = array();
+$correct_misc = array();
 
 //$query_create_final = "CREATE TABLE mujoins_final(mukey int(11) not null, cokey int(11))";
 //$result_final = mysqli_query($conn, $query_create_final);
@@ -79,11 +79,15 @@ for ($i=0; $i < sizeof($noduplicate_misc); $i++) {
 
   for ($j=0; $j < sizeof($mujoins3); $j++) {
     if($mukey == $mujoins3[$j]['mukey']){
-      echo "found";
+      echo "found at $j"." $mukey";
+    }
+    else{
+      array_push($correct_misc, $i);
     }
   }
 }
 
+var_dump($correct_misc);
 /*for ($i=0; $i < $final_size; $i++) {
   if(array_key_exists($i, $noduplicate_misc)){
     $mukey = $noduplicate_misc[$i]['mukey'];
