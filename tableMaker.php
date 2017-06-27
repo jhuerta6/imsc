@@ -79,7 +79,7 @@ for ($i=0; $i < sizeof($noduplicate_misc); $i++) {
 
   for ($j=0; $j < sizeof($mujoins3); $j++) {
     if($mukey == $mujoins3[$j]['mukey']){
-      echo "found at $j"." $mukey";
+      //echo "found at $j"." $mukey";
     }
     else{
       array_push($correct_misc, $i);
