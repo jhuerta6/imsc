@@ -47,7 +47,25 @@ $result_mujoins3 = mysqli_query($conn, $query_mujoins3);
 
 $mujoins3 = fetchAll($result_mujoins3);
 
-for ($i=0; $i < sizeof($mujoins3); $i++) {
+$query_nodupmisc = "SELECT * FROM noduplicate_misc";
+$toReturn['query_nodupmisc'] = $query_nodupmisc;
+$result_nodupmisc = mysqli_query($conn, $query_nodupmisc);
+
+$noduplicate_misc = fetchAll($result_nodupmisc);
+
+$query_noduptax = "SELECT * FROM noduplicate_tax";
+$toReturn['query_noduptax'] = $query_noduptax;
+$result_noduptax = mysqli_query($conn, $query_noduptax);
+
+$noduplicate_tax = fetchAll($result_noduptax);
+
+$toReturn['result_mujoins3'] = $mujoins3;
+$toReturn['result_nodupmisc'] = $noduplicate_misc;
+$toReturn['result_noduptax'] = $noduplicate_tax;
+
+
+
+/*for ($i=0; $i < sizeof($mujoins3); $i++) {
 	$polygons[] = $mujoins3[$i];
 }
 
