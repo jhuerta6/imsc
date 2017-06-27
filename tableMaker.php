@@ -36,19 +36,24 @@ $result_misc = mysqli_query($conn, $query_tmp_tax);
 $result_tax = mysqli_query($conn, $query_tmp_misc);*/
 /******************************************************/
 /*
-$query = "SELECT * FROM tmp_tax";
+$query_create_mujoins3 = "CREATE TABLE mujoins3 SELECT * FROM noduplicates";
+$result_create_mujoins3 = mysqli_query($conn, $query_noduplicate_tax);
+*/
+
+$query_mujoins3 = "SELECT * FROM mujoins3";
 $polygons = array();
-$toReturn['query'] = $query;
-$result = mysqli_query($conn, $query);
+$toReturn['query_mujoins3'] = $query_mujoins3;
+$result_mujoins3 = mysqli_query($conn, $query_mujoins3);
 
-$result = fetchAll($result);
+$mujoins3 = fetchAll($result_mujoins3);
 
-for ($i=0; $i < sizeof($result); $i++) {
-	$polygons[] = $result[$i];
+for ($i=0; $i < sizeof($mujoins3); $i++) {
+	$polygons[] = $mujoins3[$i];
 }
 
-$toReturn['all tmp_tax'] = $polygons;//fetch all
+$toReturn['all mujoins3'] = $polygons;//fetch all
 
+/*
 $done = 0;
 $mukey = 0;
 $array_mukey = array();
