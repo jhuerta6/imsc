@@ -142,6 +142,7 @@ function getPolygons(){
 			}
 		}
 
+		//var_dump($poly_arr);
 		$toReturn['coords'] = $polygons;
 	}
 
