@@ -110,26 +110,34 @@ function getPolygons(){
 		$skip;
 		$counter_i = 0;
 		$counter_j;
+		$entered = 0;
 
 		for ($i=0; $i < sizeof($result); $i++){
 			$counter_j = 0;
 			$ogr = $result[$i]['OGR_FID'];
 			$skip = 0;
 
+			if($entered == 1){
+				$counter_i++;
+			}
+
 			if($past_ogr == $ogr){
 				$ogr = 1;
 				$skip = 1;
-				$counter_i++;
+				$entered = 0;
+				//$counter_i++;
 			}
 			else{
 				$ogr = $result[$i]['OGR_FID'];
 				$skip = 0;
+				$entered = 0;
 			}
 			for ($j=0; $j < sizeof($result); $j++) {
 				if($ogr == $result[$j]['OGR_FID'] && $skip == 0){
 					$poly_arr[$counter_i][$counter_j] = $result[$j];
 					$past_ogr = $ogr;
 					$counter_j++;
+					$entered = 1;
 				}
 			}
 		}
