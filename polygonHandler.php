@@ -93,7 +93,8 @@ function getPolygons(){
 	//$query = "SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, $simplificaionFactor)) AS POLYGON, x.$data->property FROM polygon AS p JOIN mujoins AS mu ON p.mukey = CAST(mu.mukey AS UNSIGNED) JOIN $data->table AS x ON mu.$key = x.$key WHERE ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE) AND hzdept_r <= $data->depth AND hzdepb_r >= $data->depth";
 
 	if($data->depth_method == 6){
-		$query="SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, 1.7625422383727E-6)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM mujoins3 NATURAL JOIN polygon AS p NATURAL JOIN chorizon_r as x WHERE x.cokey = mujoins3.cokey AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
+		//$query="SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, 1.7625422383727E-6)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM mujoins3 NATURAL JOIN polygon AS p NATURAL JOIN chorizon_r as x WHERE x.cokey = mujoins3.cokey AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
+		$query="SELECT OGR_FID, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM mujoins3 NATURAL JOIN polygon AS p NATURAL JOIN chorizon_r as x WHERE x.cokey = mujoins3.cokey AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
 		//"            SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, 1.7625422383727E-6)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.pi_r FROM polygon AS p, chorizon_r as x WHERE x.cokey = 13638933 AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
 		//$query_test = "SELECT OGR_FID, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM polygon AS p, chorizon_r as x WHERE x.cokey = $cokey_usado AND OGR_FID = $ogr_usado AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)"; //just works for chorizon at the momen
 		$toReturn['query2'] = $query;
@@ -103,138 +104,162 @@ function getPolygons(){
 
 		$polygons = array();
 
-		$id_array = array();
-		$indexes_array = array();
-
-		for($i = 0; $i<sizeof($result); $i++){
-			$id_array[$i]['OGR_FID'] = $result[$i]['OGR_FID'];
-		}
-
-		$unique = array();
-		$unique = array_unique($id_array, SORT_REGULAR);
-
-		$unique_index = array();
-
+		$poly_arr = array();
+		$ogr;
+		$past_ogr = 0;
+		$skip = 0;
+		$counter_i = 0;
+		$counter_j = 0;
 		for ($i=0; $i < sizeof($result); $i++) {
-			if(array_key_exists($i, $unique)){
-				array_push($unique_index, $i);
+			$counter_i = 0;
+			$counter_j = 0;
+			$ogr = $result[$i]['OGR_FID'];
+			$skip = 0;
+			if($past_ogr == $ogr){
+				$ogr = 1;
+				$skip = 1;
 			}
-		}
-
-			for($i = 0; $i<sizeof($result); $i++){
-				if($data->depth >= $result[$i]['top'] && $data->depth <= $result[$i]['bottom']){ //discriminador de depth
-					$polygons[] = $result[$i];
+			else{
+				$ogr = $result[$i]['OGR_FID'];
+				$skip = 0;
+			}
+			for ($j=0; $j < sizeof($result); $j++) {
+				if($ogr == $result[$j]['OGR_FID'] && $skip == 0){
+					$poly_arr[$i][$counter_j] = $result[$j];
+					$past_ogr = $ogr;
+					echo "$counter_j / ";
+					$counter_j++;
 				}
 			}
-		//var_dump($unique_index);
-		$toReturn['coords'] = $polygons;//fetch all
+		}
+
+		var_dump($poly_arr);
+
+		for ($i=0; $i < sizeof($poly_arr); $i++) { //This was the method used before. It searches, goes to the depth specified, and gives the value AT that depth.
+			for ($j=0; $j < sizeof($poly_arr[$j]); $j++) {
+				if($data->depth >= $poly_arr[$i][$j]['top'] && $data->depth <= $poly_arr[$i][$j]['bottom']){ //discriminador de depth
+					$polygons[] = $poly_arr[$i][$j];
+				}
+			}
+		}
+
+		$toReturn['coords'] = $polygons;
+
+		/*for($i = 0; $i<sizeof($result); $i++){
+		if($data->depth >= $result[$i]['top'] && $data->depth <= $result[$i]['bottom']){ //discriminador de depth
+		$polygons[] = $result[$i];
+	}
+}
+
+//var_dump($polygons);
+$toReturn['coords'] = $polygons;//fetch all*/
+}
+
+if($data->table == "chorizon_rtest"){ //necesario (por ahora) para no usar layers si la propiedad no es de chorizon
+
+	/*Query for getting either the Series of Miscellaneous area from component"*/
+	$cokeys = "SELECT OGR_FID, component_r.cokey, component_r.compkind FROM polygon, component_r WHERE component_r.mukey = polygon.mukey AND (compkind = 'Miscellaneous area' AND majcompflag = 'Yes' OR compkind = 'Series' AND majcompflag = 'Yes' OR compkind = 'Taxadjunct' AND majcompflag = 'Yes') AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), polygon.SHAPE)";
+	//$cokeys = "SELECT * FROM mujoins2 WHERE cokey IN (SELECT cokey FROM component_r WHERE compkind = 'Miscellaneous area' AND majcompflag = 'Yes' OR compkind = 'Series' AND majcompflag = 'Yes')";
+	$toReturn['query para cokeys que tienen ya sea series || miscellaneous'] = $cokeys;
+	$cokeys = mysqli_query($conn, $cokeys);
+	$row_cokeys = fetchAll($cokeys);
+	$arr_cokeys = array();
+
+	for ($i=0; $i < sizeof($row_cokeys); $i++) {
+		$arr_cokeys[] = $row_cokeys[$i];
 	}
 
-	if($data->table == "chorizon_rtest"){ //necesario (por ahora) para no usar layers si la propiedad no es de chorizon
+	$toReturn['cokeys que tienen ya sea series || miscellaneous || taxadjunct'] = $arr_cokeys;
 
-		/*Query for getting either the Series of Miscellaneous area from component"*/
-		$cokeys = "SELECT OGR_FID, component_r.cokey, component_r.compkind FROM polygon, component_r WHERE component_r.mukey = polygon.mukey AND (compkind = 'Miscellaneous area' AND majcompflag = 'Yes' OR compkind = 'Series' AND majcompflag = 'Yes' OR compkind = 'Taxadjunct' AND majcompflag = 'Yes') AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), polygon.SHAPE)";
-		//$cokeys = "SELECT * FROM mujoins2 WHERE cokey IN (SELECT cokey FROM component_r WHERE compkind = 'Miscellaneous area' AND majcompflag = 'Yes' OR compkind = 'Series' AND majcompflag = 'Yes')";
-		$toReturn['query para cokeys que tienen ya sea series || miscellaneous'] = $cokeys;
-		$cokeys = mysqli_query($conn, $cokeys);
-		$row_cokeys = fetchAll($cokeys);
-		$arr_cokeys = array();
+	$query = "SELECT x.cokey, p.mukey, OGR_FID, hzdept_r AS top, hzdepb_r AS bottom, x.$data->property FROM polygon AS p JOIN mujoins AS mu ON p.mukey = CAST(mu.mukey AS UNSIGNED) JOIN $data->table AS x ON mu.$key = x.$key WHERE ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)"; //working on it
+	//$query = "SELECT x.cokey, p.mukey, OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, $simplificaionFactor)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.$data->property FROM polygon AS p JOIN mujoins AS mu ON p.mukey = CAST(mu.mukey AS UNSIGNED) JOIN $data->table AS x ON mu.$key = x.$key WHERE ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)"; //working on it
+	//$query = "SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, $simplificaionFactor)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM polygon AS p, chorizon_r as x WHERE ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)"; //no se
+	//$query = "SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, $simplificaionFactor)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM polygon AS p, chorizon_r as x WHERE x.cokey = $el_cokey_ideal AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)"; //just works for chorizon at the moment
 
-		for ($i=0; $i < sizeof($row_cokeys); $i++) {
-			$arr_cokeys[] = $row_cokeys[$i];
+	$toReturn['query2'] = $query;
+	$result = mysqli_query($conn, $query);
+
+	$result = fetchAll($result);
+
+	$polygons = array();
+
+	$id_array = array();
+	//$indexes_array = array();
+	//echo sizeof($result);
+	for($i = 0; $i<sizeof($result); $i++){
+		$id_array[$i]['OGR_FID'] = $result[$i]['OGR_FID'];
+	}
+
+	$unique = array();
+	$unique = array_unique($id_array, SORT_REGULAR);
+
+	$unique_index = array();
+
+	for ($i=0; $i < sizeof($result); $i++) {
+		if(array_key_exists($i, $unique)){
+			array_push($unique_index, $i);
 		}
+	}
 
-		$toReturn['cokeys que tienen ya sea series || miscellaneous || taxadjunct'] = $arr_cokeys;
+	$correctos_arr = array();
+	$found = false;
 
-		$query = "SELECT x.cokey, p.mukey, OGR_FID, hzdept_r AS top, hzdepb_r AS bottom, x.$data->property FROM polygon AS p JOIN mujoins AS mu ON p.mukey = CAST(mu.mukey AS UNSIGNED) JOIN $data->table AS x ON mu.$key = x.$key WHERE ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)"; //working on it
-		//$query = "SELECT x.cokey, p.mukey, OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, $simplificaionFactor)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.$data->property FROM polygon AS p JOIN mujoins AS mu ON p.mukey = CAST(mu.mukey AS UNSIGNED) JOIN $data->table AS x ON mu.$key = x.$key WHERE ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)"; //working on it
-		//$query = "SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, $simplificaionFactor)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM polygon AS p, chorizon_r as x WHERE ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)"; //no se
-		//$query = "SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, $simplificaionFactor)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM polygon AS p, chorizon_r as x WHERE x.cokey = $el_cokey_ideal AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)"; //just works for chorizon at the moment
+	$series_arr = array();
+	$misc_arr = array();
+	$tax_arr = array();
+	$correctos_test_arr = array();
 
-		$toReturn['query2'] = $query;
-		$result = mysqli_query($conn, $query);
 
-		$result = fetchAll($result);
-
-		$polygons = array();
-
-		$id_array = array();
-		//$indexes_array = array();
-		//echo sizeof($result);
-		for($i = 0; $i<sizeof($result); $i++){
-			$id_array[$i]['OGR_FID'] = $result[$i]['OGR_FID'];
-		}
-
-		$unique = array();
-		$unique = array_unique($id_array, SORT_REGULAR);
-
-		$unique_index = array();
-
-		for ($i=0; $i < sizeof($result); $i++) {
-			if(array_key_exists($i, $unique)){
-				array_push($unique_index, $i);
-			}
-		}
-
-		$correctos_arr = array();
+	for($i=0; $i < sizeof($unique_index); $i++){ //elegir los cokeys correctos
 		$found = false;
+		$found_misc = false;
+		$found_tax = false;
+		$temp = $result[$unique_index[$i]]['OGR_FID'];
 
-		$series_arr = array();
-		$misc_arr = array();
-		$tax_arr = array();
-		$correctos_test_arr = array();
+		for($j=0; $j < sizeof($arr_cokeys); $j++){
+			if($temp == $arr_cokeys[$j]['OGR_FID'] && $found == false){
+				if($arr_cokeys[$j]['compkind'] == 'Series'){ //going inside but not stopping at found
+					array_push($series_arr, $j); //mete los indexes que usaremos al meter los resultados al polygon
 
-
-		for($i=0; $i < sizeof($unique_index); $i++){ //elegir los cokeys correctos
-			$found = false;
-			$found_misc = false;
-			$found_tax = false;
-			$temp = $result[$unique_index[$i]]['OGR_FID'];
-
-			for($j=0; $j < sizeof($arr_cokeys); $j++){
-				if($temp == $arr_cokeys[$j]['OGR_FID'] && $found == false){
-					if($arr_cokeys[$j]['compkind'] == 'Series'){ //going inside but not stopping at found
-						array_push($series_arr, $j); //mete los indexes que usaremos al meter los resultados al polygon
-
-						$found = true;
-					}
-				}
-			}
-
-			for($h=0; $h < sizeof($arr_cokeys); $h++){
-				if($temp == $arr_cokeys[$h]['OGR_FID'] && $found_misc == false){
-					if($arr_cokeys[$h]['compkind'] == 'Miscellaneous area'){ //going inside but not stopping at found
-						array_push($misc_arr, $h); //mete los indexes que usaremos al meter los resultados al polygon
-						$found_misc = true;
-					}
-				}
-			}
-
-			for($k=0; $k < sizeof($arr_cokeys); $k++){
-				if($temp == $arr_cokeys[$k]['OGR_FID'] && $found_tax == false){
-					if($arr_cokeys[$k]['compkind'] == 'Taxadjunct'){ //going inside but not stopping at found
-						array_push($tax_arr, $k); //mete los indexes que usaremos al meter los resultados al polygon
-						$found_tax = true;
-					}
+					$found = true;
 				}
 			}
 		}
-		//var_dump($arr_cokeys);
-		$array_to_use = array();
-		if(sizeof($series_arr) > sizeof($misc_arr)){
-			$array_to_use = $series_arr;
-		}
-		else{
-			$array_to_use = $misc_arr;
+
+		for($h=0; $h < sizeof($arr_cokeys); $h++){
+			if($temp == $arr_cokeys[$h]['OGR_FID'] && $found_misc == false){
+				if($arr_cokeys[$h]['compkind'] == 'Miscellaneous area'){ //going inside but not stopping at found
+					array_push($misc_arr, $h); //mete los indexes que usaremos al meter los resultados al polygon
+					$found_misc = true;
+				}
+			}
 		}
 
-		$find = 0;
-		$misc_find = 0;
-		$absolute_find = 0;
-		$traversed = 0;
-		$index_to_store = 0;
-		$find_global = 0;
-		$checker_ids = array();
+		for($k=0; $k < sizeof($arr_cokeys); $k++){
+			if($temp == $arr_cokeys[$k]['OGR_FID'] && $found_tax == false){
+				if($arr_cokeys[$k]['compkind'] == 'Taxadjunct'){ //going inside but not stopping at found
+					array_push($tax_arr, $k); //mete los indexes que usaremos al meter los resultados al polygon
+					$found_tax = true;
+				}
+			}
+		}
+	}
+	//var_dump($arr_cokeys);
+	$array_to_use = array();
+	if(sizeof($series_arr) > sizeof($misc_arr)){
+		$array_to_use = $series_arr;
+	}
+	else{
+		$array_to_use = $misc_arr;
+	}
+
+	$find = 0;
+	$misc_find = 0;
+	$absolute_find = 0;
+	$traversed = 0;
+	$index_to_store = 0;
+	$find_global = 0;
+	$checker_ids = array();
 
 		$counter = 0;
 
