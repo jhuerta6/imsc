@@ -107,17 +107,19 @@ function getPolygons(){
 		$poly_arr = array();
 		$ogr;
 		$past_ogr = 0;
-		$skip = 0;
+		$skip;
 		$counter_i = 0;
-		$counter_j = 0;
+		$counter_j;
 		for ($i=0; $i < sizeof($result); $i++) {
-			$counter_i = 0;
+			//$counter_i = 0;
 			$counter_j = 0;
 			$ogr = $result[$i]['OGR_FID'];
 			$skip = 0;
+
 			if($past_ogr == $ogr){
 				$ogr = 1;
 				$skip = 1;
+				$counter_i++;
 			}
 			else{
 				$ogr = $result[$i]['OGR_FID'];
@@ -125,18 +127,18 @@ function getPolygons(){
 			}
 			for ($j=0; $j < sizeof($result); $j++) {
 				if($ogr == $result[$j]['OGR_FID'] && $skip == 0){
-					$poly_arr[$i][$counter_j] = $result[$j];
+					$poly_arr[$counter_i][$counter_j] = $result[$j];
 					$past_ogr = $ogr;
-					echo "$counter_j / ";
+					//echo "$counter_j / ";
 					$counter_j++;
 				}
 			}
 		}
 
-		var_dump($poly_arr);
+		//var_dump($poly_arr);
 
 		for ($i=0; $i < sizeof($poly_arr); $i++) { //This was the method used before. It searches, goes to the depth specified, and gives the value AT that depth.
-			for ($j=0; $j < sizeof($poly_arr[$j]); $j++) {
+			for ($j=0; $j < sizeof($poly_arr[$i]); $j++) {
 				if($data->depth >= $poly_arr[$i][$j]['top'] && $data->depth <= $poly_arr[$i][$j]['bottom']){ //discriminador de depth
 					$polygons[] = $poly_arr[$i][$j];
 				}
