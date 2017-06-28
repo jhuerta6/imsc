@@ -93,8 +93,8 @@ function getPolygons(){
 	//$query = "SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, $simplificaionFactor)) AS POLYGON, x.$data->property FROM polygon AS p JOIN mujoins AS mu ON p.mukey = CAST(mu.mukey AS UNSIGNED) JOIN $data->table AS x ON mu.$key = x.$key WHERE ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE) AND hzdept_r <= $data->depth AND hzdepb_r >= $data->depth";
 
 	if($data->depth_method == 6){
-		//$query="SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, 1.7625422383727E-6)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM mujoins3 NATURAL JOIN polygon AS p NATURAL JOIN chorizon_r as x WHERE x.cokey = mujoins3.cokey AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
-		$query="SELECT OGR_FID, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM mujoins3 NATURAL JOIN polygon AS p NATURAL JOIN chorizon_r as x WHERE x.cokey = mujoins3.cokey AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
+		$query="SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, 1.7625422383727E-6)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM mujoins3 NATURAL JOIN polygon AS p NATURAL JOIN chorizon_r as x WHERE x.cokey = mujoins3.cokey AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
+		//$query="SELECT OGR_FID, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM mujoins3 NATURAL JOIN polygon AS p NATURAL JOIN chorizon_r as x WHERE x.cokey = mujoins3.cokey AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
 		//"            SELECT OGR_FID, ASTEXT(ST_SIMPLIFY(SHAPE, 1.7625422383727E-6)) AS POLYGON, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.pi_r FROM polygon AS p, chorizon_r as x WHERE x.cokey = 13638933 AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)";
 		//$query_test = "SELECT OGR_FID, hzdept_r AS top, hzdepb_r AS bottom, x.cokey, x.$data->property FROM polygon AS p, chorizon_r as x WHERE x.cokey = $cokey_usado AND OGR_FID = $ogr_usado AND ST_INTERSECTS(ST_GEOMFROMTEXT(@geom1, 1), p.SHAPE)"; //just works for chorizon at the momen
 		$toReturn['query2'] = $query;
@@ -110,51 +110,38 @@ function getPolygons(){
 		$skip;
 		$counter_i = 0;
 		$counter_j;
-		for ($i=0; $i < sizeof($result); $i++) {
-			//$counter_i = 0;
-			$counter_j = 0;
+		for ($i=0; $i < sizeof($result); $i++)
+		$counter_j = 0;
+		$ogr = $result[$i]['OGR_FID'];
+		$skip = 0;
+
+		if($past_ogr == $ogr){
+			$ogr = 1;
+			$skip = 1;
+			$counter_i++;
+		}
+		else{
 			$ogr = $result[$i]['OGR_FID'];
 			$skip = 0;
-
-			if($past_ogr == $ogr){
-				$ogr = 1;
-				$skip = 1;
-				$counter_i++;
-			}
-			else{
-				$ogr = $result[$i]['OGR_FID'];
-				$skip = 0;
-			}
-			for ($j=0; $j < sizeof($result); $j++) {
-				if($ogr == $result[$j]['OGR_FID'] && $skip == 0){
-					$poly_arr[$counter_i][$counter_j] = $result[$j];
-					$past_ogr = $ogr;
-					//echo "$counter_j / ";
-					$counter_j++;
-				}
+		}
+		for ($j=0; $j < sizeof($result); $j++) {
+			if($ogr == $result[$j]['OGR_FID'] && $skip == 0){
+				$poly_arr[$counter_i][$counter_j] = $result[$j];
+				$past_ogr = $ogr;
+				$counter_j++;
 			}
 		}
-
-		//var_dump($poly_arr);
-
-		for ($i=0; $i < sizeof($poly_arr); $i++) { //This was the method used before. It searches, goes to the depth specified, and gives the value AT that depth.
-			for ($j=0; $j < sizeof($poly_arr[$i]); $j++) {
-				if($data->depth >= $poly_arr[$i][$j]['top'] && $data->depth <= $poly_arr[$i][$j]['bottom']){ //discriminador de depth
-					$polygons[] = $poly_arr[$i][$j];
-				}
-			}
-		}
-
-		$toReturn['coords'] = $polygons;
-
-		/*for($i = 0; $i<sizeof($result); $i++){
-		if($data->depth >= $result[$i]['top'] && $data->depth <= $result[$i]['bottom']){ //discriminador de depth
-		$polygons[] = $result[$i];
 	}
-}
 
-//var_dump($polygons);
-$toReturn['coords'] = $polygons;//fetch all*/
+	for ($i=0; $i < sizeof($poly_arr); $i++) { //This was the method used before. It searches, goes to the depth specified, and gives the value AT that depth.
+		for ($j=0; $j < sizeof($poly_arr[$i]); $j++) {
+			if($data->depth >= $poly_arr[$i][$j]['top'] && $data->depth <= $poly_arr[$i][$j]['bottom']){ //discriminador de depth
+				$polygons[] = $poly_arr[$i][$j];
+			}
+		}
+	}
+
+	$toReturn['coords'] = $polygons;
 }
 
 if($data->table == "chorizon_rtest"){ //necesario (por ahora) para no usar layers si la propiedad no es de chorizon
