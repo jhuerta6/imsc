@@ -166,19 +166,337 @@ function getPolygons(){
 
 		switch ($method_selected) {
 			case 'Maximum':
-			# code...
+			/* Busca el valor maximo de la lista de los polignos, dependientemente del depth que el usuario le otorgue*/
+			$max_value;
+			$max_index_i;
+			$max_index_j;
+			$lo_profundo = $data->depth;
+			$top;
+			$bottom;
+
+			for ($i=0; $i < sizeof($poly_arr); $i++) { //sorting by property values ascending; had to modify query
+				array_multisort($poly_arr[$i], SORT_ASC);
+			}
+
+			for ($i=0; $i < sizeof($poly_arr); $i++) {
+				$max_value = 0;
+				$max_index_i = 0;
+				$max_index_j = 0;
+				$lo_profundo = $data->depth;
+
+				if(sizeof($poly_arr[$i]) > 1 && $poly_arr[$i][sizeof($poly_arr[$i])-1][$data->property] == 0){
+					$limite =  $poly_arr[$i][sizeof($poly_arr[$i])-2]['bottom'];
+
+					if($lo_profundo <= $poly_arr[$i][0]['bottom']){
+						$max_index_i = $i;
+						$max_index_j = 0;
+					}
+					elseif($lo_profundo >= $limite){
+						$lo_profundo = $limite;
+						for ($j=0; $j < sizeof($poly_arr[$i])-1; $j++) {
+							$top = $poly_arr[$i][$j]['top'];
+							$bottom = $poly_arr[$i][$j]['bottom'];
+							if($max_value < $poly_arr[$i][$j][$data->property] && $lo_profundo > $top && $lo_profundo >= $bottom){
+								$max_value = $poly_arr[$i][$j][$data->property];
+								$max_index_i = $i;
+								$max_index_j = $j;
+							}
+						}
+					}
+					else{
+						for ($j=0; $j < sizeof($poly_arr[$i])-1; $j++) {
+							$top = $poly_arr[$i][$j]['top'];
+							$bottom = $poly_arr[$i][$j]['bottom'];
+
+							if($max_value < $poly_arr[$i][$j][$data->property] && $lo_profundo > $top && $lo_profundo >= $bottom){
+								$max_value = $poly_arr[$i][$j][$data->property];
+								$max_index_i = $i;
+								$max_index_j = $j;
+							}
+							elseif($max_value < $poly_arr[$i][$j][$data->property] && $lo_profundo > $top && $lo_profundo <= $bottom){
+								$max_value = $poly_arr[$i][$j][$data->property];
+								$max_index_i = $i;
+								$max_index_j = $j;
+							}
+						}
+					}
+				}
+				else{
+					$limite =  $poly_arr[$i][sizeof($poly_arr[$i])-1]['bottom'];
+
+					if($lo_profundo <= $poly_arr[$i][0]['bottom']){
+						$max_index_i = $i;
+						$max_index_j = 0;
+					}
+					elseif($lo_profundo >= $limite){
+						$lo_profundo = $limite;
+						for ($j=0; $j < sizeof($poly_arr[$i]); $j++) {
+							$top = $poly_arr[$i][$j]['top'];
+							$bottom = $poly_arr[$i][$j]['bottom'];
+							if($max_value < $poly_arr[$i][$j][$data->property] && $lo_profundo > $top && $lo_profundo >= $bottom){
+								$max_value = $poly_arr[$i][$j][$data->property];
+								$max_index_i = $i;
+								$max_index_j = $j;
+							}
+						}
+					}
+					else{
+						for ($j=0; $j < sizeof($poly_arr[$i]); $j++) {
+							$top = $poly_arr[$i][$j]['top'];
+							$bottom = $poly_arr[$i][$j]['bottom'];
+							if($max_value < $poly_arr[$i][$j][$data->property] && $lo_profundo > $top && $lo_profundo >= $bottom){
+								$max_value = $poly_arr[$i][$j][$data->property];
+								$max_index_i = $i;
+								$max_index_j = $j;
+							}
+							elseif($max_value < $poly_arr[$i][$j][$data->property] && $lo_profundo > $top && $lo_profundo <= $bottom){
+								$max_value = $poly_arr[$i][$j][$data->property];
+								$max_index_i = $i;
+								$max_index_j = $j;
+							}
+						}
+					}
+				}
+				$polygons[] = $poly_arr[$max_index_i][$max_index_j];
+			}
 			break;
 
 			case 'Minimum':
-			# code...
+			/* Busca el valor minimo de la lista de los polignos, dependientemente del depth que el usuario le otorgue*/
+			$min_value;
+			$min_index_i;
+			$min_index_j;
+			$lo_profundo = $data->depth;
+
+			for ($i=0; $i < sizeof($poly_arr); $i++) { //sorting by property values ascending; had to modify query
+				array_multisort($poly_arr[$i], SORT_ASC);
+			}
+
+			for ($i=0; $i < sizeof($poly_arr); $i++) {
+				$min_value = PHP_INT_MAX;
+				$min_index_i = 0;
+				$min_index_j = 0;
+				$lo_profundo = $data->depth;
+
+				if(sizeof($poly_arr[$i]) > 1 && $poly_arr[$i][sizeof($poly_arr[$i])-1][$data->property] == 0){
+					$limite = $poly_arr[$i][sizeof($poly_arr[$i])-2]['bottom'];
+
+					if($lo_profundo <= $poly_arr[$i][0]['bottom']){
+						$min_index_i = $i;
+						$min_index_j = 0;
+					}
+					elseif($lo_profundo >= $limite){
+						$lo_profundo = $limite;
+						for ($j=0; $j < sizeof($poly_arr[$i])-1; $j++) {
+							$top = $poly_arr[$i][$j]['top'];
+							$bottom = $poly_arr[$i][$j]['bottom'];
+							if($min_value > $poly_arr[$i][$j][$data->property] && $lo_profundo > $top && $lo_profundo >= $bottom){
+								$min_value = $poly_arr[$i][$j][$data->property];
+								$min_index_i =  $i;
+								$min_index_j = $j;
+							}
+						}
+					}
+					else{
+						for ($j=0; $j < sizeof($poly_arr[$i])-1; $j++) {
+							$top = $poly_arr[$i][$j]['top'];
+							$bottom = $poly_arr[$i][$j]['bottom'];
+
+							if($min_value > $poly_arr[$i][$j][$data->property] && $lo_profundo > $top && $lo_profundo >= $bottom){
+								$min_value = $poly_arr[$i][$j][$data->property];
+								$min_index_i = $i;
+								$min_index_j = $j;
+							}
+							elseif($min_value > $poly_arr[$i][$j][$data->property] && $lo_profundo > $top && $lo_profundo <= $bottom){
+								$min_value = $poly_arr[$i][$j][$data->property];
+								$min_index_i = $i;
+								$min_index_j = $j;
+							}
+						}
+					}
+				}
+				else{
+					$limite = $poly_arr[$i][sizeof($poly_arr[$i])-1]['bottom'];
+
+					if($lo_profundo <= $poly_arr[$i][0]['bottom']){
+						$min_index_i = $i;
+						$min_index_j = 0;
+					}
+					elseif($lo_profundo >= $limite){
+						$lo_profundo = $limite;
+						for ($j=0; $j < sizeof($poly_arr[$i]); $j++) {
+							$top = $poly_arr[$i][$j]['top'];
+							$bottom = $poly_arr[$i][$j]['bottom'];
+							if($min_value > $poly_arr[$i][$j][$data->property] && $lo_profundo > $top && $lo_profundo >= $bottom){
+								$min_value = $poly_arr[$i][$j][$data->property];
+								$min_index_i =  $i;
+								$min_index_j = $j;
+							}
+						}
+					}
+					else{
+						for ($j=0; $j < sizeof($poly_arr[$i]); $j++) {
+							$top = $poly_arr[$i][$j]['top'];
+							$bottom = $poly_arr[$i][$j]['bottom'];
+
+							if($min_value > $poly_arr[$i][$j][$data->property] && $lo_profundo > $top && $lo_profundo >= $bottom){
+								$min_value = $poly_arr[$i][$j][$data->property];
+								$min_index_i = $i;
+								$min_index_j = $j;
+							}
+							elseif($min_value > $poly_arr[$i][$j][$data->property] && $lo_profundo > $top && $lo_profundo <= $bottom){
+								$min_value = $poly_arr[$i][$j][$data->property];
+								$min_index_i = $i;
+								$min_index_j = $j;
+							}
+						}
+					}
+				}
+				$polygons[] = $poly_arr[$min_index_i][$min_index_j];
+			}
 			break;
 
 			case 'Median':
-			# code...
+			/*Busca el valor medio para poligonos con n layers seasen pares o impares.*/
+			$med_index_i;
+			$med_value = 0;
+			$done_med;
+			$arr_med = array();
+			$size_arr = sizeof($poly_arr);
+
+			for ($i=0; $i < sizeof($poly_arr); $i++) { //sorting by property values ascending; had to modify query
+				array_multisort($poly_arr[$i], SORT_ASC);
+			}
+
+			for ($j=0; $j < sizeof($poly_arr); $j++) {
+				$med_index_i = 0;
+				$done_med = 0;
+				for ($i=0; $i < sizeof($poly_arr[$j]); $i++) {
+					if(sizeof($poly_arr[$j])%2 == 1 && $done_med == 0){//odd
+						$med_index_i = ceil(sizeof($poly_arr[$j])/2); //have to subtract one from this value to get the index correctly
+						$done_med = 1;
+						$polygons[] = $poly_arr[$j][$med_index_i - 1];
+					}
+					elseif(sizeof($poly_arr[$j])%2 == 0 && $done_med == 0){ //even
+						$med_value = ($poly_arr[$j][(ceil(sizeof($poly_arr[$j])/2)) - 1][$data->property] + $poly_arr[$j][(ceil(sizeof($poly_arr[$j])/2))][$data->property]) / 2;
+						$poly_arr[$j][(ceil(sizeof($poly_arr[$j])/2)) - 1][$data->property] = $med_value;
+						$polygons[] = $poly_arr[$j][(ceil(sizeof($poly_arr[$j])/2)) - 1];
+						$done_med = 1;
+					}
+				}
+			}
 			break;
 
 			case 'Weighted':
-			# code...
+			/*Depending on the depth, this method will get the average value for all the layers until that depth. */
+			$profundo = $data->depth;
+			$limite;
+			$n_operaciones = 0;
+			$counter = 0;
+			$top;
+			$bottom;
+			$delta;
+			$delta_depth;
+			$valor;
+			$just_one;
+			$result_weighted;
+
+			for ($i=0; $i < sizeof($poly_arr); $i++) { //sorting by property values ascending; had to modify query
+				array_multisort($poly_arr[$i], SORT_ASC);
+			}
+
+			for ($i=0; $i < sizeof($poly_arr); $i++) {
+				$profundo = $data->depth;
+				$limite = 0;
+				$n_operaciones = 0;
+				$counter = 0;
+				$top = 0;
+				$bottom = 0;
+				$delta = 0;
+				$delta_depth = 0;
+				$valor = 0;
+				$just_one = 0;
+				$result_weighted = 0;
+
+				if(sizeof($poly_arr[$i]) > 1 && $poly_arr[$i][sizeof($poly_arr[$i])-1][$data->property] == 0){ //use the penultimate index
+					$limite = $poly_arr[$i][sizeof($poly_arr[$i])-2]['bottom'];//si lo $profundo es mayor que el limite, ignorar y usar el limite como lo profundo
+					if($profundo > $limite){
+						$profundo = $limite;
+					}
+
+					for ($k=0; $k < sizeof($poly_arr[$i])-1; $k++) {
+						if($profundo >= $poly_arr[$i][$k]['top'] && $profundo >= $poly_arr[$i][$k]['bottom'] && $profundo <= $limite){ //we need a limit/ceiling for the bottom of this
+							$n_operaciones += 1;
+						}
+						elseif($profundo >= $poly_arr[$i][$k]['top'] && $profundo <= $poly_arr[$i][$k]['bottom'] && $profundo <= $limite){
+							$n_operaciones += 1;
+						}
+					}
+
+					for ($j=0; $j < (sizeof($poly_arr[$i])-1); $j++) {
+						$top = $poly_arr[$i][$j]['top'];
+						$bottom = $poly_arr[$i][$j]['bottom'];
+						$delta = $bottom - $top;
+						$valor = $poly_arr[$i][$j][$data->property];
+						if($n_operaciones > $j){
+							if($profundo >= $delta && $profundo >= $bottom){
+								$result_weighted += (($delta/$profundo)*$valor);
+								//echo "0";
+							}
+							elseif($profundo >= $delta && $profundo <= $bottom){
+								$delta_depth = $profundo - $top;
+								$result_weighted += (($delta_depth/$profundo)*$valor);
+								//echo "1";
+							}
+							elseif($profundo <= $delta && $profundo <= $bottom && $just_one == 0) {
+								$just_one = 1;
+								$result_weighted += $valor;
+								//echo "2";
+							}
+						} //end if n_operations
+					}
+					$poly_arr[$i][0][$data->property] = round($result_weighted,1);
+					$polygons[] = $poly_arr[$i][0];
+					//echo $i . " ";
+				} //end if for using penultimate index
+				else{ //permissible to use the last index
+					$limite = $poly_arr[$i][sizeof($poly_arr[$i])-1]['bottom'];
+					if($profundo > $limite){
+						$profundo = $limite;
+					}
+
+					for ($k=0; $k < sizeof($poly_arr[$i]); $k++) {
+						if($profundo >= $poly_arr[$i][$k]['top'] && $profundo >= $poly_arr[$i][$k]['bottom'] && $profundo <= $limite){ //we need a limit/ceiling for the bottom of this
+							$n_operaciones += 1;
+						}
+						elseif($profundo >= $poly_arr[$i][$k]['top'] && $profundo <= $poly_arr[$i][$k]['bottom'] && $profundo <= $limite){
+							$n_operaciones += 1;
+						}
+					}
+
+					for ($j=0; $j < (sizeof($poly_arr[$i])); $j++) {
+						$top = $poly_arr[$i][$j]['top'];
+						$bottom = $poly_arr[$i][$j]['bottom'];
+						$delta = $bottom - $top;
+						$valor = $poly_arr[$i][$j][$data->property];
+						if($n_operaciones > $j){
+							if($profundo >= $delta && $profundo >= $bottom){
+								$result_weighted += (($delta/$profundo)*$valor);
+							}
+							elseif($profundo >= $delta && $profundo <= $bottom){
+								$delta_depth = $profundo - $top;
+								$result_weighted += (($delta_depth/$profundo)*$valor);
+							}
+							elseif($profundo <= $delta && $profundo <= $bottom && $just_one == 0) {
+								$just_one = 1;
+								$result_weighted += $valor;
+							}
+						}
+					}
+					$poly_arr[$i][0][$data->property] = round($result_weighted,1);
+					$polygons[] = $poly_arr[$i][0];
+				}
+			} //end main for loop
 			break;
 
 			case 'At':
@@ -201,14 +519,6 @@ function getPolygons(){
 			}
 			break;
 		}
-
-		/*for ($i=0; $i < sizeof($poly_arr); $i++) { //This was the method used before. It searches, goes to the depth specified, and gives the value AT that depth.
-			for ($j=0; $j < sizeof($poly_arr[$i]); $j++) {
-				if($data->depth >= $poly_arr[$i][$j]['top'] && $data->depth <= $poly_arr[$i][$j]['bottom']){ //discriminador de depth
-					$polygons[] = $poly_arr[$i][$j];
-				}
-			}
-		}*/
 
 		$toReturn['coords'] = $polygons;
 	}
