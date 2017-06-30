@@ -204,7 +204,7 @@
 										<option value="2" id="min_method">Min</option>
 										<option value="3" id="med_method">Median</option>
 										<option value="4" id="weight_method">Weighted average</option>
-										<option value="6" id="specific">At Specific Depth</option>
+										<option value="5" id="specific">At Specific Depth</option>
 									</select>
 								</div>
 							</div>
